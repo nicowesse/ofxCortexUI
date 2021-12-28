@@ -53,20 +53,18 @@ protected:
   {
     if (!source) return 0.0f;
     
-    return 0.0f;
-    
-//    switch(attr) {
-//      case LEFT: return source->left.value(); break;
-//      case RIGHT: return source->right(); break;
-//      case TOP: return source->top(); break;
-//      case BOTTOM: return source->bottom(); break;
-//      case CENTER_X: return source->centerX(); break;
-//      case CENTER_Y: return source->centerY(); break;
-//
-//      case WIDTH: return source->getWidth(); break;
-//      case HEIGHT: return source->getHeight(); break;
-//      case NO_ATTRIBUTE: return 0.0f; break;
-//    }
+    switch(attr) {
+      case LEFT: return source->getLeft(); break;
+      case RIGHT: return source->getRight(); break;
+      case TOP: return source->getTop(); break;
+      case BOTTOM: return source->getBottom(); break;
+      case CENTER_X: return source->centerX(); break;
+      case CENTER_Y: return source->centerY(); break;
+
+      case WIDTH: return source->getWidth(); break;
+      case HEIGHT: return source->getHeight(); break;
+      case NO_ATTRIBUTE: return 0.0f; break;
+    }
   }
   float getSourceAttributeValue() const { return getSourceAttributeValue(sourceAttribute); }
   
@@ -167,7 +165,7 @@ public:
     if (!constraintCheck("Top Constraint")) return;
     
     float value = multiplier * getSourceAttributeValue() + constant;
-//    target->top(value);
+    target->setTop(value);
   }
 };
 
@@ -188,7 +186,7 @@ public:
     if (!constraintCheck("Left Constraint")) return;
     
     float value = multiplier * getSourceAttributeValue() + constant;
-//    target->left(value);
+    target->setLeft(value);
   }
 };
 
@@ -211,7 +209,7 @@ public:
     
     float value = multiplier * getSourceAttributeValue() + constant;
 //    ofLogNotice("Left Constraint") << "Value: " << value;
-//    target->right(value);
+    target->setRight(value);
   }
 };
 
@@ -234,7 +232,7 @@ public:
     
     float value = multiplier * getSourceAttributeValue() + constant;
 //    ofLogNotice("Left Constraint") << "Value: " << value;
-//    target->bottom(value);
+    target->setBottom(value);
   }
 };
 
@@ -253,7 +251,26 @@ public:
     
     float value = multiplier * getSourceAttributeValue() + constant;
 //    ofLogNotice("Left Constraint") << "Value: " << value;
-//    target->setHeight(value);
+    target->setHeight(value);
+  }
+};
+
+class WidthConstraint : public Constraint {
+public:
+  WidthConstraint() = default;
+  
+  WidthConstraint(shared_ptr<Component> target, shared_ptr<Component> source, Attribute sourceAttribute, RelationOperator relation = EQUAL, float multiplier = 1.0f, float constant = 0.0f)
+  : Constraint(target, Attribute::WIDTH, source, sourceAttribute, relation, multiplier, constant) {};
+  
+  virtual void evaluate() override
+  {
+    if (!target) { ofLogWarning("Width Constraint") << "Target is not set. Returning.."; return; }
+    if (!isSizeAttribute(sourceAttribute) && !isConstantAttribute(sourceAttribute)) { ofLogWarning("Width Constraint") << "Source attribute [" << attributeToString(sourceAttribute) << "] has to be a size-attribute. Returning.."; return; }
+    if (!isOnSameAxis(targetAttribute, sourceAttribute) && !isConstantAttribute(sourceAttribute)) { ofLogWarning("Width Constraint") << "Source attribute [" << attributeToString(sourceAttribute) << "] has to be on the same axis as target [SIZE_Y]. Returning.."; return; }
+    
+    float value = multiplier * getSourceAttributeValue() + constant;
+//    ofLogNotice("Left Constraint") << "Value: " << value;
+    target->setWidth(value);
   }
 };
 

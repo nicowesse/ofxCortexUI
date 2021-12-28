@@ -3,8 +3,6 @@
 #include "ofMain.h"
 #include "core/UUID.h"
 
-#include "kiwi/kiwi.h"
-
 namespace ofxCortex { namespace ui {
   
   class DisplayObject : public enable_shared_from_this<DisplayObject> {
@@ -57,12 +55,12 @@ namespace ofxCortex { namespace ui {
     virtual DisplayObject* setTop(float top, bool adjustLayout = true);
 //    virtual DisplayObject* top(float y, bool adjustLayout = true) { setTop(y, adjustLayout); }
     
-//    float centerX() const { return _rect.getCenter().x; }
-//    virtual DisplayObject* centerX(float x, bool adjustLayout = true);
-//    float centerY() const { return _rect.getCenter().x; }
-//    virtual DisplayObject* centerY(float y, bool adjustLayout = true);
-//    glm::vec2 center() const { return _rect.getCenter(); }
-//    virtual DisplayObject* center(glm::vec2 pos, bool adjustLayout = true);
+    float centerX() const { return _rect.getCenter().x; }
+    virtual DisplayObject* centerX(float x, bool adjustLayout = true);
+    float centerY() const { return _rect.getCenter().x; }
+    virtual DisplayObject* centerY(float y, bool adjustLayout = true);
+    glm::vec2 center() const { return _rect.getCenter(); }
+    virtual DisplayObject* center(glm::vec2 pos, bool adjustLayout = true);
     
     float getWidth() const { return _rect.width; }
     float getRight() const { return _rect.getRight(); }
@@ -101,18 +99,6 @@ namespace ofxCortex { namespace ui {
     
     
   protected:
-    kiwi::Variable left{ "left" };
-    kiwi::Variable top{ "top" };
-    kiwi::Variable width{ "width" };
-    kiwi::Variable height{ "height" };
-    kiwi::Variable right{ "right" };
-    kiwi::Variable bottom{ "bottom" };
-    kiwi::Variable centerX{ "center X" };
-    kiwi::Variable centerY{ "center Y" };
-    
-    vector<kiwi::Constraint> constraints;
-    kiwi::Solver solver;
-    
     ofRectangle _rect;
     ofRectangle _localRect {0, 0, 1, 1};
     glm::vec2 _scale {1.0, 1.0};

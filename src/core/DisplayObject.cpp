@@ -14,16 +14,6 @@ _scale(1.0f, 1.0f)
   _addKeyEventListeners();
   
   setRect(ofRectangle(0, 0, 100, 32));
-  
-  solver.addEditVariable(top, kiwi::strength::strong);
-  solver.addEditVariable(left, kiwi::strength::strong);
-  solver.addEditVariable(width, kiwi::strength::strong);
-  solver.addEditVariable(height, kiwi::strength::strong);
-  
-  solver.addConstraint(kiwi::Constraint{ right == left + width });
-  solver.addConstraint(kiwi::Constraint{ bottom == top + height });
-  solver.addConstraint(kiwi::Constraint{ centerX == left + 0.5 * width });
-  solver.addConstraint(kiwi::Constraint{ centerY == top + 0.5 * height });
 }
 
 DisplayObject::~DisplayObject()
@@ -92,39 +82,35 @@ DisplayObject* DisplayObject::setBottom(float bottom, bool adjustLayout)
   return this;
 }
 
+DisplayObject* DisplayObject::centerX(float x, bool adjustLayout)
+{
+  this->setX(x - (getWidth() * 0.5));
+  if (adjustLayout) this->_adjustLayout();
 
-//DisplayObject* DisplayObject::centerX(float x, bool adjustLayout)
-//{
-//  this->setX(x - (getWidth() * 0.5));
-//  if (adjustLayout) this->_adjustLayout();
-//
-//  return this;
-//}
-//
-//DisplayObject* DisplayObject::centerY(float y, bool adjustLayout)
-//{
-//  this->setY(y - (getHeight() * 0.5));
-//  if (adjustLayout) this->_adjustLayout();
-//
-//  return this;
-//}
-//
-//DisplayObject* DisplayObject::center(glm::vec2 pos, bool adjustLayout)
-//{
-//  this->setX(pos.x - (getWidth() * 0.5));
-//  this->setY(pos.y - (getHeight() * 0.5));
-//  if (adjustLayout) this->_adjustLayout();
-//
-//  return this;
-//}
+  return this;
+}
+
+DisplayObject* DisplayObject::centerY(float y, bool adjustLayout)
+{
+  this->setY(y - (getHeight() * 0.5));
+  if (adjustLayout) this->_adjustLayout();
+
+  return this;
+}
+
+DisplayObject* DisplayObject::center(glm::vec2 pos, bool adjustLayout)
+{
+  this->setX(pos.x - (getWidth() * 0.5));
+  this->setY(pos.y - (getHeight() * 0.5));
+  if (adjustLayout) this->_adjustLayout();
+
+  return this;
+}
 
 DisplayObject* DisplayObject::setSize(glm::vec2 size, bool adjustLayout)
 {
-  solver.suggestValue(width, size.x);
-  solver.suggestValue(height, size.y);
-  solver.updateVariables();
-  _localRect.width = _rect.width = width.value();
-  _localRect.height = _rect.height = height.value();
+  _localRect.width = _rect.width = size.x;
+  _localRect.height = _rect.height = size.y;
   if (adjustLayout) this->_adjustLayout();
   
   return this;
@@ -132,11 +118,9 @@ DisplayObject* DisplayObject::setSize(glm::vec2 size, bool adjustLayout)
 
 DisplayObject* DisplayObject::setRect(const ofRectangle & rect, bool adjustLayout)
 {
-  solver.suggestValue(top, rect.getTop());
-  solver.suggestValue(left, rect.getLeft());
-  solver.suggestValue(width, rect.width);
-  solver.suggestValue(height, rect.height);
-  solver.updateVariables();
+  _rect = rect;
+  _localRect.width = rect.width;
+  _localRect.height = rect.height;
   
   if (adjustLayout) this->_adjustLayout();
   
@@ -182,10 +166,10 @@ glm::vec2 DisplayObject::globalToLocal(glm::vec2 pos, bool includeSelf) const
 
 void DisplayObject::_updateRect()
 {
-  _rect.x = left.value();
-  _rect.y = top.value();
-  _rect.width = width.value();
-  _rect.height = height.value();
+//  _rect.x = left.value();
+//  _rect.y = top.value();
+//  _rect.width = width.value();
+//  _rect.height = height.value();
   
   _localRect.width = _rect.width;
   _localRect.height = _rect.height;
