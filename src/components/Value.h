@@ -1,13 +1,13 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 #include "components/Label.h"
 #include "types/Range.h"
 
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class Value : public ofxCortex::ui::Component {
+class Value : public ofxCortex::ui::View {
 public:
   
   Value(string name, T value)
@@ -81,7 +81,7 @@ protected:
     background->setRect(this->getRect());
     label->setRect(this->getRect());
     
-    Component::_adjustLayout();
+    View::_adjustLayout();
   }
   
   string _getFormattedString()
