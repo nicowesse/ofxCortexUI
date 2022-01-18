@@ -5,12 +5,12 @@
 
 namespace ofxCortex { namespace ui {
 
-class Component : public ofxCortex::ui::DisplayObject {
+class View : public ofxCortex::ui::DisplayObject {
   
 public:
   
-  Component(string name = "");
-  static shared_ptr<Component> create(string name = "") { return make_shared<Component>(name); }
+  View(string name = "");
+  static shared_ptr<View> create(string name = "") { return make_shared<View>(name); }
   
   virtual void setStyle(shared_ptr<Style> style, bool affectChildren = true);
   
@@ -19,11 +19,11 @@ public:
   
 #pragma mark - Positioning and Sizing
   
-  virtual Component* setWidthWithEvent(float width, bool adjustLayout = true);
-  virtual Component* setHeightWithEvent(float height, bool adjustLayout = true);
-  virtual Component* setSizeWithEvent(glm::vec2 size, bool adjustLayout = true);
-  virtual Component* setSizeWithEvent(float width, float height, bool adjustLayout = true);
-  virtual Component* setRectWithEvent(const ofRectangle & rect, bool adjustLayout = true);
+  virtual View* setWidthWithEvent(float width, bool adjustLayout = true);
+  virtual View* setHeightWithEvent(float height, bool adjustLayout = true);
+  virtual View* setSizeWithEvent(glm::vec2 size, bool adjustLayout = true);
+  virtual View* setSizeWithEvent(float width, float height, bool adjustLayout = true);
+  virtual View* setRectWithEvent(const ofRectangle & rect, bool adjustLayout = true);
   
   const ofRectangle & getRenderRect() const { return _renderRect; }
   
@@ -35,13 +35,13 @@ public:
   bool hasFocus() { return (this == _focused.get()); }
   
 protected:
-  static shared_ptr<Component> _focused;
+  static shared_ptr<View> _focused;
   bool _hasFocus { false };
   bool _isFocusEnabled { true };
   
 #pragma mark - Helpers and Utils
   
-  virtual string _getModule() const override { return "Component"; };
+  virtual string _getModule() const override { return "View"; };
   
 #pragma mark - Rendering and Loops
   

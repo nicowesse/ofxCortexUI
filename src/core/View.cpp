@@ -1,10 +1,10 @@
-#include "Component.h"
+#include "View.h"
 
 namespace ofxCortex { namespace ui {
 
-shared_ptr<Component> Component::_focused;
+shared_ptr<View> View::_focused;
 
-Component::Component(string name)
+View::View(string name)
 {
   setName(name);
   style = Style::create();
@@ -15,20 +15,20 @@ Component::Component(string name)
   _adjustLayout();
 }
 
-void Component::setStyle(shared_ptr<Style> style, bool affectChildren)
+void View::setStyle(shared_ptr<Style> style, bool affectChildren)
 {
   this->style = style;
   
   if (affectChildren)
   {
-    for (auto & child : children<Component>())
+    for (auto & child : children<View>())
     {
       child->setStyle(style, affectChildren);
     }
   }
 }
 
-Component* Component::setWidthWithEvent(float width, bool adjustLayout)
+View* View::setWidthWithEvent(float width, bool adjustLayout)
 {
   DisplayObject::setWidth(width, adjustLayout);
   
@@ -37,7 +37,7 @@ Component* Component::setWidthWithEvent(float width, bool adjustLayout)
   onResizedE.notify(this, r);
 }
 
-Component* Component::setHeightWithEvent(float width, bool adjustLayout)
+View* View::setHeightWithEvent(float width, bool adjustLayout)
 {
   DisplayObject::setHeight(width, adjustLayout);
   
@@ -46,7 +46,7 @@ Component* Component::setHeightWithEvent(float width, bool adjustLayout)
   onResizedE.notify(this, r);
 }
 
-Component* Component::setSizeWithEvent(glm::vec2 size, bool adjustLayout)
+View* View::setSizeWithEvent(glm::vec2 size, bool adjustLayout)
 {
   DisplayObject::setSize(size, adjustLayout);
   
@@ -55,7 +55,7 @@ Component* Component::setSizeWithEvent(glm::vec2 size, bool adjustLayout)
   onResizedE.notify(this, r);
 }
 
-Component* Component::setSizeWithEvent(float width, float height, bool adjustLayout)
+View* View::setSizeWithEvent(float width, float height, bool adjustLayout)
 {
   DisplayObject::setSize(width, height, adjustLayout);
   
@@ -64,7 +64,7 @@ Component* Component::setSizeWithEvent(float width, float height, bool adjustLay
   onResizedE.notify(this, r);
 }
 
-Component* Component::setRectWithEvent(const ofRectangle & rect, bool adjustLayout)
+View* View::setRectWithEvent(const ofRectangle & rect, bool adjustLayout)
 {
   DisplayObject::setRect(rect, adjustLayout);
   
@@ -73,16 +73,16 @@ Component* Component::setRectWithEvent(const ofRectangle & rect, bool adjustLayo
   onResizedE.notify(this, r);
 }
 
-void Component::setFocused()
+void View::setFocused()
 {
   if (_isFocusEnabled && !hasFocus()) // We are not currently focused
   {
     _focused->removeFocus();
-    _focused = dynamic_pointer_cast<Component>(shared_from_this());
+    _focused = dynamic_pointer_cast<View>(shared_from_this());
   }
 }
 
-void Component::removeFocus()
+void View::removeFocus()
 {
   if (hasFocus())
   {
@@ -90,12 +90,12 @@ void Component::removeFocus()
   }
 }
 
-void Component::_draw()
+void View::_draw()
 {
   _drawFocusOutline();
 }
 
-void Component::_drawFocusOutline()
+void View::_drawFocusOutline()
 {
   if (!hasFocus()) return;
   
@@ -109,19 +109,19 @@ void Component::_drawFocusOutline()
   ofPopStyle();
 }
 
-void Component::_update()
+void View::_update()
 {
   
 }
 
-void Component::_adjustLayout()
+void View::_adjustLayout()
 {
   _recalculateRenderRect();
   
   DisplayObject::_adjustLayout();
 }
 
-void Component::_debug()
+void View::_debug()
 {
   DisplayObject::_debug();
   
@@ -129,7 +129,7 @@ void Component::_debug()
   ofDrawRectangle(_renderRect);
 }
 
-void Component::_recalculateRenderRect()
+void View::_recalculateRenderRect()
 {
   _renderRect.x = _localRect.getLeft() + style->padding.left;
   _renderRect.y = _localRect.getTop() + style->padding.top;
@@ -137,12 +137,12 @@ void Component::_recalculateRenderRect()
   _renderRect.height = _localRect.height - style->padding.top - style->padding.bottom;
 }
 
-void Component::_mousePressed(const ofMouseEventArgs & e)
+void View::_mousePressed(const ofMouseEventArgs & e)
 {
   setFocused();
 }
 
-void Component::_onResize(const ofRectangle &rect)
+void View::_onResize(const ofRectangle &rect)
 {
   ofLogVerbose(_getLogModule()) << "On Resize! " << rect;
 }
