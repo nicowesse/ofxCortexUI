@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "core/UUID.h"
+#include "core/Stencil.h"
 
 namespace ofxCortex { namespace ui {
   
@@ -18,8 +19,9 @@ namespace ofxCortex { namespace ui {
     virtual void setName(string name) { _name = name; };
     const string & getName() const { return _name; };
     
+    bool operator== (const DisplayObject& other) const { return this->_uuid == other._uuid; }
     bool compare(shared_ptr<DisplayObject> other) { return _uuid == other->_uuid; }
-//    bool compare(ofxCortex::core::UUID uuid) { return _uuid == uuid; }
+    
     const string getUUID() const { return _uuid.toString(); }
     const string getPrettyID() const { return (_name != "") ? _name : _uuid; }
     
@@ -43,17 +45,13 @@ namespace ofxCortex { namespace ui {
     
     float getX() const { return _rect.x; }
     float getLeft() const { return _rect.getLeft(); }
-//    float left() const { return getLeft(); }
     virtual DisplayObject* setX(float x) { _rect.x = x; return this; }
     virtual DisplayObject* setLeft(float left, bool adjustLayout = true);
-//    virtual DisplayObject* left(float x, bool adjustLayout = true) { setLeft(x, adjustLayout); }
     
     float getY() const { return _rect.y; }
     float getTop() const { return _rect.getTop(); }
-//    float top() const { return getTop(); }
     virtual DisplayObject* setY(float y) { _rect.y = y; return this; }
     virtual DisplayObject* setTop(float top, bool adjustLayout = true);
-//    virtual DisplayObject* top(float y, bool adjustLayout = true) { setTop(y, adjustLayout); }
     
     float centerX() const { return _rect.getCenter().x; }
     virtual DisplayObject* centerX(float x, bool adjustLayout = true);
@@ -64,17 +62,16 @@ namespace ofxCortex { namespace ui {
     
     float getWidth() const { return _rect.width; }
     float getRight() const { return _rect.getRight(); }
-//    float right() const { return getRight(); }
     virtual DisplayObject* setWidth(float width, bool adjustLayout = true);
     virtual DisplayObject* setRight(float right, bool adjustLayout = true);
+    virtual DisplayObject* alignRight(float right);
 //    virtual DisplayObject* right(float x, bool adjustLayout = true) { setRight(x, adjustLayout); }
     
     float getHeight() const { return _rect.height; }
     float getBottom() const { return _rect.getBottom(); }
-//    float bottom() const { return getBottom(); }
     virtual DisplayObject* setHeight(float height, bool adjustLayout = true);
     virtual DisplayObject* setBottom(float bottom, bool adjustLayout = true);
-//    virtual DisplayObject* bottom(float y, bool adjustLayout = true) { setBottom(y, adjustLayout); }
+    virtual DisplayObject* alignBottom(float bottom);
     
     const glm::vec2 getSize() const { return { _rect.width, _rect.height }; };
     virtual DisplayObject* setSize(glm::vec2 size, bool adjustLayout = true);
@@ -96,6 +93,7 @@ namespace ofxCortex { namespace ui {
     glm::vec2 globalToLocal(glm::vec2 pos, bool includeSelf = true) const;
     
     bool isInsideRectangle(glm::vec2 pos, bool useGlobalRect = false);
+    bool isInsideRectangle(const ofRectangle & rect, bool useGlobalRect = false);
     
     
   protected:
@@ -141,6 +139,7 @@ namespace ofxCortex { namespace ui {
     virtual void _postDraw() {};
     
     virtual void _drawChildren();
+    virtual void _drawMask();
     
     virtual void _update();
     virtual void _update(float time, float deltaTime);
@@ -151,12 +150,6 @@ namespace ofxCortex { namespace ui {
     
     // Stencil Mask
     bool _useMask { true };
-    
-    void _beginDrawingMask();
-    void _endDrawingMask();
-    
-    void _beginMask();
-    void _endMask();
     
     
     
@@ -215,6 +208,7 @@ namespace ofxCortex { namespace ui {
     }
     
     virtual void addChild(shared_ptr<DisplayObject> child);
+    virtual void addChildren(vector<shared_ptr<DisplayObject>> children);
     virtual void addChildAt(shared_ptr<DisplayObject> child, unsigned int index);
     
     virtual void removeChild(shared_ptr<DisplayObject> child);

@@ -65,6 +65,13 @@ DisplayObject* DisplayObject::setRight(float right, bool adjustLayout)
   return this;
 }
 
+DisplayObject* DisplayObject::alignRight(float right)
+{
+  this->setX(right - this->getWidth());
+  
+  return this;
+}
+
 DisplayObject* DisplayObject::setHeight(float height, bool adjustLayout)
 {
   _localRect.height = _rect.height = height;
@@ -78,6 +85,13 @@ DisplayObject* DisplayObject::setBottom(float bottom, bool adjustLayout)
   ofRectangle originalRect = getRect();
   float h = bottom - originalRect.getBottom();
   this->setHeight(h, adjustLayout);
+  
+  return this;
+}
+
+DisplayObject* DisplayObject::alignBottom(float bottom)
+{
+  this->setY(bottom - this->getHeight());
   
   return this;
 }
@@ -213,12 +227,10 @@ void DisplayObject::draw()
   {
     if (_useMask)
     {
-      _beginDrawingMask();
-      ofSetColor(255);
-      ofDrawRectangle(_localRect);
-      _endDrawingMask();
-      
-      _beginMask();
+      Stencil::beginDrawingMask();
+      this->_drawMask();
+      Stencil::endDrawingMask();
+      Stencil::beginUsingMask();
     }
     
     ofPushStyle();
@@ -231,7 +243,7 @@ void DisplayObject::draw()
     
     if (_doDrawChildren) _drawChildren();
     
-    if (_useMask) _endMask();
+    if (_useMask) Stencil::stopUsingMask();
   }
   ofPopMatrix();
 }
@@ -285,6 +297,17 @@ void DisplayObject::_drawChildren()
   for (auto & child : _children) child->draw();
 }
 
+void DisplayObject::_drawMask()
+{
+  ofPushStyle();
+  {
+    ofFill();
+    ofSetColor(255);
+    ofDrawRectangle(_localRect);
+  }
+  ofPopStyle();
+}
+
 void DisplayObject::_update()
 {
   _update(ofGetElapsedTimef(), ofGetLastFrameTime());
@@ -313,37 +336,6 @@ void DisplayObject::_debug()
 }
 
 
-void DisplayObject::_beginDrawingMask()
-{
-  glClearStencil(0);
-  glClear(GL_STENCIL_BUFFER_BIT);
-  glEnable(GL_STENCIL_TEST); //Enable using the stencil buffer
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); //Disable drawing colors to the screen
-  glDepthMask(GL_FALSE); //Disable drawing to depth buffer
-  glStencilFunc(GL_ALWAYS, 1, 1); //Make the stencil test always pass
-                                  //Make pixels in the stencil buffer be set to 1 when the stencil test passes
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-  //Set all of the pixels below to be 1 in the stencil buffer...
-}
-
-void DisplayObject::_endDrawingMask()
-{
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); //Enable drawing colors to the screen
-  glDepthMask(GL_TRUE); //Eable drawing to depth buffer
-}
-
-void DisplayObject::_beginMask()
-{
-  glStencilFunc(GL_EQUAL, 1, 1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-}
-
-void DisplayObject::_endMask()
-{
-  glDisable(GL_STENCIL_TEST); //Disable using the stencil buffer
-}
-
-
 
 #pragma mark - The Family
 
@@ -360,15 +352,19 @@ void DisplayObject::makeBaseObject()
 
 void DisplayObject::addChild(shared_ptr<DisplayObject> child)
 {
-  if (child->getParent().get() == this) return; // Child is already a child of this
-  if (child->hasParent()) child->getParent()->removeChild(child);
-  
-  _children.push_back(child);
-  child->_setParent(shared_from_this());
+  this->addChildAt(child, _children.size());
+}
+
+void DisplayObject::addChildren(vector<shared_ptr<DisplayObject>> children)
+{
+  for (auto & child : children) addChild(child);
 }
 
 void DisplayObject::addChildAt(shared_ptr<DisplayObject> child, unsigned int index)
 {
+  if (child->getParent().get() == this) return; // Child is already a child of this
+  if (child->hasParent()) child->getParent()->removeChild(child);
+  
   _children.insert(_children.begin() + ofClamp(index, 0, _children.size()), child);
   child->_setParent(shared_from_this());
 }
@@ -796,6 +792,12 @@ bool DisplayObject::isInsideRectangle(glm::vec2 pos, bool useGlobalRect)
 {
   ofRectangle rect = (useGlobalRect) ? getGlobalRect() : getRect();
   return (pos.x >= rect.getLeft() && pos.x <= rect.getRight() && pos.y >= rect.getTop() && pos.y <= rect.getBottom());
+}
+
+bool DisplayObject::isInsideRectangle(const ofRectangle & incoming, bool useGlobalRect)
+{
+  ofRectangle rect = (useGlobalRect) ? getGlobalRect() : getRect();
+  return (incoming.getLeft() >= rect.getLeft() && incoming.getRight() <= rect.getRight() && incoming.getTop() >= rect.getTop() && incoming.getBottom() <= rect.getBottom());
 }
 
 bool DisplayObject::_isInsideLocalRect(glm::vec2 pos)
