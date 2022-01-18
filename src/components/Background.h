@@ -1,22 +1,26 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 
 namespace ofxCortex { namespace ui {
 
-class Background : public ofxCortex::ui::Component {
+class Background : public ofxCortex::ui::View {
 public:
-  Background() : Component() {};
+  Background() : View() {};
   static shared_ptr<Background> create() { return make_shared<Background>(); }
   
-  void drawBackground(ofFloatColor c)
+  void drawBackground(ofFloatColor background, ofFloatColor border = ofFloatColor(1.0f, 0.0f))
   {
     const auto & rect = getRenderRect();
     
     ofPushStyle();
     {
       ofFill();
-      ofSetColor(c);
+      ofSetColor(background);
+      ofDrawRectRounded(rect, style->boxRadius.topLeft, style->boxRadius.topRight, style->boxRadius.bottomRight, style->boxRadius.bottomLeft);
+      
+      ofNoFill();
+      ofSetColor(border);
       ofDrawRectRounded(rect, style->boxRadius.topLeft, style->boxRadius.topRight, style->boxRadius.bottomRight, style->boxRadius.bottomLeft);
     }
     ofPopStyle();
