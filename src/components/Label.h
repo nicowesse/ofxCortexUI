@@ -1,18 +1,17 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 #include "components/Background.h"
 
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class Label : public ofxCortex::ui::Component {
+class Label : public ofxCortex::ui::View {
 public:
   
   Label(string name)
-  : ofxCortex::ui::Component()
+  : ofxCortex::ui::View(name)
   {
-    setName(name);
     parameter.setName(name);
     
     _init();
@@ -20,7 +19,7 @@ public:
   static shared_ptr<Label<T>> create(string name) { return make_shared<Label<T>>(name); }
   
   Label(ofParameter<T> & param)
-  : ofxCortex::ui::Component()
+  : ofxCortex::ui::View()
   {
     setName(parameter.getName());
     parameter.makeReferenceTo(param);
@@ -77,7 +76,10 @@ protected:
   {
     background->setRect(this->getRect());
     
-    Component::_adjustLayout();
+    float labelWidth = style->getLabelFont()->stringWidth(parameter.getName());
+    if (this->getWidth() < labelWidth) { this->setWidth(labelWidth); }
+    
+    View::_adjustLayout();
   }
   
   shared_ptr<ofxCortex::ui::Background> background;
