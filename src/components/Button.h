@@ -1,11 +1,11 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 #include "components/Label.h"
 
 namespace ofxCortex { namespace ui {
 
-class Button : public ofxCortex::ui::Component {
+class Button : public ofxCortex::ui::View {
 public:
   
   Button(ofParameter<void> param)
@@ -46,19 +46,19 @@ protected:
     background->setRect(this->getRect());
     label->setRect(this->getRect());
     
-    Component::_adjustLayout();
+    View::_adjustLayout();
   }
   
   virtual void _mouseEnter(const ofMouseEventArgs & e) override
   {
-    Component::_mouseEnter(e);
+    View::_mouseEnter(e);
     
     backgroundColor = style->foregroundColor;
   }
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override
   {
-    Component::_mousePressed(e);
+    View::_mousePressed(e);
     
     backgroundColor *= 1.4;
     parameter.trigger();
@@ -66,14 +66,21 @@ protected:
   
   virtual void _mouseReleased(const ofMouseEventArgs & e) override
   {
-    Component::_mouseReleased(e);
+    View::_mouseReleased(e);
+    
+    backgroundColor = style->foregroundColor;
+  }
+  
+  virtual void _mouseReleasedOutside(const ofMouseEventArgs & e) override
+  {
+    View::_mouseReleasedOutside(e);
     
     backgroundColor = style->foregroundColor;
   }
   
   virtual void _mouseExit(const ofMouseEventArgs & e) override
   {
-    Component::_mousePressed(e);
+    View::_mousePressed(e);
     
     backgroundColor = style->backgroundColor;
   }
