@@ -17,13 +17,13 @@ void RangeSlider::Bar::drawBar(ofFloatColor acc, float horizontalPadding)
 
 DisplayObject* RangeSlider::Bar::setLeft(float x, bool adjustLayout)
 {
-  x = ofClamp(x, _dragBounds.getLeft(), _dragBounds.getRight() - this->getWidth());
+  x = ofClamp(x, _dragBounds.getLeft(), _dragBounds.getRight());
   return DisplayObject::setLeft(x, false);
 }
 
 DisplayObject* RangeSlider::Bar::setRight(float x, bool adjustLayout)
 {
-  x = ofClamp(x, _dragBounds.getLeft(), _dragBounds.getRight() - this->getWidth());
+  x = ofClamp(x, _dragBounds.getLeft(), _dragBounds.getRight());
   
   return DisplayObject::setRight(x, false);
 }
@@ -96,7 +96,7 @@ void RangeSlider::_init()
   toHandle->setWidth(16);
   this->addChild(toHandle);
   
-  auto onBarDragged = [this](Draggable::DraggableEventArgs e) {
+  auto onHandleDragged = [this](Draggable::DraggableEventArgs e) {
     auto minHandle = _getMinHandle();
     auto maxHandle = _getMaxHandle();
     
@@ -109,8 +109,8 @@ void RangeSlider::_init()
     bar->setRight(maxHandle->getRect().getLeft());
   };
   
-  _eventListeners.push(fromHandle->onDragE.newListener(onBarDragged));
-  _eventListeners.push(toHandle->onDragE.newListener(onBarDragged));
+  _eventListeners.push(fromHandle->onDragE.newListener(onHandleDragged));
+  _eventListeners.push(toHandle->onDragE.newListener(onHandleDragged));
   
   bar = make_shared<Bar>(getRenderRect());
   bar->setName("RangeSlider::Bar");
@@ -137,13 +137,13 @@ void RangeSlider::_init()
     bar->setLeft(fromHandle->getRect().getRight());
     bar->setRight(toHandle->getRect().getLeft());
   }));
+  
+  _adjustLayout();
 }
 
 void RangeSlider::_update()
 {
   DisplayObject::_update();
-  
-//  if (!_isMousePressedInside) _handleOpacity = ofClamp(_handleOpacity - _deltaTime, 0.7, 1.0);
 }
 
 void RangeSlider::_draw()
@@ -159,7 +159,7 @@ void RangeSlider::_draw()
 
 void RangeSlider::_debug()
 {
-  Component::_debug();
+  View::_debug();
   
   fromHandle->debug();
   toHandle->debug();
@@ -184,7 +184,7 @@ void RangeSlider::_adjustLayout()
   toHandle->setY(dragBounds.y);
   toHandle->setFromNormalizedX(parameter->getNormalizedTo());
   
-  dragBounds.setFromCenter(dragBounds.getCenter(), dragBounds.width - (fromHandle->getWidth() + toHandle->getWidth()), dragBounds.height);
+//  dragBounds.setFromCenter(dragBounds.getCenter(), dragBounds.width - (fromHandle->getWidth() + toHandle->getWidth()), dragBounds.height);
   
   bar->setDragBounds(dragBounds);
   bar->setHeight(dragBounds.height);
@@ -192,12 +192,12 @@ void RangeSlider::_adjustLayout()
   bar->setLeft(_getMinHandle()->getRect().getRight());
   bar->setRight(_getMaxHandle()->getRect().getLeft());
   
-  Component::_adjustLayout();
+  View::_adjustLayout();
 }
 
 void RangeSlider::_mousePressed(const ofMouseEventArgs & e)
 {
-  Component::_mousePressed(e);
+  View::_mousePressed(e);
   
   glm::vec2 localCoord = globalToLocal(e);
 }
@@ -245,76 +245,6 @@ void RangeSlider::_keyPressed(const ofKeyEventArgs & e)
     break;
   }
 }
-
-//ofShader & RangeSlider::_getShader()
-//{
-//  static ofShader shader;
-//  
-//  if (!shader.isLoaded())
-//  {
-//    string vertexShader;
-//    string fragShader;
-//    
-//    if (ofIsGLProgrammableRenderer())
-//    {
-//      vertexShader = R"(
-//      #version 150
-//      
-//      uniform mat4 modelViewProjectionMatrix;
-//      
-//      in vec4 position;
-//      in vec4 color;
-//      in vec4 normal;
-//      in vec2 texcoord;
-//      
-//      out vec2 texCoordVarying;
-//      
-//      void main() {
-//        texCoordVarying = texcoord;
-//        gl_Position = modelViewProjectionMatrix * position;
-//      }
-//      )";
-//      
-//      fragShader =
-//      R"(
-//      #version 150
-//      
-//      const float PI = 3.1415926535897932384626433832795;
-//      
-//      float parabola( float x, float k )
-//      {
-//          return pow( 4.0 * x * (1.0 - x), k );
-//      }
-//      
-//      float pcurve( float x, float c, float s )
-//      {
-//          float a = c * s;
-//          float b = (1.0 - c) * s;
-//          float k = pow(a + b, a + b) / (pow(a, a) * pow(b, b));
-//      
-//          return k * pow(x, a) * pow(1.0 - x, b);
-//      }
-//      
-//      in vec2 texCoordVarying;
-//      out vec4 outputColor;
-//      
-//      uniform float u_center = 0.5;
-//      
-//      void main() {
-//        float alpha = pcurve(texCoordVarying.x, u_center, 6.0);
-//        outputColor = vec4(1.0, 1.0, 1.0, alpha);
-//      }
-//      )";
-//    }
-//    
-//    shader.setupShaderFromSource(GL_VERTEX_SHADER, vertexShader);
-//    shader.setupShaderFromSource(GL_FRAGMENT_SHADER, fragShader);
-//    shader.bindDefaults();
-//    shader.linkProgram();
-//  }
-//  
-//  return shader;
-//}
 
 
 }}

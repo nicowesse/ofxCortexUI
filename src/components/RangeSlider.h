@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 #include "components/Background.h"
 #include "components/Label.h"
 #include "components/Value.h"
@@ -13,7 +13,7 @@
 
 namespace ofxCortex { namespace ui {
 
-class RangeSlider : public Component {
+class RangeSlider : public ofxCortex::ui::View {
 public:
   class Bar : public Draggable {
   public:
