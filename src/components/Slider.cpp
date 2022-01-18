@@ -112,13 +112,13 @@ void Slider<T>::_draw()
   label->drawLabel(ofFloatColor(style->labelFontColor, _textOpacity));
   value->drawValue(ofFloatColor(style->valueFontColor, _textOpacity));
   
-  Component::_drawFocusOutline();
+  View::_drawFocusOutline();
 }
 
 template<typename T>
 void Slider<T>::_debug()
 {
-  Component::_debug();
+  View::_debug();
   
   handle->debug();
 }
@@ -126,7 +126,7 @@ void Slider<T>::_debug()
 template<typename T>
 void Slider<T>::_adjustLayout()
 {
-  Component::_recalculateRenderRect();
+  View::_recalculateRenderRect();
   
   background->setRect(this->getRect());
   label->setRect(this->getRect());
@@ -146,7 +146,7 @@ void Slider<T>::_adjustLayout()
 template<typename T>
 void Slider<T>::_mousePressed(const ofMouseEventArgs & e)
 {
-  Component::_mousePressed(e);
+  View::_mousePressed(e);
   
   glm::vec2 localCoord = globalToLocal(e);
   

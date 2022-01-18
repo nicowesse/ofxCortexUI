@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Component.h"
+#include "core/View.h"
 #include "components/Background.h"
 #include "components/Label.h"
 #include "components/Value.h"
@@ -30,7 +30,7 @@ protected:
 };
 
 template<typename T>
-class Slider : public Component {
+class Slider : public ofxCortex::ui::View {
   static_assert(std::is_arithmetic<T>::value, "Slider: T must be numeric!");
   
 public:
