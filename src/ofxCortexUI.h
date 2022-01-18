@@ -1,10 +1,10 @@
 #pragma mark
 
 #include "core/DisplayObject.h"
-#include "core/Component.h"
+#include "core/View.h"
 #include "core/Draggable.h"
 
-#include "layout/Layout.h"
+#include "layout/StackView.h"
 
 #include "components/Label.h"
 #include "components/Value.h"
