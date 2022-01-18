@@ -5,21 +5,30 @@ namespace ofxCortex { namespace ui {
 class Style {
 public:
   Style() :
-    margin(2.0),
-    padding(2.0),
+    margin(0.0),
+    padding(4.0),
     boxRadius(3.0),
     backgroundColor(0.06),
     foregroundColor(0.12),
     supportingColor(0.4),
+    containerColor(0.08),
     accentColor(ofFloatColor::white),
     borderColor(ofFloatColor::white, 0.25),
     labelFontColor(ofFloatColor::white),
     valueFontColor(ofFloatColor::white, 0.75)
   {
-    fonts.load();
+    
   };
   
   static shared_ptr<Style> create() { return make_shared<Style>(); }
+  static shared_ptr<Style> copy(shared_ptr<Style> original) { return make_shared<Style>(*original); }
+  
+  ofFloatColor backgroundColor;
+  ofFloatColor foregroundColor;
+  ofFloatColor supportingColor;
+  ofFloatColor containerColor;
+  ofFloatColor accentColor;
+  ofFloatColor borderColor;
   
   struct Spacing {
     float top{0.0};
@@ -30,6 +39,26 @@ public:
     Spacing(float s) : top(s), right(s), bottom(s), left(s) {};
     operator glm::vec2() const { return glm::vec2(left, top); }
     operator glm::vec4() const { return glm::vec4(left, top, right, bottom); }
+    
+    Spacing& operator += (const float& rhs)
+    {
+      top += rhs;
+      right += rhs;
+      bottom += rhs;
+      left += rhs;
+      
+      return *this;
+    }
+    
+    Spacing& operator *= (const float& rhs)
+    {
+      top *= rhs;
+      right *= rhs;
+      bottom *= rhs;
+      left *= rhs;
+      
+      return *this;
+    }
   } margin, padding;
   
   struct BoxRadius {
@@ -39,55 +68,70 @@ public:
     float bottomRight{0.0};
     
     BoxRadius(float s) : topLeft(s), topRight(s), bottomLeft(s), bottomRight(s) {};
+    BoxRadius& operator += (const float& rhs)
+    {
+      topLeft += rhs;
+      topRight += rhs;
+      bottomLeft += rhs;
+      bottomRight += rhs;
+      
+      return *this;
+    }
+    
+    BoxRadius& operator *= (const float& rhs)
+    {
+      topLeft *= rhs;
+      topRight *= rhs;
+      bottomLeft *= rhs;
+      bottomRight *= rhs;
+      
+      return *this;
+    }
   } boxRadius;
   
   ofAlignHorz labelAlignment { OF_ALIGN_HORZ_LEFT };
   ofAlignHorz valueAlignment { OF_ALIGN_HORZ_LEFT };
   
   struct Font {
-    shared_ptr<ofTrueTypeFont> regular;
-    shared_ptr<ofTrueTypeFont> medium;
+    shared_ptr<ofTrueTypeFont> ttf;
     float xHeight;
     
     Font() {
-      regular = make_shared<ofTrueTypeFont>();
-      medium = make_shared<ofTrueTypeFont>();
+      ttf = make_shared<ofTrueTypeFont>();
     }
     
-    void load(string regularFontPath = "fonts/SF-Mono-Medium.otf", string mediumFontPath = "fonts/SF-Mono-Regular.otf")
+    void load(string path = "assets/fonts/SF-Pro-Text-Regular.otf")
     {
-      std::initializer_list<ofUnicode::range> fontRanges = {
+      ofTrueTypeFontSettings fontSettings(ofToDataPath(path), 8.0f);
+      fontSettings.antialiased = true;
+      fontSettings.contours = true;
+      fontSettings.addRanges({
         ofUnicode::Latin1Supplement,
         ofUnicode::Arrows
-      };
+      });
+      ttf->load(fontSettings);
       
-      ofTrueTypeFontSettings regularFontSettings(ofToDataPath(regularFontPath), 8.0f);
-      regularFontSettings.antialiased = true;
-      regularFontSettings.contours = true;
-      regularFontSettings.addRanges(fontRanges);
-      regular->load(regularFontSettings);
-      
-      xHeight = regular->stringHeight("X");
-      
-      ofTrueTypeFontSettings mediumFontSettings(ofToDataPath(mediumFontPath), 8.0f);
-      mediumFontSettings.antialiased = true;
-      mediumFontSettings.contours = true;
-      mediumFontSettings.addRanges(fontRanges);
-      medium->load(mediumFontSettings);
+      xHeight = ttf->stringHeight("X");
+    }
+  };
+  
+  struct FontLibrary {
+    Font label;
+    Font value;
+    
+    FontLibrary() {
+      label.load("assets/fonts/SF-Pro-Text-Medium.otf");
+      value.load("assets/fonts/SF-Pro-Text-Regular.otf");
     }
   } fonts;
   
-  ofFloatColor backgroundColor;
-  ofFloatColor foregroundColor;
-  ofFloatColor supportingColor;
-  ofFloatColor accentColor;
-  ofFloatColor borderColor;
+  
   ofFloatColor labelFontColor;
   ofFloatColor valueFontColor;
   
-  const shared_ptr<ofTrueTypeFont> getLabelFont() { return fonts.regular; }
-  const shared_ptr<ofTrueTypeFont> getValueFont() { return fonts.regular; }
-  float getFontXHeight() const { return fonts.xHeight;  }
+  const shared_ptr<ofTrueTypeFont> getLabelFont() { return fonts.label.ttf; }
+  const shared_ptr<ofTrueTypeFont> getValueFont() { return fonts.value.ttf; }
+  float getFontXHeight() const { return fonts.label.xHeight;  }
   
 protected:
 };
