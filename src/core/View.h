@@ -13,6 +13,7 @@ public:
   static shared_ptr<View> create(string name = "") { return make_shared<View>(name); }
   
   virtual void setStyle(shared_ptr<Style> style, bool affectChildren = true);
+  shared_ptr<Style> getStyle() { return style; }
   
   ofEvent<ofRectangle> onResizedE;
   void onResized(function<void(ofRectangle)> callback);

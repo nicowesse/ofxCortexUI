@@ -9,7 +9,7 @@ View::View(string name)
   setName(name);
   style = Style::create();
   
-  setWidth(288);
+  setWidth(200);
   setHeight(40);
   
   _adjustLayout();
