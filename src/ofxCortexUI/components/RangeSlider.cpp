@@ -167,6 +167,8 @@ void RangeSlider::_debug()
 
 void RangeSlider::_adjustLayout()
 {
+  View::_recalculateRenderRect();
+  
   background->setRect(this->getRect());
   label->setRect(this->getRect());
   value->setRect(this->getRect());
@@ -192,7 +194,7 @@ void RangeSlider::_adjustLayout()
   bar->setLeft(_getMinHandle()->getRect().getRight());
   bar->setRight(_getMaxHandle()->getRect().getLeft());
   
-  View::_adjustLayout();
+  DisplayObject::_adjustLayout();
 }
 
 void RangeSlider::_mousePressed(const ofMouseEventArgs & e)
@@ -212,7 +214,7 @@ void RangeSlider::_mouseScrolled(const ofMouseEventArgs & e)
   else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
   else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
   
-  parameter += e.scrollX * delta;
+  parameter += e.scrollY * delta;
 }
 
 void RangeSlider::_keyPressed(const ofKeyEventArgs & e)

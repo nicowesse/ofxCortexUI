@@ -1,13 +1,13 @@
 #pragma once
 
-#include "core/View.h"
+#include "ofxCortexUI/core/View.h"
 
 namespace ofxCortex { namespace ui {
 
 class Background : public ofxCortex::ui::View {
 public:
-  Background() : View() {};
-  static shared_ptr<Background> create() { return make_shared<Background>(); }
+  Background(string name = "Background") : View(name) {};
+  static shared_ptr<Background> create(string name = "Background") { return make_shared<Background>(name); }
   
   void drawBackground(ofFloatColor background, ofFloatColor border = ofFloatColor(1.0f, 0.0f))
   {

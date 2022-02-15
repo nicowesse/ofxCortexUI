@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/View.h"
-#include "components/Label.h"
-#include "types/Range.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/components/Label.h"
+#include "ofxCortex/types/Range.h"
 
 namespace ofxCortex { namespace ui {
 

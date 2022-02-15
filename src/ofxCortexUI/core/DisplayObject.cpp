@@ -2,6 +2,8 @@
 
 namespace ofxCortex { namespace ui {
 
+shared_ptr<DisplayObject> DisplayObject::superview { nullptr };
+
 DisplayObject::DisplayObject()
 :
 _parent(NULL),
@@ -339,12 +341,9 @@ void DisplayObject::_debug()
 
 #pragma mark - The Family
 
-void DisplayObject::makeBaseObject()
+void DisplayObject::makeSuperview()
 {
-  this->_isBaseObject = true;
-  
-//  _addUpdateEventListener();
-//  _addDrawEventListener();
+  this->superview = shared_from_this();
   
   _addMouseEventListeners();
   _addKeyEventListeners();
@@ -388,6 +387,37 @@ void DisplayObject::removeAllChildren()
   for (auto & child : _children) child->_setParent(nullptr);
   _children.clear();
 }
+
+vector<shared_ptr<DisplayObject>> DisplayObject::children(bool recursive) const
+{
+  if (!recursive) return _children;
+  
+  vector<shared_ptr<DisplayObject>> children = _children;
+  for (auto & child : _children)
+  {
+    auto grandchildren = child->children(recursive);
+    children.insert(children.end(), grandchildren.begin(), grandchildren.end());
+  }
+  
+  return children;
+}
+
+size_t DisplayObject::numChildren(bool recursive) const
+{
+  size_t count = _children.size();
+
+  if (recursive)
+  {
+    for (const auto & child : children())
+    {
+      count += child->numChildren(true);
+    }
+  }
+
+  return count;
+}
+
+#pragma mark - Events and Interaction
 
 void DisplayObject::enableMouseEvents()
 {
@@ -534,6 +564,7 @@ void DisplayObject::_mousePressedHandler(ofMouseEventArgs &e)
     bool isInsideRect = isInsideRectangle(e, true);
     bool isInsideParent = (hasParent()) ? getParent()->isInsideRectangle(e, true) : false;
     bool isInteractionOutsideParentAllowed = (hasParent()) ? getParent()->_isChildInteractionOutsideRectEnabled : true;
+    bool isCovered = this->_isCovered(e);
     
     if (isInsideRect)
     {
@@ -813,7 +844,7 @@ bool DisplayObject::_isHovering(glm::vec2 pos, bool isCovered)
 
 bool DisplayObject::_isCovered(const glm::vec2 & pos)
 {
-  for (const auto & child : _children)
+  for (const auto & child : children(true))
   {
     if (child->isInsideRectangle(pos, true)) return true;
   }

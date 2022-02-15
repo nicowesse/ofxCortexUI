@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/View.h"
-#include "components/Background.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/components/Background.h"
 
 namespace ofxCortex { namespace ui {
 

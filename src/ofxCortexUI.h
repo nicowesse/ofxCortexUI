@@ -1,13 +1,15 @@
 #pragma mark
 
-#include "core/DisplayObject.h"
-#include "core/View.h"
-#include "core/Draggable.h"
+#include "ofxCortexUI/core/DisplayObject.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/Draggable.h"
 
-#include "layout/StackView.h"
+#include "ofxCortexUI/layout/StackView.h"
+#include "ofxCortexUI/layout/RuleView.h"
+#include "ofxCortexUI/layout/FitView.h"
 
-#include "components/Label.h"
-#include "components/Value.h"
-#include "components/Slider.h"
-#include "components/RangeSlider.h"
-#include "components/Button.h"
+#include "ofxCortexUI/components/Label.h"
+#include "ofxCortexUI/components/Value.h"
+#include "ofxCortexUI/components/Slider.h"
+#include "ofxCortexUI/components/RangeSlider.h"
+#include "ofxCortexUI/components/Button.h"

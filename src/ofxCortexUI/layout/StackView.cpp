@@ -85,15 +85,17 @@ void StackView::_adjustLayout()
 {
   View::_recalculateRenderRect();
   
-  if (_axis == VERTICAL)
+  
+  
+  if (_axis == Layout::VERTICAL)
   {
-    if (_getViewsHeight() > this->getHeight() || _distribution == STACK || _distribution == STACK_CENTER || _distribution == STACK_END) _layoutVerticalStack();
+    if (LayoutHelpers::getSpacedViewsHeight(_subviews, style->padding) > this->getHeight() || _distribution == STACK || _distribution == STACK_CENTER || _distribution == STACK_END) _layoutVerticalStack();
     else if (_distribution == FILL_EQUALLY) _layoutVerticalFillEqually();
     else if (_distribution == SPACE_EQUALLY) _layoutVerticalEqualSpacing();
   }
-  else if (_axis == HORIZONTAL)
+  else if (_axis == Layout::HORIZONTAL)
   {
-    if (_getViewsWidth() > this->getWidth() || _distribution == STACK || _distribution == STACK_CENTER || _distribution == STACK_END) _layoutHorizontalStack();
+    if (LayoutHelpers::getSpacedViewsWidth(_subviews, style->padding) > this->getWidth() || _distribution == STACK || _distribution == STACK_CENTER || _distribution == STACK_END) _layoutHorizontalStack();
     else if (_distribution == FILL_EQUALLY) _layoutHorizontalFillEqually();
     else if (_distribution == SPACE_EQUALLY) _layoutHorizontalEqualSpacing();
   }
@@ -106,12 +108,13 @@ void StackView::_adjustLayout()
 void StackView::_layoutVerticalStack()
 {
   glm::vec2 pos = getRenderRect().getPosition();
+  float innerHeight = getRenderRect().height;
   
   float offsetY = 0.0f;
-  if (_getViewsHeight() < _getInnerHeight())
+  if (LayoutHelpers::getSpacedViewsHeight(_subviews, style->padding) < innerHeight)
   {
-    if (_distribution == STACK_CENTER) offsetY = (_getInnerHeight() - _getViewsHeight()) * 0.5f;
-    else if (_distribution == STACK_END) offsetY = _getInnerHeight() - _getViewsHeight(false);
+    if (_distribution == STACK_CENTER) offsetY = (innerHeight - LayoutHelpers::getViewsHeight(_subviews)) * 0.5f;
+    else if (_distribution == STACK_END) offsetY = innerHeight - LayoutHelpers::getViewsHeight(_subviews);
   }
   
   pos.y += offsetY;
@@ -123,21 +126,19 @@ void StackView::_layoutVerticalStack()
     pos.y += view->getHeight() + view->getStyle()->margin.bottom;
   }
   
-  wrapper->setSize({ this->getWidth(), _getViewsHeight() });
+  wrapper->setSize({ this->getWidth(), LayoutHelpers::getSpacedViewsHeight(_subviews, style->padding) });
 }
 
 void StackView::_layoutHorizontalStack()
 {
   glm::vec2 pos = getRenderRect().getPosition();
+  float innerWidth = getRenderRect().width;
   
-  float offsetX = 0.0f;
-  if (_getViewsWidth() < _getInnerWidth())
+  if (LayoutHelpers::getSpacedViewsWidth(_subviews, style->padding) < innerWidth)
   {
-    if (_distribution == STACK_CENTER) offsetX = (_getInnerWidth() - _getViewsWidth()) * 0.5f;
-    else if (_distribution == STACK_END) offsetX = _getInnerWidth() - _getViewsWidth(false);
+    if (_distribution == STACK_CENTER) pos.x += (innerWidth - LayoutHelpers::getSpacedViewsWidth(_subviews, style->padding)) * 0.5f;
+    else if (_distribution == STACK_END) pos.x += innerWidth - LayoutHelpers::getViewsWidth(_subviews);
   }
-  
-  pos.x += offsetX;
   
   for (auto & view : _subviews)
   {
@@ -146,13 +147,13 @@ void StackView::_layoutHorizontalStack()
     pos.x += view->getWidth() + view->getStyle()->margin.right;
   }
   
-  wrapper->setSize({ _getViewsWidth(), this->getHeight() });
+  wrapper->setSize({ LayoutHelpers::getSpacedViewsWidth(_subviews, style->padding), this->getHeight() });
 }
 
 void StackView::_layoutVerticalFillEqually()
 {
   glm::vec2 pos = style->padding;
-  float viewHeight = _getInnerHeight() / _subviews.size();
+  float viewHeight = getRenderRect().height / _subviews.size();
   
   for (auto & view : _subviews)
   {
@@ -168,7 +169,7 @@ void StackView::_layoutVerticalFillEqually()
 void StackView::_layoutHorizontalFillEqually()
 {
   glm::vec2 pos = style->padding;
-  float viewWidth = _getInnerWidth() / _subviews.size();
+  float viewWidth = getRenderRect().width / _subviews.size();
   
   for (auto & view : _subviews)
   {
@@ -184,10 +185,10 @@ void StackView::_layoutHorizontalFillEqually()
 void StackView::_layoutVerticalEqualSpacing()
 {
   glm::vec2 pos = style->padding;
-  float innerWidth = _getInnerWidth();
-  float innerHeight = _getInnerHeight();
+  float innerWidth = getRenderRect().width;
+  float innerHeight = getRenderRect().height;
   
-  float spacing = (innerHeight - _getViewsHeight(false)) / (_subviews.size() - 1);
+  float spacing = (innerHeight - LayoutHelpers::getViewsHeight(_subviews)) / (_subviews.size() - 1);
   
   for (auto & view : _subviews)
   {
@@ -204,9 +205,9 @@ void StackView::_layoutVerticalEqualSpacing()
 void StackView::_layoutHorizontalEqualSpacing()
 {
   glm::vec2 pos = style->padding;
-  float innerHeight = _getInnerHeight();
+  float innerHeight = getRenderRect().height;
   
-  float spacing = (_getInnerWidth() - _getViewsWidth(false)) / (_subviews.size() - 1);
+  float spacing = (getRenderRect().width - LayoutHelpers::getViewsWidth(_subviews)) / (_subviews.size() - 1);
   
   for (auto & view : _subviews)
   {
@@ -239,52 +240,20 @@ void StackView::_mouseScrolled(const ofMouseEventArgs & e)
   if (potentialX > -diffX && potentialX <= 0.0f) wrapper->translate({ e.scrollX, 0.0f });
 }
 
-float StackView::_getViewsHeight(bool includeSpacing)
-{
-  float h = style->padding.top * includeSpacing;
-  
-  for (const auto & view : _subviews) h += view->getHeight() + (style->margin.bottom * includeSpacing);
-  h += style->padding.bottom * includeSpacing;
-  
-  return h;
-}
-
-float StackView::_getViewsWidth(bool includeSpacing)
-{
-  float w = style->padding.left * includeSpacing;
-  
-  for (const auto & view : _subviews) w += view->getWidth() + (style->margin.right * includeSpacing);
-  w += style->padding.right * includeSpacing;
-  
-  return w;
-}
-
-float StackView::_getInnerWidth()
-{
-  return getRenderRect().width;
-//  return getWidth() - style->padding.left - style->padding.right;
-}
-
-float StackView::_getInnerHeight()
-{
-  return getRenderRect().height;
-//  return getHeight() - style->padding.top - style->padding.bottom;
-}
-
 void StackView::_alignVertical(shared_ptr<View> view, const glm::vec2 & pos)
 {
-  if (_alignment == FILL) { view->setPosition(pos)->setWidth(_getInnerWidth()); }
-  else if (_alignment == ALIGN_START) { view->setPosition(pos); }
-  else if (_alignment == ALIGN_END) { view->setY(pos.y)->alignRight(getRenderRect().getRight()); }
-  else if (_alignment == ALIGN_CENTER) { view->setY(pos.y)->centerX(getRenderRect().getCenter().x); }
+  if (_alignment == Layout::FILL) { view->setPosition(pos)->setWidth(getRenderRect().width); }
+  else if (_alignment == Layout::ALIGN_START) { view->setPosition(pos); }
+  else if (_alignment == Layout::ALIGN_END) { view->setY(pos.y)->alignRight(getRenderRect().getRight()); }
+  else if (_alignment == Layout::ALIGN_CENTER) { view->setY(pos.y)->centerX(getRenderRect().getCenter().x); }
 }
 
 void StackView::_alignHorizontal(shared_ptr<View> view, const glm::vec2 & pos)
 {
-  if (_alignment == FILL) { view->setPosition(pos)->setHeight(_getInnerHeight()); }
-  else if (_alignment == ALIGN_START) { view->setPosition(pos); }
-  else if (_alignment == ALIGN_END) { view->setX(pos.x)->alignBottom(getRenderRect().getBottom()); }
-  else if (_alignment == ALIGN_CENTER) { view->setX(pos.x)->centerY(getRenderRect().getCenter().y); }
+  if (_alignment == Layout::FILL) { view->setPosition(pos)->setHeight(getRenderRect().height); }
+  else if (_alignment == Layout::ALIGN_START) { view->setPosition(pos); }
+  else if (_alignment == Layout::ALIGN_END) { view->setX(pos.x)->alignBottom(getRenderRect().getBottom()); }
+  else if (_alignment == Layout::ALIGN_CENTER) { view->setX(pos.x)->centerY(getRenderRect().getCenter().y); }
 }
 
 }}

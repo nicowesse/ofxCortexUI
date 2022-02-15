@@ -39,6 +39,7 @@ public:
     Spacing(float s) : top(s), right(s), bottom(s), left(s) {};
     operator glm::vec2() const { return glm::vec2(left, top); }
     operator glm::vec4() const { return glm::vec4(left, top, right, bottom); }
+    static Spacing zero() { return Spacing(0); }
     
     Spacing& operator += (const float& rhs)
     {

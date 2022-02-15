@@ -1,7 +1,8 @@
 #pragma once
 
-#include "core/View.h"
-#include "components/Background.h"
+#include "ofxCortexUI/layout/LayoutHelpers.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/components/Background.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -12,11 +13,6 @@ class StackView : public ofxCortex::ui::View {
   };
   
 public:
-  enum Axis {
-    VERTICAL,
-    HORIZONTAL
-  };
-  
   enum Distribution {
     STACK,
     STACK_CENTER,
@@ -25,20 +21,21 @@ public:
     SPACE_EQUALLY
   };
   
-  enum Alignment {
-    FILL,
-    ALIGN_START,
-    ALIGN_CENTER,
-    ALIGN_END
-  };
   
-  StackView(ofRectangle rect = ofRectangle(0, 0, 200, 400), Axis axis = VERTICAL, Distribution distribute = STACK, Alignment align = FILL) : View("Layout"), _axis(axis), _distribution(distribute), _alignment(align) {
+  StackView(Layout::Axis axis = Layout::VERTICAL, Distribution distribute = STACK, Layout::Alignment align = Layout::FILL, ofRectangle rect = ofRectangle(0, 0, 200, 400), string name = "StackView") : View(name), _axis(axis), _distribution(distribute), _alignment(align) {
     this->setRect(rect, false);
     this->disableChildRendering();
   }
   
-  static shared_ptr<StackView> create(ofRectangle rect = ofRectangle(0, 0, 200, 400), Axis axis = VERTICAL, Distribution distribute = STACK, Alignment align = FILL) {
-    auto ptr = make_shared<StackView>(rect, axis, distribute, align);
+  /**
+   *  Helper for creating a StackView
+   *
+   *  @param  axis What axis you want the stack to distribute along. Takes VERTICAL or HORIZONTAL. Defaults to VERTICAL.
+   *  @param  distribute How to distribute the views along the axis. Takes STACK, STACK_CENTER, STACK_END, FILL_EQUALLY, SPACE_EQUALLY. Defaults to STACK
+   *  @param  align How to align the views on the opposite of the axis. Takes FILL, ALIGN_START, ALIGN_CENTER, ALIGN_END. Defaults to FILL.
+   */
+  static shared_ptr<StackView> create(Layout::Axis axis = Layout::VERTICAL, Distribution distribute = STACK, Layout::Alignment align = Layout::FILL, ofRectangle rect = ofRectangle(0, 0, 200, 400), string name = "StackView") {
+    auto ptr = make_shared<StackView>(axis, distribute, align, rect, name);
     ptr->_init();
     return ptr;
   }
@@ -71,18 +68,16 @@ protected:
   
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   
-  float _getViewsHeight(bool includeSpacing = true);
-  float _getViewsWidth(bool includeSpacing = true);
-  float _getInnerWidth();
-  float _getInnerHeight();
+//  float _getViewsHeight(bool includeSpacing = true);
+//  float _getViewsWidth(bool includeSpacing = true);
   void _alignVertical(shared_ptr<View> view, const glm::vec2 & pos);
   void _alignHorizontal(shared_ptr<View> view, const glm::vec2 & pos);
   
   vector<shared_ptr<View>> _subviews;
   
-  Axis _axis;
+  Layout::Axis _axis;
   Distribution _distribution;
-  Alignment _alignment;
+  Layout::Alignment _alignment;
   
   shared_ptr<Wrapper> wrapper;
   shared_ptr<Background> background;

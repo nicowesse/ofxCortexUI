@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
-#include "core/UUID.h"
-#include "core/Stencil.h"
+#include "ofxCortex/core/UUID.h"
+#include "ofxCortexUI/core/Stencil.h"
 
 namespace ofxCortex { namespace ui {
   
@@ -158,8 +158,8 @@ namespace ofxCortex { namespace ui {
 #pragma mark - The Family
   public:
     
-    void makeBaseObject();
-    shared_ptr<DisplayObject> getBaseObject() { return (_isBaseObject) ? shared_from_this() : this->getParent()->getBaseObject(); }
+    void makeSuperview();
+    static shared_ptr<DisplayObject> getSuperview() { return DisplayObject::superview; }
     
     // Parents
     shared_ptr<DisplayObject> getParent() const { return _parent; }
@@ -174,31 +174,38 @@ namespace ofxCortex { namespace ui {
       else return getParent()->getParent<T>();
     }
     
+    shared_ptr<DisplayObject> getAncestor() {
+      if (hasParent()) return getParent()->getAncestor();
+      else return shared_from_this();
+    }
+    
     void setParent(shared_ptr<DisplayObject> parent) { _parent = parent; }
     bool hasParent() const { return _parent != nullptr; }
     
     // Children
-    vector<shared_ptr<DisplayObject>> children() const { return _children; }
+    vector<shared_ptr<DisplayObject>> children(bool recursive = false) const;
     
-    template<typename T> vector<shared_ptr<T>> children()
+    template<typename T> vector<shared_ptr<T>> children(bool recursive = false)
     {
       vector<shared_ptr<T>> candidates;
       
       for (shared_ptr<DisplayObject> child : _children)
       {
-        auto childWithType = dynamic_pointer_cast<T>(child);
-        if (childWithType) candidates.push_back(childWithType);
+        if (auto childWithType = dynamic_pointer_cast<T>(child)) candidates.push_back(childWithType);
         
-        vector<shared_ptr<T>> childCandidates = child->children<T>();
-        candidates.insert(candidates.end(), childCandidates.begin(), childCandidates.end());
+        if (recursive)
+        {
+          vector<shared_ptr<T>> childCandidates = child->children<T>(recursive);
+          candidates.insert(candidates.end(), childCandidates.begin(), childCandidates.end());
+        }
       }
       
       return candidates;
     }
     
-    template<typename N> bool isOfType() { return dynamic_pointer_cast<N>(shared_from_this()); }
+    template<typename N> bool isOfType() { return dynamic_pointer_cast<N>(shared_from_this()) != nullptr; }
     
-    size_t numChildren(bool recursive = false);
+    size_t numChildren(bool recursive = false) const;
     unsigned int indexOfChild(shared_ptr<DisplayObject> child) { return find(_children.begin(), _children.end(), child) - _children.begin(); }
     shared_ptr<DisplayObject> childAt(unsigned int index)
     {
@@ -217,6 +224,7 @@ namespace ofxCortex { namespace ui {
     
 
   protected:
+    static shared_ptr<DisplayObject> superview;
     
     bool _isBaseObject;
     

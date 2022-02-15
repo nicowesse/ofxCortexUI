@@ -1,12 +1,12 @@
 #pragma once
 
-#include "core/View.h"
-#include "components/Background.h"
-#include "components/Label.h"
-#include "components/Value.h"
-#include "core/Draggable.h"
-#include "components/RangeSlider.h"
-#include "utils/Utils.h"
+#include "ofxCortex/utils/Helpers.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/Draggable.h"
+#include "ofxCortexUI/components/Background.h"
+#include "ofxCortexUI/components/Label.h"
+#include "ofxCortexUI/components/Value.h"
+#include "ofxCortexUI/components/RangeSlider.h"
 #include "ofxTweenzor.h"
 
 #define STRINGIFY(A) #A

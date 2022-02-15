@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/View.h"
-#include "components/Label.h"
+#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/components/Label.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -17,7 +17,19 @@ public:
     _adjustLayout();
   };
   
+  Button(string name, function<void()> func)
+  {
+    setName(name);
+    parameter.setName(name);
+    
+    onParameterTrigger = parameter.newListener(func);
+    
+    _init();
+    _adjustLayout();
+  };
+  
   static shared_ptr<Button> create(ofParameter<void> param) { return make_shared<Button>(param); }
+  static shared_ptr<Button> create(string name, function<void()> func) { return make_shared<Button>(name, func); }
   
 protected:
   virtual string _getModule() const override { return "Button"; };
@@ -61,6 +73,7 @@ protected:
     View::_mousePressed(e);
     
     backgroundColor *= 1.4;
+    
     parameter.trigger();
   }
   
@@ -87,6 +100,7 @@ protected:
   
   // Members
   ofParameter<void> parameter;
+  ofEventListener onParameterTrigger;
   
   shared_ptr<ui::Background> background;
   ofFloatColor backgroundColor;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/DisplayObject.h"
+#include "ofxCortexUI/core/DisplayObject.h"
 
 namespace ofxCortex { namespace ui {
   
