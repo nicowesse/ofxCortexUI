@@ -47,6 +47,9 @@ public:
   
   virtual void removeView(shared_ptr<View> view);
   virtual void removeAllViews();
+    
+  virtual void enableBackground() { _drawBackground = true; }
+  virtual void disableBackground() { _drawBackground = false; }
   
   
 protected:
@@ -81,6 +84,7 @@ protected:
   
   shared_ptr<Wrapper> wrapper;
   shared_ptr<Background> background;
+  bool _drawBackground { true };
   
 };
 

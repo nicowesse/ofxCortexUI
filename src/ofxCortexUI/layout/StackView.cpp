@@ -65,7 +65,7 @@ void StackView::_init()
 
 void StackView::_draw()
 {
-  background->drawBackground(style->containerColor, ofFloatColor(1.0f, 0.1f));
+  if (_drawBackground) background->drawBackground(style->containerColor, ofFloatColor(1.0f, 0.1f));
   wrapper->draw();
 }
 
