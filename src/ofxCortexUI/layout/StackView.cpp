@@ -63,10 +63,28 @@ void StackView::_init()
   addChild(wrapper);
 }
 
+void StackView::_update(float time, float delta)
+{
+  scrollOpacity = ofClamp(scrollOpacity - delta * 2.0, 0, 1);
+}
+
 void StackView::_draw()
 {
   background->drawBackground(style->containerColor, ofFloatColor(1.0f, 0.1f));
   wrapper->draw();
+  
+  ofPushStyle();
+  ofSetColor(255, scrollOpacity * 255.0f);
+  if (wrapper->getHeight() > this->getHeight())
+  {
+    float scrollbarAvailableHeight = this->getRenderRect().height;
+    float scrollbarHeight = scrollbarAvailableHeight / (wrapper->getHeight() / this->getHeight());
+    float scrollbarDifference = scrollbarAvailableHeight - scrollbarHeight;
+    float overflowDifference = wrapper->getHeight() - this->getHeight();
+    float offsetY = scrollbarDifference * (abs(wrapper->getY()) / overflowDifference);
+    ofDrawRectRounded(this->getRenderRect().getRight() - 2, this->getRenderRect().y + offsetY, 1, scrollbarHeight, 4);
+  }
+  ofPopStyle();
 }
 
 void StackView::_drawMask()
@@ -232,6 +250,7 @@ void StackView::_mouseScrolled(const ofMouseEventArgs & e)
   float potentialY = wrapper->getY() + e.scrollY;
   
   if (potentialY > -diffY && potentialY <= 0.0f) wrapper->translate({ 0.0f, e.scrollY });
+  scrollOpacity = ofClamp(scrollOpacity + abs(e.scrollY), 0, 1);
   
   // Scroll X
   float diffX = wrapper->getWidth() - this->getWidth();
