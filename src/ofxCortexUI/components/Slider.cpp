@@ -36,6 +36,8 @@ void Slider<T>::drawSlider()
 //      ofSetColor(style->foregroundColor);
 //      ofDrawRectRounded(rect, rect.height / 2);
     
+    
+    ofFill();
     if (parameter.getMin() < 0.0) this->drawZero();
     handle->drawHandle(ofFloatColor(style->accentColor * _handleOpacity), ofFloatColor(style->backgroundColor * _handleOpacity), 6.0 + (2.0 * _handleOpacity));
   }
