@@ -1,13 +1,38 @@
-//
-//  ParameterUtils.hpp
-//  cases-scatterer
-//
-//  Created by Nicolay Wesseltoft on 16/02/2022.
-//
+#pragma once
 
-#ifndef ParameterUtils_hpp
-#define ParameterUtils_hpp
+#include "ofxCortexUI/core/View.h"
 
-#include <stdio.h>
+namespace ofxCortex { namespace ui {
 
-#endif /* ParameterUtils_hpp */
+class ParameterUtils {
+public:
+  static shared_ptr<View> createViewFromParameter(ofAbstractParameter & param){};
+  
+  template<typename T>
+  static ofParameter<T> addParameter(const string & name, T value, T min, T max, ofParameterGroup & parameters)
+  {
+    ofParameter<T> param(name, value, min, max);
+    parameters.add(param);
+    return param;
+  }
+  
+  template<typename T>
+  static ofParameter<T> addParameter(const string & name, T value, ofParameterGroup & parameters)
+  {
+    ofParameter<T> param(name, value);
+    parameters.add(param);
+    return param;
+  }
+  
+  template<typename T>
+  static ofParameter<T> addParameter(const string & name, ofParameterGroup & parameters)
+  {
+    ofParameter<T> param(name);
+    parameters.add(param);
+    return param;
+  }
+    
+protected:
+};
+
+}}
