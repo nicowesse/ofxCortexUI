@@ -1,5 +1,7 @@
 #pragma mark
 
+#include "ofxCortexUI/utils/ParameterUtils.h"
+
 #include "ofxCortexUI/core/DisplayObject.h"
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/core/Draggable.h"
