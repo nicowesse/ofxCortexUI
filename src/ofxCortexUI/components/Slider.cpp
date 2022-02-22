@@ -168,7 +168,7 @@ void Slider<T>::_mouseScrolled(const ofMouseEventArgs & e)
   
   if (e.modifiers == OF_KEY_SHIFT)
   {
-    parameter = (e.scrollY < 0.0f) ? floor(parameter.get() - 0.00001f) : ceil(parameter.get() + 0.00001f);
+    parameter = (e.scrollX < 0.0f) ? floor(parameter.get() - 0.00001f) : ceil(parameter.get() + 0.00001f);
   }
   else
   {
@@ -178,10 +178,10 @@ void Slider<T>::_mouseScrolled(const ofMouseEventArgs & e)
     else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
     else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
     
-    parameter += e.scrollY * delta;
+    parameter += e.scrollX * delta;
   }
   
-  _handleOpacity = ofClamp(_handleOpacity + abs(e.scrollY), 0.7, 1.0);
+  _handleOpacity = ofClamp(_handleOpacity + abs(e.scrollX), 0.7, 1.0);
 }
 
 template<typename T>

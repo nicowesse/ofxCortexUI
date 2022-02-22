@@ -214,7 +214,7 @@ void RangeSlider::_mouseScrolled(const ofMouseEventArgs & e)
   else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
   else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
   
-  parameter += e.scrollY * delta;
+  parameter += e.scrollX * delta;
 }
 
 void RangeSlider::_keyPressed(const ofKeyEventArgs & e)
