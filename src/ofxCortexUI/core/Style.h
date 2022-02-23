@@ -1,5 +1,10 @@
 #pragma once
 
+#include "ofVectorMath.h"
+#include "ofColor.h"
+#include "ofTrueTypeFont.h"
+#include "ofRectangle.h"
+
 namespace ofxCortex { namespace ui {
 
 class Style {
@@ -20,8 +25,8 @@ public:
     
   };
   
-  static shared_ptr<Style> create() { return make_shared<Style>(); }
-  static shared_ptr<Style> copy(shared_ptr<Style> original) { return make_shared<Style>(*original); }
+  static std::shared_ptr<Style> create() { return std::make_shared<Style>(); }
+  static std::shared_ptr<Style> copy(std::shared_ptr<Style> original) { return std::make_shared<Style>(*original); }
   
   ofFloatColor backgroundColor;
   ofFloatColor foregroundColor;
@@ -94,26 +99,14 @@ public:
   ofAlignHorz valueAlignment { OF_ALIGN_HORZ_LEFT };
   
   struct Font {
-    shared_ptr<ofTrueTypeFont> ttf;
+    std::shared_ptr<ofTrueTypeFont> ttf;
     float xHeight;
     
     Font() {
-      ttf = make_shared<ofTrueTypeFont>();
+      ttf = std::make_shared<ofTrueTypeFont>();
     }
     
-    void load(string path = "assets/fonts/SF-Pro-Text-Regular.otf")
-    {
-      ofTrueTypeFontSettings fontSettings(ofToDataPath(path), 8.0f);
-      fontSettings.antialiased = true;
-      fontSettings.contours = true;
-      fontSettings.addRanges({
-        ofUnicode::Latin1Supplement,
-        ofUnicode::Arrows
-      });
-      ttf->load(fontSettings);
-      
-      xHeight = ttf->stringHeight("X");
-    }
+    void load(std::string path = "assets/fonts/SF-Pro-Text-Regular.otf");
   };
   
   struct FontLibrary {
@@ -121,7 +114,7 @@ public:
     Font value;
     
     FontLibrary() {
-      label.load("assets/fonts/SF-Pro-Text-Medium.otf");
+      label.load("assets/fonts/SF-Pro-Text-Regular.otf");
       value.load("assets/fonts/SF-Pro-Text-Regular.otf");
     }
   } fonts;
@@ -130,8 +123,8 @@ public:
   ofFloatColor labelFontColor;
   ofFloatColor valueFontColor;
   
-  const shared_ptr<ofTrueTypeFont> getLabelFont() { return fonts.label.ttf; }
-  const shared_ptr<ofTrueTypeFont> getValueFont() { return fonts.value.ttf; }
+  const std::shared_ptr<ofTrueTypeFont> getLabelFont() { return fonts.label.ttf; }
+  const std::shared_ptr<ofTrueTypeFont> getValueFont() { return fonts.value.ttf; }
   float getFontXHeight() const { return fonts.label.xHeight;  }
   
 protected:

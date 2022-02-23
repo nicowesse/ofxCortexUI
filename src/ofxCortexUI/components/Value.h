@@ -37,6 +37,11 @@ public:
   {
     const auto & rect = getRenderRect();
     
+    if (!style->getValueFont()->isLoaded())
+    {
+      ofLogWarning(_getLogModule()) << "Value font is not loaded. Please make sure the paths are correct. Returning.."; return;
+    }
+    
     string value = _getFormattedString();
     float valueWidth = style->getValueFont()->stringWidth(value);
     float x = rect.getRight() - 12 - valueWidth;

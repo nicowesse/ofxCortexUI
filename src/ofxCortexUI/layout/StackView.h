@@ -56,6 +56,7 @@ protected:
   virtual string _getModule() const override { return "StackView"; };
   
   void _init();
+  virtual void _update(float time, float delta) override;
   virtual void _draw() override;
   virtual void _adjustLayout() override;
   virtual void _debug() override;
@@ -85,6 +86,8 @@ protected:
   shared_ptr<Wrapper> wrapper;
   shared_ptr<Background> background;
   bool _drawBackground { true };
+  
+  float scrollOpacity { 0.0f };
   
 };
 

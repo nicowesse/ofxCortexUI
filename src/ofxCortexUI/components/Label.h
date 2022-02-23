@@ -33,6 +33,12 @@ public:
   {
     const auto & rect = getRenderRect();
     
+    if (!style->getLabelFont()->isLoaded())
+    {
+      ofLogWarning(_getLogModule()) << "Label font not loaded! Please make sure the paths are correct. Returning..";
+      return;
+    }
+    
     float labelInset = 12.0f;
     
     string label = parameter.getName();
@@ -76,8 +82,15 @@ protected:
   {
     background->setRect(this->getRect());
     
-    float labelWidth = style->getLabelFont()->stringWidth(parameter.getName());
-    if (this->getWidth() < labelWidth) { this->setWidth(labelWidth); }
+    if (style->getLabelFont()->isLoaded())
+    {
+      float labelWidth = style->getLabelFont()->stringWidth(parameter.getName());
+      if (this->getWidth() < labelWidth) { this->setWidth(labelWidth); }
+    }
+    else
+    {
+      ofLogWarning(_getLogModule()) << "Label font is not loaded!";
+    }
     
     View::_adjustLayout();
   }
