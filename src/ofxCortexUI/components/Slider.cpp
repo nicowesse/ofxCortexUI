@@ -72,7 +72,7 @@ void Slider<T>::_init()
   background->disableEvents();
   this->addChild(background);
   
-  label = ofxCortex::ui::Label<T>::create(parameter);
+  label = ofxCortex::ui::Label::create(parameter);
   label->setName("Slider::Label");
   label->disableEvents();
   this->addChild(label);
@@ -304,5 +304,7 @@ ofShader & Slider<T>::_getShader()
 }
 
 template class Slider<float>;
+template class Slider<int>;
+template class Slider<double>;
 
 }}

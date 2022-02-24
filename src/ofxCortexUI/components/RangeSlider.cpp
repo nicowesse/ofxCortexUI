@@ -77,7 +77,7 @@ void RangeSlider::_init()
   background->disableEvents();
   this->addChild(background);
   
-  label = ofxCortex::ui::Label<ofxCortex::types::Range>::create(parameter);
+  label = ofxCortex::ui::Label::create(parameter);
   label->setName("RangeSlider::Label");
   label->disableEvents();
   this->addChild(label);

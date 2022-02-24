@@ -6,6 +6,8 @@
 
 namespace ofxCortex { namespace ui {
 
+static ofEventListeners listeners;
+
 class ParameterUtils {
 public:
   
@@ -14,6 +16,16 @@ public:
   {
     ofParameter<T> param(name, value, min, max);
     parameters.add(param);
+    return param;
+  }
+  
+  template<typename T, typename F>
+  static ofParameter<T> addParameterWithEvent(const std::string & name, T value, T min, T max, ofParameterGroup & parameters, F&& lambda)
+  {
+    ofParameter<T> param(name, value, min, max);
+    parameters.add(param);
+    
+    ofxCortex::ui::listeners.push(param.newListener(lambda));
     return param;
   }
   

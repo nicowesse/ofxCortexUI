@@ -5,7 +5,6 @@
 
 namespace ofxCortex { namespace ui {
 
-template<typename T>
 class Label : public ofxCortex::ui::View {
 public:
   
@@ -16,17 +15,17 @@ public:
     
     _init();
   }
-  static shared_ptr<Label<T>> create(string name) { return make_shared<Label<T>>(name); }
+  static shared_ptr<Label> create(string name) { return make_shared<Label>(name); }
   
-  Label(ofParameter<T> & param)
+  Label(ofAbstractParameter & param)
   : ofxCortex::ui::View()
   {
-    setName(parameter.getName());
-    parameter.makeReferenceTo(param);
+    parameter.makeReferenceTo(param.cast<string>());
+    setName(param.cast<string>().getName());
     
     _init();
   }
-  static shared_ptr<Label<T>> create(ofParameter<T> & parameter) { return make_shared<Label<T>>(parameter); }
+  static shared_ptr<Label> create(ofAbstractParameter & parameter) { return make_shared<Label>(parameter); }
   
   
   void drawLabel(ofFloatColor color, ofAlignHorz labelAlignment = OF_ALIGN_HORZ_LEFT)
@@ -41,7 +40,7 @@ public:
     
     float labelInset = 12.0f;
     
-    string label = parameter.getName();
+    string label = parameter.cast<string>().getName();
     float labelWidth = style->getLabelFont()->stringWidth(label);
     
     float x = rect.getLeft() + 12;
@@ -96,7 +95,7 @@ protected:
   }
   
   shared_ptr<ofxCortex::ui::Background> background;
-  ofParameter<T> parameter;
+  ofParameter<string> parameter;
 };
 
 }}

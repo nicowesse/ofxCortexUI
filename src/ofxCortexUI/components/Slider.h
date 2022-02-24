@@ -69,7 +69,7 @@ protected:
   T getNormalizedParameter() { return ofMap(parameter.get(), parameter.getMin(), parameter.getMax(), 0, 1, true); }
   
   shared_ptr<ui::Background> background;
-  shared_ptr<ui::Label<T>> label;
+  shared_ptr<ui::Label> label;
   shared_ptr<ui::Value<T>> value;
   shared_ptr<Handle> handle;
   

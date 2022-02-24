@@ -42,7 +42,7 @@ protected:
     
     backgroundColor = style->backgroundColor;
     
-    label = ui::Label<void>::create(parameter);
+    label = ui::Label::create(parameter);
     label->setName("Button::Label");
     label->disableEvents();
   };
@@ -104,7 +104,7 @@ protected:
   
   shared_ptr<ui::Background> background;
   ofFloatColor backgroundColor;
-  shared_ptr<ui::Label<void>> label;
+  shared_ptr<ui::Label> label;
 };
 
 }}

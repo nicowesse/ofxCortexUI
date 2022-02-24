@@ -70,7 +70,7 @@ protected:
   ofParameter<ofxCortex::types::Range> parameter;
   
   shared_ptr<ui::Background> background;
-  shared_ptr<ui::Label<ofxCortex::types::Range>> label;
+  shared_ptr<ui::Label> label;
   shared_ptr<ui::Value<ofxCortex::types::Range>> value;
   shared_ptr<Handle> fromHandle;
   shared_ptr<Handle> toHandle;

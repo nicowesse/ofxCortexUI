@@ -1,6 +1,7 @@
 #include "ParameterUtils.h"
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortexUI/components/Slider.h"
+#include "ofxCortexUI/components/Checkbox.h"
 
 #include "ofxCortex/types/Range.h"
 
@@ -10,7 +11,7 @@ std::vector<std::shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFo
 {
   vector<shared_ptr<ofxCortex::ui::View>> views;
   
-  if (parameters.getName().size() > 0) views.push_back(ui::Label<string>::create(parameters.getName()));
+  if (parameters.getName().size() > 0) views.push_back(ui::Label::create(parameters.getName()));
 
   vector<shared_ptr<ofAbstractParameter> >::iterator param = parameters.begin();
 
@@ -43,15 +44,29 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
     ofParameter<float> & p = param.cast<float>();
     views.push_back(Slider<float>::create(p));
   }
+  else if (type == typeid(ofParameter<int>).name())
+  {
+    ofParameter<int> & p = param.cast<int>();
+    views.push_back(Slider<int>::create(p));
+  }
   else if (type == typeid(ofParameter<string>).name())
   {
     ofParameter<string> & p = param.cast<string>();
-    views.push_back(Label<string>::create(p));
+    views.push_back(Label::create(p));
+  }
+  else if (type == typeid(ofParameter<bool>).name())
+  {
+    ofParameter<bool> & p = param.cast<bool>();
+    views.push_back(Checkbox::create(p));
   }
   else if (type == typeid(ofParameter<ofxCortex::types::Range>).name())
   {
     ofParameter<ofxCortex::types::Range> & p = param.cast<ofxCortex::types::Range>();
     views.push_back(RangeSlider::create(p));
+  }
+  else
+  {
+    ofLogNotice("ParameterUtils::createViewsFromParameter") << "Implementation for type '" << type << "' is missing. No View created.";
   }
   
   return views;
