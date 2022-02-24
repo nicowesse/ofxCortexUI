@@ -15,3 +15,4 @@
 #include "ofxCortexUI/components/Slider.h"
 #include "ofxCortexUI/components/RangeSlider.h"
 #include "ofxCortexUI/components/Button.h"
+#include "ofxCortexUI/components/Checkbox.h"

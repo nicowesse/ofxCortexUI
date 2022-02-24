@@ -69,7 +69,7 @@ protected:
     background->setName("Value::Background");
     background->disableEvents();
     
-    label = ui::Label<T>::create(parameter);
+    label = ui::Label::create(parameter);
     label->setName("Value::Label");
     label->disableEvents();
   }
@@ -97,7 +97,7 @@ protected:
   }
   
   shared_ptr<ui::Background> background;
-  shared_ptr<ui::Label<T>> label;
+  shared_ptr<ui::Label> label;
   ofParameter<T> parameter;
 
 };
