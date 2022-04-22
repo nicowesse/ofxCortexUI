@@ -252,9 +252,7 @@ void DisplayObject::draw()
 
 void DisplayObject::update()
 {
-  _update(ofGetElapsedTimef(), ofGetLastFrameTime());
-  
-  for (auto & child : _children) child->update();
+  update(ofGetElapsedTimef(), ofGetLastFrameTime());
 }
 
 void DisplayObject::update(float time, float deltaTime)
