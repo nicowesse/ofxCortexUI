@@ -1,4 +1,4 @@
-#pragma mark
+#pragma once
 
 #include "ofxTweenzor.h"
 
@@ -15,6 +15,11 @@ public:
     _init();
     _adjustLayout();
   };
+  
+//  ~Checkbox()
+//  {
+//    Tweenzor::removeTween(&innerAnimation);
+//  }
   
   static shared_ptr<Checkbox> create(ofParameter<bool> & param) { return make_shared<Checkbox>(param); }
   
@@ -83,7 +88,7 @@ protected:
     
     parameter.set(!parameter.get());
     
-    if (Tweenzor::Instance() != nullptr) Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
+    Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
   }
   
   // Members
