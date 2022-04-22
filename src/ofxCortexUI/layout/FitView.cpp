@@ -44,6 +44,7 @@ void FitView::_init()
   background->setStyle(backgroundStyle);
   background->setName(getName() + "::Background");
   background->disableEvents();
+  
   addChild(background);
 }
 
@@ -66,6 +67,8 @@ void FitView::_adjustLayout()
     
     pos.y += view->getHeight() + view->getStyle()->margin.bottom;
   }
+  
+  background->setRect(this->getRect());
   
   DisplayObject::_adjustLayout();
 }

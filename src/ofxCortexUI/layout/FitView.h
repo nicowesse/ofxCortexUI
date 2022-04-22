@@ -10,7 +10,7 @@ public:
   FitView(ofRectangle rect = ofRectangle(0, 0, 200, 400), string name = "FitView")
   : View(name)
   {
-    setRect(rect);
+    setRect(rect, false);
   }
   
   static shared_ptr<FitView> create(ofRectangle rect = ofRectangle(0, 0, 200, 400), string name = "FitView") {

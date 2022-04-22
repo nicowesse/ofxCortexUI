@@ -1,5 +1,6 @@
 #include "ParameterUtils.h"
 #include "ofxCortexUI/components/Label.h"
+#include "ofxCortexUI/components/Button.h"
 #include "ofxCortexUI/components/Slider.h"
 #include "ofxCortexUI/components/Checkbox.h"
 
@@ -7,11 +8,11 @@
 
 namespace ofxCortex { namespace ui {
 
-std::vector<std::shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsForParameterGroup(ofParameterGroup & parameters, int addSpaces)
+std::vector<std::shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsForParameterGroup(ofParameterGroup & parameters, bool includeGroupName, int addSpaces)
 {
   vector<shared_ptr<ofxCortex::ui::View>> views;
   
-  if (parameters.getName().size() > 0) views.push_back(ui::Label::create(parameters.getName()));
+  if (parameters.getName().size() > 0 && includeGroupName) views.push_back(ui::Label::create(parameters.getName()));
 
   vector<shared_ptr<ofAbstractParameter> >::iterator param = parameters.begin();
 
@@ -58,6 +59,11 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   {
     ofParameter<bool> & p = param.cast<bool>();
     views.push_back(Checkbox::create(p));
+  }
+  else if (type == typeid(ofParameter<void>).name())
+  {
+    ofParameter<void> & p = param.cast<void>();
+    views.push_back(Button::create(p));
   }
   else if (type == typeid(ofParameter<ofxCortex::types::Range>).name())
   {
