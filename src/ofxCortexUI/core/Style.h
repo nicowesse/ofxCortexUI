@@ -16,7 +16,7 @@ public:
     backgroundColor(0.06),
     foregroundColor(0.12),
     supportingColor(0.4),
-    containerColor(0.08),
+    containerColor(0.10),
     accentColor(ofFloatColor::white),
     borderColor(ofFloatColor::white, 0.25),
     labelFontColor(ofFloatColor::white),
