@@ -82,7 +82,7 @@ void RangeSlider::_init()
   label->disableEvents();
   this->addChild(label);
   
-  value = ofxCortex::ui::Value<ofxCortex::types::Range>::create(parameter);
+  value = ofxCortex::ui::Value<ofxCortex::core::types::Range>::create(parameter);
   value->setName("RangeSlider::Value");
   value->disableEvents();
   this->addChild(value);
@@ -101,7 +101,7 @@ void RangeSlider::_init()
     auto minHandle = _getMinHandle();
     auto maxHandle = _getMaxHandle();
     
-    ofxCortex::types::Range range = parameter.get();
+    ofxCortex::core::types::Range range = parameter.get();
     range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
     range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
     parameter.set(range);
@@ -125,13 +125,13 @@ void RangeSlider::_init()
     auto minHandle = _getMinHandle();
     auto maxHandle = _getMaxHandle();
     
-    ofxCortex::types::Range range = parameter.get();
+    ofxCortex::core::types::Range range = parameter.get();
     range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
     range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
     parameter.set(range);
   }));
   
-  _eventListeners.push(parameter.newListener([this](const ofxCortex::types::Range & value) {
+  _eventListeners.push(parameter.newListener([this](const ofxCortex::core::types::Range & value) {
     fromHandle->setFromNormalizedX(ofMap(value.from, value.min, value.max, 0, 1, true));
     toHandle->setFromNormalizedX(ofMap(value.to, value.min, value.max, 0, 1, true));
     

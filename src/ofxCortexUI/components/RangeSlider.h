@@ -36,7 +36,7 @@ public:
   };
 public:
   
-  RangeSlider(ofParameter<ofxCortex::types::Range> param)
+  RangeSlider(ofParameter<ofxCortex::core::types::Range> param)
   {
     setName(param.getName());
     
@@ -44,7 +44,7 @@ public:
     this->disableChildRendering();
   };
   
-  static shared_ptr<RangeSlider> create(ofParameter<ofxCortex::types::Range> param) {
+  static shared_ptr<RangeSlider> create(ofParameter<ofxCortex::core::types::Range> param) {
     auto ptr = make_shared<RangeSlider>(param);
     ptr->_init();
     return ptr;
@@ -67,11 +67,11 @@ protected:
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   
-  ofParameter<ofxCortex::types::Range> parameter;
+  ofParameter<ofxCortex::core::types::Range> parameter;
   
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;
-  shared_ptr<ui::Value<ofxCortex::types::Range>> value;
+  shared_ptr<ui::Value<ofxCortex::core::types::Range>> value;
   shared_ptr<Handle> fromHandle;
   shared_ptr<Handle> toHandle;
   shared_ptr<Bar> bar;
