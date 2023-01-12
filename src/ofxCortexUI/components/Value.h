@@ -3,6 +3,7 @@
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortex/types/Range.h"
+#include "ofxCortex/types/Image.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -130,12 +131,29 @@ inline string Value<glm::vec3>::_getFormattedString()
 }
 
 template<>
-inline string Value<ofxCortex::types::Range>::_getFormattedString()
+inline string Value<ofxCortex::core::types::Range>::_getFormattedString()
 {
   int precision = 2;
   stringstream ss;
   ss << ofToString(parameter->from, precision) << " ←→ " << ofToString(parameter->to, precision);
   return ss.str();
+}
+
+template<>
+inline string Value<ofxCortex::core::types::Image>::_getFormattedString()
+{
+  stringstream ss;
+  ss << parameter->path;
+  string original = ss.str();
+  
+  int length = MIN(28, original.size());
+  int index = CLAMP(original.size() - length - 0, 0, original.size() - length);
+  string substring = original.substr(index, length);
+  
+  stringstream output;
+  if (original.size() > 28) output << "...";
+  output << substring;
+  return output.str();
 }
 
 }}

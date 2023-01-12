@@ -257,7 +257,7 @@ void DisplayObject::update()
 
 void DisplayObject::update(float time, float deltaTime)
 {
-  _update(_time, _deltaTime);
+  _update(time, deltaTime);
   
   for (auto & child : _children) child->update(_time, _deltaTime);
 }
