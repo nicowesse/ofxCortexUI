@@ -4,56 +4,43 @@
 
 namespace ofxCortex { namespace ui {
 
-class Checkbox : public ofxCortex::ui::View {
+class CheckboxView : public ofxCortex::ui::View {
 public:
   
-  Checkbox(ofParameter<bool> & param)
+  CheckboxView(ofParameter<bool> & param) : View(param.getName())
   {
-    setName(param.getName());
     parameter.makeReferenceTo(param);
-    
-    _init();
-    _adjustLayout();
   };
   
-//  ~Checkbox()
-//  {
-//    Tweenzor::removeTween(&innerAnimation);
-//  }
-  
-  static shared_ptr<Checkbox> create(ofParameter<bool> & param) { return make_shared<Checkbox>(param); }
+  static shared_ptr<CheckboxView> create(ofParameter<bool> & param) {
+    auto ptr = make_shared<CheckboxView>(param);
+    ptr->_setup();
+    return ptr;
+  }
   
 protected:
-  virtual string _getModule() const override { return "Checkbox"; };
+  virtual string _getComponentName() const override { return "Checkbox"; };
   
-  void _init()
+  void _setup()
   {
-    background = ui::Background::create();
-    background->setName("Checkbox::Background");
-    background->disableEvents();
-    
-    label = ui::Label::create(parameter);
-    label->setName("Checkbox::Label");
-    label->disableEvents();
-    
     outerRing.circle(0, 0, 12 * 0.5);
     outerRing.circle(0, 0, 10 * 0.5);
-    outerRing.setFillColor(style->accentColor);
+    outerRing.setFillColor(Styling::getAccentColor());
     
     innerAnimation = parameter.get();
   };
   
   virtual void _draw() override
   {
-    background->drawBackground(style->backgroundColor);
-    label->drawLabel(style->labelFontColor);
+    Styling::drawBackground(this->getBounds(), View::getMouseState());
+    Styling::drawLabel(parameter.getName(), this->getBounds());
     
     _drawCheckbox();
   }
   
   virtual void _drawCheckbox()
   {
-    const auto & rect = getRenderRect();
+    const auto & rect = this->getContentBounds();
     
     float diameter = 10.0f;
     float radius = diameter * 0.5;
@@ -65,21 +52,13 @@ protected:
     
     ofPushStyle();
     {
-      ofSetColor(style->accentColor);
+      ofSetColor(Styling::getAccentColor());
       outerRing.draw(x, y);
       
       ofFill();
       ofDrawCircle(x, y, innerRadius);
     }
     ofPopStyle();
-  }
-  
-  virtual void _adjustLayout() override
-  {
-    background->setRect(this->getRect());
-    label->setRect(this->getRect());
-    
-    View::_adjustLayout();
   }
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override
@@ -94,9 +73,6 @@ protected:
   // Members
   ofParameter<bool> parameter;
   ofEventListener onParameterTrigger;
-  
-  shared_ptr<ui::Background> background;
-  shared_ptr<ui::Label> label;
   
   ofPath outerRing;
   float innerAnimation { 0.0f };

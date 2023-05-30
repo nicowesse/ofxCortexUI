@@ -1,4 +1,4 @@
-#include "Image.h"
+#include "ImageView.h"
 
 namespace ofxCortex { namespace ui {
 

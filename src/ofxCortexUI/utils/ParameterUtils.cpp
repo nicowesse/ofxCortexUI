@@ -1,11 +1,16 @@
 #include "ParameterUtils.h"
-#include "ofxCortexUI/components/Label.h"
-#include "ofxCortexUI/components/Value.h"
-#include "ofxCortexUI/components/Button.h"
-#include "ofxCortexUI/components/Slider.h"
-#include "ofxCortexUI/components/Checkbox.h"
+#include "ofxCortexUI/components/LabelView.h"
+#include "ofxCortexUI/components/ValueView.h"
+#include "ofxCortexUI/components/ButtonView.h"
+#include "ofxCortexUI/components/SliderView.h"
+#include "ofxCortexUI/components/RangeSliderView.h"
+#include "ofxCortexUI/components/CheckboxView.h"
+#include "ofxCortexUI/components/ImageView.h"
+#include "ofxCortexUI/components/FileView.h"
 
 #include "ofxCortex/types/Range.h"
+#include "ofxCortex/types/Image.h"
+#include "ofxCortex/types/Spacer.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -13,7 +18,7 @@ std::vector<std::shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFo
 {
   vector<shared_ptr<ofxCortex::ui::View>> views;
   
-  if (parameters.getName().size() > 0 && includeGroupName) views.push_back(ui::Label::create(parameters.getName()));
+  if (parameters.getName().size() > 0 && includeGroupName) views.push_back(ui::LabelView::create(parameters.getName()));
 
   vector<shared_ptr<ofAbstractParameter> >::iterator param = parameters.begin();
 
@@ -41,36 +46,61 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   else if (type == typeid(ofParameter<float>).name())
   {
     ofParameter<float> & p = param.cast<float>();
-    views.push_back(Slider<float>::create(p));
+    views.push_back(SliderView<float>::create(p));
   }
   else if (type == typeid(ofParameter<int>).name())
   {
     ofParameter<int> & p = param.cast<int>();
-    views.push_back(Slider<int>::create(p));
+    views.push_back(SliderView<int>::create(p));
   }
   else if (type == typeid(ofParameter<string>).name())
   {
     ofParameter<string> & p = param.cast<string>();
-    views.push_back(Value<string>::create(p));
+    views.push_back(ValueView<string>::create(p));
   }
   else if (type == typeid(ofParameter<bool>).name())
   {
     ofParameter<bool> & p = param.cast<bool>();
-    views.push_back(Checkbox::create(p));
+    views.push_back(CheckboxView::create(p));
   }
   else if (type == typeid(ofParameter<void>).name())
   {
     ofParameter<void> & p = param.cast<void>();
-    views.push_back(Button::create(p));
+    views.push_back(ButtonView::create(p));
+  }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::Spacer>).name())
+  {
+    ofParameter<ofxCortex::core::types::Spacer> & p = param.cast<ofxCortex::core::types::Spacer>();
+    auto spacer = View::create("Spacer");
+    spacer->setHeight(Styling::getRowHeight(p->rows));
+    views.push_back(spacer);
   }
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
     ofParameter<ofxCortex::core::types::Range> & p = param.cast<ofxCortex::core::types::Range>();
-    views.push_back(RangeSlider::create(p));
+    views.push_back(RangeSliderView::create(p));
+  }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::Image>).name())
+  {
+    ofParameter<ofxCortex::core::types::Image> & p = param.cast<ofxCortex::core::types::Image>();
+    views.push_back(Image::create(p));
+  }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::File>).name())
+  {
+    ofParameter<ofxCortex::core::types::File> & p = param.cast<ofxCortex::core::types::File>();
+    views.push_back(FileView::create(p));
   }
   else
   {
-    ofLogNotice("ParameterUtils::createViewsFromParameter") << "Implementation for type '" << type << "' is missing. No View created.";
+    string prettyType = type;
+    ofStringReplace(prettyType, "11", "");
+    ofStringReplace(prettyType, "IN9", "<");
+    ofStringReplace(prettyType, "4", "::");
+    ofStringReplace(prettyType, "5", "::");
+    ofStringReplace(prettyType, "EE", ">");
+    ofStringReplace(prettyType, "I", "<");
+    ofStringReplace(prettyType, "E", ">");
+    ofLogNotice("⚠️ ParameterUtils::createViewsFromParameter") << "Implementation for type '" << prettyType << "' is missing. No View created.";
   }
   
   return views;

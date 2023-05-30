@@ -28,7 +28,7 @@ public:
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   }
   
-  static void stopUsingMask()
+  static void endUsingMask()
   {
     glDisable(GL_STENCIL_TEST); //Disable using the stencil buffer
   }
