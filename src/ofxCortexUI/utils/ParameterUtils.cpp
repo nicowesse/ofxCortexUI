@@ -40,33 +40,27 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   }
   else if (type == typeid(ofParameter<float>).name())
   {
-    ofParameter<float> & p = param.cast<float>();
-    views.push_back(Slider<float>::create(p));
+    views.push_back(Slider<float>::create(param.cast<float>()));
   }
   else if (type == typeid(ofParameter<int>).name())
   {
-    ofParameter<int> & p = param.cast<int>();
-    views.push_back(Slider<int>::create(p));
+    views.push_back(Slider<int>::create(param.cast<int>()));
   }
   else if (type == typeid(ofParameter<string>).name())
   {
-    ofParameter<string> & p = param.cast<string>();
-    views.push_back(Value<string>::create(p));
+    views.push_back(Value<string>::create(param.cast<string>()));
   }
   else if (type == typeid(ofParameter<bool>).name())
   {
-    ofParameter<bool> & p = param.cast<bool>();
-    views.push_back(Checkbox::create(p));
+    views.push_back(Checkbox::create(param.cast<bool>()));
   }
   else if (type == typeid(ofParameter<void>).name())
   {
-    ofParameter<void> & p = param.cast<void>();
-    views.push_back(Button::create(p));
+    views.push_back(Button::create(param.cast<void>()));
   }
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
-    ofParameter<ofxCortex::core::types::Range> & p = param.cast<ofxCortex::core::types::Range>();
-    views.push_back(RangeSlider::create(p));
+    views.push_back(RangeSlider::create(param.cast<ofxCortex::core::types::Range>()));
   }
   else
   {
