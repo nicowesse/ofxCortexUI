@@ -160,7 +160,7 @@ public:
         auto stackConstraints = stack(views, axis);
         constraints.insert(std::end(constraints), std::begin(stackConstraints), std::end(stackConstraints));
         
-        auto attachmentConstraints = attachLeading(outer, views, axis);
+        auto attachmentConstraints = attachEnds(outer, views, axis);
         constraints.insert(std::end(constraints), std::begin(attachmentConstraints), std::end(attachmentConstraints));
       }
       else if (distribution == Distribution::EQUAL_SPACING)
@@ -188,7 +188,6 @@ public:
     else if (axis == Axis::VERTICAL)
     {
       LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
-        std::cout << "STACK: Current = " << current->getName() << " Next = " << next->getName() << std::endl;
         constraints.push_back({ next->top == current->bottom + Styling::marginBottom() | kiwi::strength::strong });
       });
     }
