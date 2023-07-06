@@ -82,7 +82,7 @@ void SliderView<T>::_drawDot()
 }
 
 template<typename T>
-void SliderView<T>::_mousePressed(const ofMouseEventArgs & e)
+void SliderView<T>::_mousePressed(const MouseEventArgs & e)
 {
   View::_mousePressed(e);
   
@@ -102,13 +102,13 @@ void SliderView<T>::_mouseDragged(const DeltaMouseEvent & e)
 }
 
 template<typename T>
-void SliderView<T>::_mouseScrolled(const ofMouseEventArgs & e)
+void SliderView<T>::_mouseScrolled(const MouseEventArgs & e)
 {
   if (!_isFocused()) return;
   
   if (e.modifiers == OF_KEY_SHIFT)
   {
-    parameter = (e.scrollX < 0.0f) ? floor(parameter.get() - 0.00001f) : ceil(parameter.get() + 0.00001f);
+    parameter = (e.scrollX > 0.0f) ? floor(parameter.get() - 0.00001f) : ceil(parameter.get() + 0.00001f);
   }
   else
   {
@@ -118,10 +118,8 @@ void SliderView<T>::_mouseScrolled(const ofMouseEventArgs & e)
     else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
     else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
     
-    parameter += e.scrollX * delta;
+    parameter -= e.scrollX * delta;
   }
-  
-//  _handleOpacity = ofClamp(_handleOpacity + abs(e.scrollX), 0.7, 1.0);
 }
 
 template<typename T>
@@ -285,7 +283,7 @@ void SliderView<int>::_draw()
 }
 
 template<>
-void SliderView<int>::_mousePressed(const ofMouseEventArgs & e)
+void SliderView<int>::_mousePressed(const MouseEventArgs & e)
 {
   View::_mousePressed(e);
   

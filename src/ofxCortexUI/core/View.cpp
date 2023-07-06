@@ -8,7 +8,7 @@ std::vector<std::shared_ptr<View>> View::everyView;
 View::View(std::string name)
 {
   setName(name);
-  enableMask();
+//  enableMask();
   
   this->addConstraints({
     kiwi::Constraint { right >= left | kiwi::strength::required },
@@ -127,25 +127,26 @@ void View::draw()
 {
   ofPushMatrix();
   {
-    if (_enableMask)
-    {
-      Stencil::beginDrawingMask();
-      _drawMask();
-      Stencil::endDrawingMask();
-      Stencil::beginUsingMask();
-    }
-    
     ofPushStyle();
     {
       _preDraw();
+      
+      if (_enableMask)
+      {
+        Stencil::beginDrawingMask();
+        _drawMask();
+        Stencil::endDrawingMask();
+        Stencil::beginUsingMask();
+      }
+      
       _draw();
+      
+      if (_shouldDrawSubviews) _drawSubviews();
+      if (_enableMask) Stencil::endUsingMask();
+      
       _postDraw();
     }
     ofPopStyle();
-    
-    if (_shouldDrawSubviews) _drawSubviews();
-    
-    if (_enableMask) Stencil::endUsingMask();
   }
   ofPopMatrix();
 }
@@ -157,7 +158,7 @@ void View::_preDraw()
 
 void View::_draw()
 {
-  ofxCortex::ui::Styling::drawBackground(this->getBounds());
+  
 }
 
 void View::_postDraw()
@@ -173,11 +174,11 @@ void View::_postDraw()
   {
     ofPushStyle();
     ofNoFill();
-    ofSetColor(ofColor::tomato, 128);
+    ofSetColor(ofColor::red);
     ofDrawRectangle(this->getBounds());
     
-    ofSetColor(Styling::getAccentColor(), 128);
-    ofDrawRectangle(this->getContentBounds());
+    ofSetColor(ofColor::red, 128);
+//    ofDrawRectangle(this->getContentBounds());
     ofPopStyle();
   }
 }
@@ -327,7 +328,7 @@ bool View::isOverlapped(const glm::vec2 & point)
 }
 
 
-void View::addSubviewAt(std::shared_ptr<View> subview, size_t index)
+void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
 {
   subview->superview = shared_from_this();
   subview->level = this->level + 1;
@@ -335,7 +336,7 @@ void View::addSubviewAt(std::shared_ptr<View> subview, size_t index)
   everyView.push_back(subview);
 }
 
-void View::addSubview(std::shared_ptr<View> subview)
+void View::addSubview(const std::shared_ptr<View> & subview)
 {
   this->addSubviewAt(subview, subviews.size());
 }
@@ -476,47 +477,21 @@ void View::_layoutIfNeeded(bool layoutSubviews)
 void View::_updateLayout()
 {
   ofLogVerbose(_getLogModule(__FUNCTION__));
-  
-  this->_updateBounds();
 }
 
 ofRectangle View::getBounds() const
 {
-  ofRectangle bounds;
-  
-  bounds.x = left.value();
-  bounds.y = top.value();
-  bounds.width = width.value();
-  bounds.height = height.value();
-  
-  return bounds;
+  return ofRectangle(left.value(), top.value(), width.value(), height.value());
 }
 
 ofRectangle View::getContentBounds() const
 {
-  ofRectangle contentBounds;
-  
-  contentBounds.x = content_left.value();
-  contentBounds.y = content_top.value();
-  contentBounds.width = content_width.value();
-  contentBounds.height = content_height.value();
-  
-  return contentBounds;
+  return ofRectangle(content_left.value(), content_top.value(), content_width.value(), content_height.value());
 }
 
 void View::_updateBounds()
 {
   ofLogVerbose(_getLogModule(__FUNCTION__));
-  
-//  bounds.x = left.value();
-//  bounds.y = top.value();
-//  bounds.width = width.value();
-//  bounds.height = height.value();
-//
-//  contentBounds.x = content_left.value();
-//  contentBounds.y = content_top.value();
-//  contentBounds.width = content_width.value();
-//  contentBounds.height = content_height.value();
 }
 
 ofRectangle View::_getLocalBounds() const {
@@ -631,10 +606,18 @@ void View::_drawHandler(ofEventArgs &e)
 
 void View::_mousePressedHandler(ofMouseEventArgs &e)
 {
-  bool isPressedInside = isInside(e) && !isOverlapped(e);
+  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  
+  if (isInside(e)) ofLogNotice(_getLogModule(__FUNCTION__)) << "Should trigger? " << shouldTrigger << std::endl;
+  
+  bool isPressedInside = isInside(e) && shouldTrigger;
+  
+  MouseEventArgs customE(e);
+  customE.isOverlapped = isOverlapped(e);
   
   if (isPressedInside) {
-    _triggerMousePressed(e);
+    _triggerMousePressed(customE);
     if (_includeInOverlap) View::focused = shared_from_this();
   }
   
@@ -645,10 +628,15 @@ void View::_mousePressedHandler(ofMouseEventArgs &e)
 
 void View::_mouseReleasedHandler(ofMouseEventArgs &e)
 {
-  bool isReleasedInside = isInside(e) && !isOverlapped(e);
+  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  bool isReleasedInside = isInside(e) && shouldTrigger;
   
-  if (_wasMousePressedInside) _triggerMouseReleased(e);
-  if (_wasMousePressedInside && !isReleasedInside) _triggerMouseReleasedOutside(e);
+  MouseEventArgs customE(e);
+  customE.isOverlapped = isOverlapped(e);
+  
+  if (_wasMousePressedInside) _triggerMouseReleased(customE);
+  if (_wasMousePressedInside && !isReleasedInside) _triggerMouseReleasedOutside(customE);
   
   _isMousePressed = false;
   _wasMousePressedInside = false;
@@ -657,20 +645,23 @@ void View::_mouseReleasedHandler(ofMouseEventArgs &e)
 
 void View::_mouseMovedHandler(ofMouseEventArgs &e)
 {
-  //  ofLogVerbose(getLogModule(__FUNCTION__));
-  bool isMovedInside = isInside(e) && !isOverlapped(e);
+  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  
+  bool isMovedInside = isInside(e) && shouldTrigger;
   
   auto deltaEvent = DeltaMouseEvent(e);
+  deltaEvent.isOverlapped = isOverlapped(e);
   deltaEvent.delta = e - _lastMousePosition;
   
   if (isMovedInside) _triggerMouseMoved(deltaEvent);
   
   if (!_isMouseOver && isMovedInside) {
-    _triggerMouseEnter(e);
+    _triggerMouseEnter(deltaEvent);
   }
   
   if (_isMouseOver && !isMovedInside) {
-    _triggerMouseExit(e);
+    _triggerMouseExit(deltaEvent);
   }
   
   _isMouseOver = isMovedInside;
@@ -680,18 +671,22 @@ void View::_mouseMovedHandler(ofMouseEventArgs &e)
 void View::_mouseDraggedHandler(ofMouseEventArgs &e)
 {
   auto deltaEvent = DeltaMouseEvent(e);
+  deltaEvent.isOverlapped = isOverlapped(e);
   deltaEvent.delta = e - _lastMousePosition;
   
-  bool isMovedInside = isInside(e) && !isOverlapped(e);
+  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  
+  bool isMovedInside = isInside(e) && shouldTrigger;
   
   if (_wasMousePressedInside) _triggerMouseDragged(deltaEvent);
   
   if (!_isMouseOver && isMovedInside) {
-    _triggerMouseEnter(e);
+    _triggerMouseEnter(deltaEvent);
   }
   
   if (_isMouseOver && !isMovedInside) {
-    _triggerMouseExit(e);
+    _triggerMouseExit(deltaEvent);
   }
   
   _isMouseOver = isMovedInside;
@@ -700,7 +695,14 @@ void View::_mouseDraggedHandler(ofMouseEventArgs &e)
 
 void View::_mouseScrolledHandler(ofMouseEventArgs &e)
 {
-  if (_isMouseOver) _triggerMouseScrolled(e);
+  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  
+  bool isScrolledInside = isInside(e) && shouldTrigger;
+  
+  MouseEventArgs event(e);
+  event.isOverlapped = isOverlapped(e);
+  if (isScrolledInside) _triggerMouseScrolled(event);
 }
 
 

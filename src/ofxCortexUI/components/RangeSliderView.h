@@ -47,7 +47,7 @@ protected:
   virtual void _draw() override;
   virtual void _updateConstraints() override;
   
-  virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
+  virtual void _mouseScrolled(const MouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   virtual void _windowResized(ofResizeEventArgs & e) override;
   

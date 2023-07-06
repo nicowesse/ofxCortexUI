@@ -46,41 +46,11 @@ protected:
     Styling::drawLabel(parameter.getName(), this->getContentBounds(), OF_ALIGN_HORZ_CENTER);
   }
   
-  virtual void _mouseEnter(const ofMouseEventArgs & e) override
-  {
-    View::_mouseEnter(e);
-    
-//    backgroundColor = style->foregroundColor;
-  }
-  
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
+  virtual void _mousePressed(const MouseEventArgs & e) override
   {
     View::_mousePressed(e);
-    
-//    backgroundColor *= 1.4;
     
     parameter.trigger();
-  }
-  
-  virtual void _mouseReleased(const ofMouseEventArgs & e) override
-  {
-    View::_mouseReleased(e);
-    
-//    backgroundColor = style->foregroundColor;
-  }
-  
-  virtual void _mouseReleasedOutside(const ofMouseEventArgs & e) override
-  {
-    View::_mouseReleasedOutside(e);
-    
-//    backgroundColor = style->foregroundColor;
-  }
-  
-  virtual void _mouseExit(const ofMouseEventArgs & e) override
-  {
-    View::_mousePressed(e);
-    
-//    backgroundColor = style->backgroundColor;
   }
   
   // Members

@@ -71,6 +71,11 @@ public:
   
   static double getHorizontalPadding() { return get().getPaddingLeft() + get().getPaddingRight(); }
   
+  static const kiwi::Variable & spacingX() { return get().spacing_x; }
+  static double getSpacingX() { return get().spacing_x.value(); }
+  static const kiwi::Variable & spacingY() { return get().spacing_y; }
+  static double getSpacingY() { return get().spacing_y.value(); }
+  
   static const ofColor & getBackgroundColor(State state = IDLE) {
     switch (state) {
       case HOVER: return get().backgroundColorHovering; break;
@@ -79,6 +84,7 @@ public:
       default: return get().backgroundColor; break;
     }
   }
+  static const ofColor & getContainerColor() { return get().containerColor; }
   static const ofColor & getForegroundColor() { return get().foregroundColor; }
   static const ofColor & getAccentColor() { return get().accentColor; }
   static const ofColor & getBorderColor(State state = IDLE) {
@@ -100,13 +106,28 @@ public:
     {
       ofSetColor(fillColor);
       ofFill();
-    //  ofDrawRectRounded(b.x, b.y, layerZ * 10, b.width, b.height, 4);
       ofDrawRectRounded(bounds, 6 * Styling::getScale());
       
-      ofSetColor(borderColor);
-      ofNoFill();
-    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
-      ofDrawRectRounded(bounds, 6 * Styling::getScale());
+//      ofSetColor(borderColor);
+//      ofNoFill();
+//    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
+//      ofDrawRectRounded(bounds, 6 * Styling::getScale());
+    }
+    ofPopStyle();
+  }
+  
+  static void drawContainerBackground(const ofRectangle & bounds, ofColor fillColor = Styling::getContainerColor(), ofColor borderColor = Styling::getBorderColor()) {
+    ofPushStyle();
+    {
+      ofSetColor(fillColor);
+      ofFill();
+    //  ofDrawRectRounded(b.x, b.y, layerZ * 10, b.width, b.height, 4);
+      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
+      
+//      ofSetColor(borderColor);
+//      ofNoFill();
+//    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
+//      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
     }
     ofPopStyle();
   }
@@ -124,36 +145,36 @@ public:
     
     glm::vec2 renderPosition = position + offset;
     
-    get().fonts.labelFont.drawString(text, renderPosition.x, renderPosition.y);
+    Styling::getLabelFont().drawString(text, renderPosition.x, renderPosition.y);
   }
   
   static void drawLabel(const std::string & text, const ofRectangle & BB, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_LEFT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
   {
     if (horzAlignment == OF_ALIGN_HORZ_LEFT)
     {
-      float X = BB.getLeft() + getPaddingLeft();
+      float X = BB.getLeft() + Styling::getPaddingLeft();
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
     
     if (horzAlignment == OF_ALIGN_HORZ_CENTER)
     {
       float X = BB.getCenter().x;
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
     
     if (horzAlignment == OF_ALIGN_HORZ_RIGHT)
     {
       float X = BB.getRight() - getPaddingRight();
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawLabel(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
   }
   
@@ -162,44 +183,44 @@ public:
     float textW = get().fonts.valueFont.stringWidth(text);
     
     glm::vec2 offset { 0, 0 };
-    if (verticalAlignment == OF_ALIGN_VERT_TOP) offset.y += get().fonts.valueFont.dimensions.height;
-    if (verticalAlignment == OF_ALIGN_VERT_CENTER) offset.y += get().fonts.valueFont.dimensions.height * 0.5;
+    if (verticalAlignment == OF_ALIGN_VERT_TOP) offset.y += Styling::getValueFont().dimensions.height;
+    if (verticalAlignment == OF_ALIGN_VERT_CENTER) offset.y += Styling::getValueFont().dimensions.height * 0.5;
     
     if (horzAlignment == OF_ALIGN_HORZ_CENTER) offset.x -= textW * 0.5;
     if (horzAlignment == OF_ALIGN_HORZ_RIGHT) offset.x -= textW;
     
     glm::vec2 renderPosition = position + offset;
     
-    get().fonts.valueFont.drawString(text, renderPosition.x, renderPosition.y);
+    getValueFont().drawString(text, renderPosition.x, renderPosition.y);
   }
   
   static void drawValue(const std::string & text, const ofRectangle & BB, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_RIGHT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
   {
     if (horzAlignment == OF_ALIGN_HORZ_LEFT)
     {
-      float X = BB.getLeft() + getPaddingLeft();
+      float X = BB.getLeft() + Styling::getPaddingLeft();
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawValue(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
     
     if (horzAlignment == OF_ALIGN_HORZ_CENTER)
     {
       float X = BB.getCenter().x;
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawValue(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
     
     if (horzAlignment == OF_ALIGN_HORZ_RIGHT)
     {
-      float X = BB.getRight() - getPaddingRight();
+      float X = BB.getRight() - Styling::getPaddingRight();
       
-      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + getPaddingTop()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_TOP) drawValue(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawValue(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
-      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - getPaddingBottom()), horzAlignment, verticalAlignment);
+      if (verticalAlignment == OF_ALIGN_VERT_BOTTOM) drawValue(text, glm::vec2(X, BB.getBottom() - Styling::getPaddingBottom()), horzAlignment, verticalAlignment);
     }
   }
   
@@ -236,6 +257,12 @@ private:
     LayoutEngine::suggestValue(padding_left, initialPadding);
     LayoutEngine::suggestValue(padding_bottom, initialPadding);
     LayoutEngine::suggestValue(padding_right, initialPadding);
+    
+    double initialSpacing = 6 * scale;
+    LayoutEngine::addEditVariable(spacing_x, kiwi::strength::strong);
+    LayoutEngine::addEditVariable(spacing_y, kiwi::strength::strong);
+    LayoutEngine::suggestValue(spacing_x, initialSpacing);
+    LayoutEngine::suggestValue(spacing_y, initialSpacing);
     
     _loadFonts(scale);
 //
@@ -274,6 +301,10 @@ private:
     LayoutEngine::suggestValue(padding_bottom, initialPadding);
     LayoutEngine::suggestValue(padding_right, initialPadding);
     
+    double initialSpacing = 6 * scale;
+    LayoutEngine::suggestValue(spacing_x, initialSpacing);
+    LayoutEngine::suggestValue(spacing_y, initialSpacing);
+    
     _loadFonts(scale);
     
     LayoutEngine::forceSolve();
@@ -297,10 +328,14 @@ private:
   kiwi::Variable padding_bottom { "padding_bottom" };
   kiwi::Variable padding_right { "padding_right" };
   
+  kiwi::Variable spacing_x { "spacing_x" };
+  kiwi::Variable spacing_y { "spacing_y" };
+  
   // Colors
   ofColor backgroundColor { 14 };
   ofColor backgroundColorHovering { 18 };
   ofColor backgroundColorActive { 24 };
+  ofColor containerColor { 24 };
   ofColor foregroundColor { 255 };
   ofColor accentColor { ofColor::fromHex(0xFFD953) };
   ofColor borderColor { 64 };

@@ -2,6 +2,7 @@
 
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/core/LayoutHelpers.h"
+#include "ofParameter.h"
 
 namespace ofxCortex { namespace ui {
 

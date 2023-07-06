@@ -84,12 +84,12 @@ protected:
     this->_drawOverlay(_overlayOpacity);
   }
   
-  virtual void _mouseEnter(const ofMouseEventArgs & e) override
+  virtual void _mouseEnter(const MouseEventArgs & e) override
   {
     Tweenzor::add(&_overlayOpacity, _overlayOpacity, 1.0f, 0.0f, 0.25f, EASE_IN_OUT_QUART);
   }
   
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
+  virtual void _mousePressed(const MouseEventArgs & e) override
   {
     auto result = ofSystemLoadDialog("Image Path");
     if (result.bSuccess) {
@@ -101,7 +101,7 @@ protected:
     }
   }
   
-  virtual void _mouseExit(const ofMouseEventArgs & e) override
+  virtual void _mouseExit(const MouseEventArgs & e) override
   {
     Tweenzor::add(&_overlayOpacity, _overlayOpacity, 0.0f, 0.0f, 0.25f, EASE_IN_OUT_QUART);
   }

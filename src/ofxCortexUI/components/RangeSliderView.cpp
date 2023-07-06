@@ -78,8 +78,8 @@ void RangeSliderView::_setup()
     float normalizedFrom = ofMap(e.bounds.getLeft(), CBB.getLeft(), CBB.getRight() - minSize.x, 0, 1, true);
     float normalizedTo = ofMap(e.bounds.getRight(), CBB.getLeft() + minSize.x, CBB.getRight(), 0, 1, true);
     
-    bool hitLeft = ofIsFloatEqual(bar->getLeft(), this->getContentLeft());
-    bool hitRight = ofIsFloatEqual(bar->getRight(), this->getContentRight());
+    bool hitLeft = ofIsFloatEqual(bar->getLeft(), (this->getContentLeft() - 0.0001f));
+    bool hitRight = ofIsFloatEqual(bar->getRight(), (this->getContentRight() + 0.0001f));
     
     if ((hitLeft | hitRight) == 0)
     {
@@ -128,7 +128,7 @@ void RangeSliderView::_draw()
   ofPopStyle();
 }
 
-void RangeSliderView::_mouseScrolled(const ofMouseEventArgs & e)
+void RangeSliderView::_mouseScrolled(const MouseEventArgs & e)
 {
   parameter += -e.scrollX;
 }

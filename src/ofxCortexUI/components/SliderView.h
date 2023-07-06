@@ -35,9 +35,9 @@ protected:
   void _drawZero();
   void _drawDot();
   
-  virtual void _mousePressed(const ofMouseEventArgs & e) override;
+  virtual void _mousePressed(const MouseEventArgs & e) override;
   virtual void _mouseDragged(const View::DeltaMouseEvent & e) override;
-  virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
+  virtual void _mouseScrolled(const MouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   
   ofParameter<T> parameter;

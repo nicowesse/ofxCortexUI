@@ -31,7 +31,7 @@ public:
   void enableMask() { _enableMask = true; }
   void disableMask() { _enableMask = false; }
   void enableDebug() { _debugBounds = true; }
-  void disableDebug() { _debugBounds = true; }
+  void disableDebug() { _debugBounds = false; }
   
   
 #pragma mark - OBJECT: Initalizsations and Loops
@@ -108,8 +108,10 @@ public:
   glm::vec2 getPosition() const { return glm::vec2(this->left.value(), this->top.value()); }
   void setWidth(float value);
   float getWidth() const { return this->width.value(); }
+  float getContentWidth() const { return this->content_width.value(); }
   void setHeight(float value);
   float getHeight() const { return this->height.value(); }
+  float getContentHeight() const { return this->content_height.value(); }
   void setSize(float w, float h);
   void setSize(glm::vec2 size);
   
@@ -200,20 +202,23 @@ protected:
   
 #pragma mark - Family Tree
 public:
-  void addSubviewAt(std::shared_ptr<View> subview, size_t index);
-  void addSubview(std::shared_ptr<View> subview);
-  void addSubviews(std::vector<std::shared_ptr<View>> views);
-  void removeSubview(std::shared_ptr<View> subview);
+  virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index);
+  virtual void addSubview(const std::shared_ptr<View> & subview);
+  virtual void addSubviews(std::vector<std::shared_ptr<View>> views);
+  virtual void removeSubview(std::shared_ptr<View> subview);
   
   bool hasParent() const { return superview != nullptr; }
   std::shared_ptr<View> getParent() const { return superview; }
+  void setParent(std::shared_ptr<View> parent) { this->superview = parent; }
   
   std::shared_ptr<View> getRoot();
   static std::vector<std::shared_ptr<View>> flatten(const std::shared_ptr<View> & node);
+  void setLevel(int level) { this->level = level; }
   
 protected:
   std::shared_ptr<View> superview;
   std::vector<std::shared_ptr<View>> subviews;
+  
   inline static std::shared_ptr<View> focused = nullptr;
   bool _isFocused() const { return View::focused != nullptr && View::focused.get() == this; }
   static std::vector<std::shared_ptr<View>> everyView;
@@ -236,9 +241,32 @@ public:
   void enableMouseEvents() { _addMouseEventListeners(); }
   void disableMouseEvents() { _removeMouseEventListeners(); }
   
-  struct DeltaMouseEvent : public ofMouseEventArgs {
-    DeltaMouseEvent() : ofMouseEventArgs() {};
-    DeltaMouseEvent(const ofMouseEventArgs & e) : ofMouseEventArgs(e) {};
+  void enableInteractionOutsideParent() { this->_enableInteractionOutsideParent = true; }
+  void disableInteractionOutsideParent() { this->_enableInteractionOutsideParent = false; }
+  
+  struct MouseEventArgs : public ofMouseEventArgs {
+    MouseEventArgs() : ofMouseEventArgs() {};
+    MouseEventArgs(const ofMouseEventArgs & e) : ofMouseEventArgs(e) {};
+    MouseEventArgs& operator= (const MouseEventArgs &other)
+    {
+      ofMouseEventArgs::operator=(other);
+      isOverlapped = other.isOverlapped;
+      return *this;
+    }
+    
+    bool isOverlapped { false };
+  };
+  
+  struct DeltaMouseEvent : public MouseEventArgs {
+    DeltaMouseEvent() : MouseEventArgs() {};
+    DeltaMouseEvent(const ofMouseEventArgs & e) : MouseEventArgs(e) {};
+    DeltaMouseEvent(const DeltaMouseEvent & e) : MouseEventArgs(e), delta(e.delta) {};
+    DeltaMouseEvent& operator= (const DeltaMouseEvent &other)
+    {
+      MouseEventArgs::operator=(other);
+      delta = other.delta;
+      return *this;
+    }
     
     glm::vec2 delta;
   };
@@ -256,18 +284,18 @@ public:
   
   
   
-  ofEvent<ofMouseEventArgs> onMousePressedE;
-  void onMousePressed(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMousePressedE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMousePressedE;
+  void onMousePressed(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMousePressedE.newListener(callback, 0)); }
   bool isMousePressed() { return _isMousePressed; }
   
-  ofEvent<ofMouseEventArgs> onMouseDoublePressedE;
-  void onMouseDoublePressed(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseDoublePressedE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseDoublePressedE;
+  void onMouseDoublePressed(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseDoublePressedE.newListener(callback, 0)); }
   
-  ofEvent<ofMouseEventArgs> onMouseReleasedE;
-  void onMouseReleased(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseReleasedE;
+  void onMouseReleased(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedE.newListener(callback, 0)); }
   
-  ofEvent<ofMouseEventArgs> onMouseReleasedOutsideE;
-  void onMouseReleasedOutside(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedOutsideE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseReleasedOutsideE;
+  void onMouseReleasedOutside(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedOutsideE.newListener(callback, 0)); }
   
   ofEvent<DeltaMouseEvent> onMouseMovedE;
   void onMouseMoved(std::function<void(DeltaMouseEvent)> callback) { _eventListeners.push(onMouseMovedE.newListener(callback, 0)); }
@@ -275,15 +303,15 @@ public:
   ofEvent<DeltaMouseEvent> onMouseDraggedE;
   void onMouseDragged(std::function<void(DeltaMouseEvent)> callback) { _eventListeners.push(onMouseDraggedE.newListener(callback, 0)); }
   
-  ofEvent<ofMouseEventArgs> onMouseEnterE;
-  void onMouseEnter(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseDraggedE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseEnterE;
+  void onMouseEnter(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseDraggedE.newListener(callback, 0)); }
   bool isMouseOver(){ return _isMouseOver; };
   
-  ofEvent<ofMouseEventArgs> onMouseExitE;
-  void onMouseExit(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseExitE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseExitE;
+  void onMouseExit(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseExitE.newListener(callback, 0)); }
   
-  ofEvent<ofMouseEventArgs> onMouseScrolledE;
-  void onMouseScrolled(std::function<void(ofMouseEventArgs)> callback) { _eventListeners.push(onMouseScrolledE.newListener(callback, 0)); }
+  ofEvent<MouseEventArgs> onMouseScrolledE;
+  void onMouseScrolled(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseScrolledE.newListener(callback, 0)); }
   
   
   ofEvent<ofKeyEventArgs> onKeyPressedE;
@@ -327,6 +355,8 @@ protected:
   int _doublePressInterval { 500 };
   glm::vec2 _lastMousePosition { 0, 0 };
   
+  bool _enableInteractionOutsideParent { true };
+  
   ofEventListeners _eventListeners;
   
 #pragma mark - EVENTS: Handlers
@@ -342,22 +372,22 @@ protected:
   void _charHandler(uint32_t &c);
   
   // Trigger Helpers
-  void _triggerMousePressed(ofMouseEventArgs & args) {
+  void _triggerMousePressed(MouseEventArgs & args) {
     onMousePressedE.notify(args);
     _mousePressed(args);
   }
   
-  void _triggerMouseDoublePressed(ofMouseEventArgs & args) {
+  void _triggerMouseDoublePressed(MouseEventArgs & args) {
     onMouseDoublePressedE.notify(args);
     _mouseDoublePressed(args);
   }
   
-  void _triggerMouseReleased(ofMouseEventArgs & args) {
+  void _triggerMouseReleased(MouseEventArgs & args) {
     onMouseReleasedE.notify(args);
     _mouseReleased(args);
   }
   
-  void _triggerMouseReleasedOutside(ofMouseEventArgs & args) {
+  void _triggerMouseReleasedOutside(MouseEventArgs & args) {
     onMouseReleasedOutsideE.notify(args);
     _mouseReleasedOutside(args);
   }
@@ -372,17 +402,17 @@ protected:
     _mouseDragged(args);
   }
   
-  void _triggerMouseScrolled(ofMouseEventArgs & args) {
+  void _triggerMouseScrolled(MouseEventArgs & args) {
     onMouseScrolledE.notify(args);
     _mouseScrolled(args);
   }
   
-  void _triggerMouseEnter(ofMouseEventArgs & args) {
+  void _triggerMouseEnter(MouseEventArgs & args) {
     onMouseEnterE.notify(args);
     _mouseEnter(args);
   }
   
-  void _triggerMouseExit(ofMouseEventArgs & args) {
+  void _triggerMouseExit(MouseEventArgs & args) {
     onMouseExitE.notify(args);
     _mouseExit(args);
   }
@@ -403,17 +433,17 @@ protected:
   }
   
   // Hooks
-  virtual void _mousePressed(const ofMouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
+  virtual void _mousePressed(const MouseEventArgs & e) {
+    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
   }
-  virtual void _mouseDoublePressed(const ofMouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
+  virtual void _mouseDoublePressed(const MouseEventArgs & e) {
+    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
   }
-  virtual void _mouseReleased(const ofMouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
+  virtual void _mouseReleased(const MouseEventArgs & e) {
+    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
   }
-  virtual void _mouseReleasedOutside(const ofMouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
+  virtual void _mouseReleasedOutside(const MouseEventArgs & e) {
+    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
   }
   virtual void _mouseMoved(const DeltaMouseEvent & e) {
     //    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " delta: " << e.delta.x << "," << e.delta.y;
@@ -421,13 +451,13 @@ protected:
   virtual void _mouseDragged(const DeltaMouseEvent & e) {
     ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " delta: " << e.delta.x << "," << e.delta.y;
   }
-  virtual void _mouseScrolled(const ofMouseEventArgs & e) {
+  virtual void _mouseScrolled(const MouseEventArgs & e) {
     ofLogVerbose(_getLogModule(__FUNCTION__)) << e.scrollX << "," << e.scrollY;
   }
-  virtual void _mouseEnter(const ofMouseEventArgs & e) {
+  virtual void _mouseEnter(const MouseEventArgs & e) {
     ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
   }
-  virtual void _mouseExit(const ofMouseEventArgs & e) {
+  virtual void _mouseExit(const MouseEventArgs & e) {
     ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
   }
   

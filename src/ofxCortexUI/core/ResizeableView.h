@@ -168,7 +168,7 @@ protected:
   float _minHeight { 20 };
   std::shared_ptr<View> constrainingView;
   
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
+  virtual void _mousePressed(const MouseEventArgs & e) override
   {
     if (abs(e.x - this->getLeft()) < _grabAreaDimensions.x && _enableX) dragAnchorHorz = OF_ALIGN_HORZ_LEFT;
     if (abs(e.x - this->getRight()) < _grabAreaDimensions.x && _enableX) dragAnchorHorz = OF_ALIGN_HORZ_RIGHT;
@@ -198,7 +198,7 @@ protected:
     else if (dragAnchorVert == OF_ALIGN_VERT_BOTTOM) _translateBottom(e.delta.y);
   }
   
-  virtual void _mouseReleased(const ofMouseEventArgs & e) override
+  virtual void _mouseReleased(const MouseEventArgs & e) override
   {
     dragAnchorHorz = OF_ALIGN_HORZ_IGNORE;
     dragAnchorVert = OF_ALIGN_VERT_IGNORE;

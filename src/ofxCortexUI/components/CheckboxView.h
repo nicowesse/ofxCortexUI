@@ -61,7 +61,7 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
+  virtual void _mousePressed(const MouseEventArgs & e) override
   {
     View::_mousePressed(e);
     

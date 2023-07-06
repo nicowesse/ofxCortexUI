@@ -5,7 +5,7 @@
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/core/ResizeableView.h"
 
-//#include "ofxCortexUI/layout/StackView.h"
+#include "ofxCortexUI/layout/StackView.h"
 //#include "ofxCortexUI/layout/RuleView.h"
 //#include "ofxCortexUI/layout/FitView.h"
 
