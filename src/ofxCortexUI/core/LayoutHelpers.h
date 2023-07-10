@@ -297,6 +297,8 @@ public:
   
   static std::vector<kiwi::Constraint> attachEnds(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
   {
+    if (views.size() == 0) return std::vector<kiwi::Constraint>();
+    
     if (axis == Axis::HORIZONTAL)
     {
       return std::vector<kiwi::Constraint>{
@@ -315,6 +317,8 @@ public:
   
   static std::vector<kiwi::Constraint> attachLeading(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
   {
+    if (views.size() == 0) return std::vector<kiwi::Constraint>();
+    
     if (axis == Axis::HORIZONTAL)
     {
       return std::vector<kiwi::Constraint>{
@@ -331,6 +335,8 @@ public:
   
   static std::vector<kiwi::Constraint> attachTrailing(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
   {
+    if (views.size() == 0) return std::vector<kiwi::Constraint>();
+    
     if (axis == Axis::HORIZONTAL)
     {
       return std::vector<kiwi::Constraint>{

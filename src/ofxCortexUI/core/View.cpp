@@ -330,8 +330,8 @@ bool View::isOverlapped(const glm::vec2 & point)
 
 void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
 {
-  subview->superview = shared_from_this();
-  subview->level = this->level + 1;
+  subview->setParent(shared_from_this());
+  subview->setLevel(this->level + 1);
   subviews.insert(subviews.begin() + index, subview);
   everyView.push_back(subview);
 }
@@ -344,6 +344,8 @@ void View::addSubview(const std::shared_ptr<View> & subview)
 
 void View::addSubviews(std::vector<std::shared_ptr<View>> views)
 {
+  if (views.size() == 0) return;
+  
   for (auto & view : views) this->addSubview(view);
 }
 
@@ -459,6 +461,7 @@ void View::_setNeedsUpdateConstraints()
 {
   this->_needsUpdateConstraints = true;
 }
+
 
 void View::_updateLayoutImmediately()
 {
