@@ -41,9 +41,9 @@ protected:
   
   virtual void _draw() override
   {
-    View::_draw();
-    
     const auto & b = this->getContentBounds();
+    
+    Styling::drawBackground(this->getBounds());
     
     ofSetColor(Styling::getForegroundColor());
     ofxCortex::ui::Styling::drawLabel(parameter.getName(), b);

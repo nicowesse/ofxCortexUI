@@ -116,12 +116,24 @@ public:
     ofPopStyle();
   }
   
-  static void drawContainerBackground(const ofRectangle & bounds, ofColor fillColor = Styling::getContainerColor(), ofColor borderColor = Styling::getBorderColor()) {
+  static void drawFocusBorder(const ofRectangle & bounds)
+  {
+    ofPushStyle();
+    {
+      ofSetColor(get().borderColorFocused);
+      ofNoFill();
+      ofDrawRectRounded(bounds, 6 * Styling::getScale());
+    }
+    ofPopStyle();
+  }
+  
+  static void drawContainerBackground(const ofRectangle & bounds, ofColor fillColor = Styling::getContainerColor(), ofColor borderColor = Styling::getBorderColor(), int level = 0) {
+    fillColor += 8 * level;
+    
     ofPushStyle();
     {
       ofSetColor(fillColor);
       ofFill();
-    //  ofDrawRectRounded(b.x, b.y, layerZ * 10, b.width, b.height, 4);
       ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
       
 //      ofSetColor(borderColor);

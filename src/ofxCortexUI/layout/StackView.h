@@ -78,6 +78,8 @@ protected:
       { wrapper->top <= this->top | kiwi::strength::strong },
       { wrapper->top == this->scroll_y | kiwi::strength::strong },
     });
+    
+    this->setIntrinsicHeight(Styling::getRowHeight() * 5);
   }
   
   virtual void _update(double time, double delta) override
@@ -113,7 +115,7 @@ protected:
   {
     ofPushStyle();
     {
-      if (this->_enableBackground) Styling::drawContainerBackground(this->getBounds());
+      if (this->_enableBackground) Styling::drawContainerBackground(this->getBounds(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
     }
     ofPopStyle();
   }
