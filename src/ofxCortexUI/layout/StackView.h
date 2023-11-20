@@ -9,6 +9,7 @@ namespace ofxCortex { namespace ui {
 class StackView : public ofxCortex::ui::View {
   class Wrapper : public DisplayObject {
   protected:
+    virtual string _getModule() const override { return "Wrapper"; };
     virtual void _drawChildren() override;
   };
   

@@ -65,6 +65,8 @@ void StackView::_init()
 
 void StackView::_update(float time, float delta)
 {
+  DisplayObject::_update(time, delta);
+  
   scrollOpacity = ofClamp(scrollOpacity - delta * 2.0, 0, 1);
 }
 

@@ -250,11 +250,6 @@ void DisplayObject::draw()
   ofPopMatrix();
 }
 
-void DisplayObject::update()
-{
-  update(ofGetElapsedTimef(), ofGetLastFrameTime());
-}
-
 void DisplayObject::update(float time, float deltaTime)
 {
   _update(time, deltaTime);
@@ -308,11 +303,6 @@ void DisplayObject::_drawMask()
   ofPopStyle();
 }
 
-void DisplayObject::_update()
-{
-  _update(ofGetElapsedTimef(), ofGetLastFrameTime());
-}
-
 void DisplayObject::_update(float time, float deltaTime)
 {
   _time = time;
@@ -345,6 +335,22 @@ void DisplayObject::makeSuperview()
   
   _addMouseEventListeners();
   _addKeyEventListeners();
+}
+
+int DisplayObject::getLevel() const
+{
+  if (!hasParent()) return 0;
+  
+  int level = hasParent();
+  
+  auto parent = getParent();
+  while (parent->hasParent())
+  {
+    parent = parent->getParent();
+    level++;
+  }
+  
+  return level;
 }
 
 void DisplayObject::addChild(shared_ptr<DisplayObject> child)
@@ -545,7 +551,7 @@ void DisplayObject::_removeKeyEventListeners()
 
 void DisplayObject::_updateHandler(ofEventArgs &e)
 {
-  update();
+  update(ofGetElapsedTimef(), ofGetLastFrameTime());
 }
 
 void DisplayObject::_drawHandler(ofEventArgs &e)

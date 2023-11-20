@@ -62,6 +62,7 @@ void Draggable::_mousePressed(const ofMouseEventArgs & e)
   DisplayObject::_mousePressed(e);
   
   _lastDragPosition = e;
+  _pressedOffset = globalToLocal(e);
   _isDragging = true;
 }
 
@@ -69,44 +70,16 @@ void Draggable::_mouseDragged(const ofMouseEventArgs & e)
 {
   DisplayObject::_mouseDragged(e);
   
-  DraggableEventArgs event;
-  event.type = e.type;
-  event.button = e.button;
-  event.x = e.x;
-  event.y = e.y;
-  event.modifiers = e.modifiers;
-
-  glm::vec2 delta = e - _lastDragPosition;
-  event.delta = delta;
-  
-  if (_ignoreX) delta.x = 0;
-  if (_ignoreY) delta.y = 0;
-  ofRectangle potentialRect = this->getRect();
-  potentialRect.translate(delta);
-
-  float epsilon = 0.5f;
-  if (_isDragging && potentialRect.getLeft() >= _dragBounds.getLeft() - epsilon && potentialRect.getRight() <= _dragBounds.getRight() + epsilon && potentialRect.getTop() >= _dragBounds.getTop() - epsilon && potentialRect.getBottom() <= _dragBounds.getBottom() + epsilon)
-  {
-    this->translate(delta);
-
-    _onDrag(e, event);
-    onDragE.notify(this, event);
-  }
-
-  _lastDragPosition = e;
-}
-
-void Draggable::_update()
-{
-//  DisplayObject::_update();
-//
-//  ofLogNotice(_getLogModule()) << "Update!";
-//
-//  ofMouseEventArgs e(ofMouseEventArgs::Dragged, ofGetMouseX(), ofGetMouseY(), OF_MOUSE_BUTTON_LEFT);
-//
-//  if (!ofGetCurrentViewport().inside(e)) return;
+//  DraggableEventArgs event;
+//  event.type = e.type;
+//  event.button = e.button;
+//  event.x = e.x;
+//  event.y = e.y;
+//  event.modifiers = e.modifiers;
 //
 //  glm::vec2 delta = e - _lastDragPosition;
+//  event.delta = delta;
+//
 //  if (_ignoreX) delta.x = 0;
 //  if (_ignoreY) delta.y = 0;
 //  ofRectangle potentialRect = this->getRect();
@@ -117,13 +90,43 @@ void Draggable::_update()
 //  {
 //    this->translate(delta);
 //
-//    _onDrag(e, delta);
-//    onDragE.notify(this, delta);
-//
-//    _lastDragPosition = e;
+//    _onDrag(e, event);
+//    onDragE.notify(this, event);
 //  }
 //
-//
+//  _lastDragPosition = e;
+}
+
+void Draggable::_update(float time, float deltaTime)
+{
+  DisplayObject::_update(time, deltaTime);
+
+  glm::vec2 localMouse = globalToLocal(glm::vec2(ofGetMouseX(), ofGetMouseY()));
+  ofMouseEventArgs e(ofMouseEventArgs::Dragged, localMouse.x, localMouse.y, OF_MOUSE_BUTTON_LEFT);
+
+  if (!ofGetCurrentViewport().inside(e)) return;
+
+  glm::vec2 delta = e - _lastDragPosition;
+  if (_ignoreX) delta.x = 0;
+  if (_ignoreY) delta.y = 0;
+  ofRectangle potentialRect = this->getRect();
+//  potentialRect.translate(delta);
+  
+  if (!_ignoreX) potentialRect.setX(e.x - _pressedOffset.x);
+  if (!_ignoreY) potentialRect.setY(e.y - _pressedOffset.y);
+  
+  cout << "Mouse down: " << _isMouseDown << " Delta: " << delta << " New position: " << e - _pressedOffset << endl;
+
+  float epsilon = 0.5f;
+  if (_isMouseDown && potentialRect.getLeft() >= _dragBounds.getLeft() - epsilon && potentialRect.getRight() <= _dragBounds.getRight() + epsilon && potentialRect.getTop() >= _dragBounds.getTop() - epsilon && potentialRect.getBottom() <= _dragBounds.getBottom() + epsilon)
+  {
+    this->translate(delta);
+
+    _onDrag(e, delta);
+//    onDragE.notify(this, delta);
+  }
+  
+  _lastDragPosition = e;
 }
 
 }}
