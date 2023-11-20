@@ -23,6 +23,9 @@ public:
   
   static shared_ptr<Checkbox> create(ofParameter<bool> & param) { return make_shared<Checkbox>(param); }
   
+  virtual bool hasParameter() const override { return true; }
+  virtual ofParameter<bool> & getParameter() { return parameter; }
+  
 protected:
   virtual string _getModule() const override { return "Checkbox"; };
   
@@ -39,6 +42,10 @@ protected:
     outerRing.circle(0, 0, 12 * 0.5);
     outerRing.circle(0, 0, 10 * 0.5);
     outerRing.setFillColor(style->accentColor);
+    
+    onParameterTrigger = parameter.newListener([this](bool & param) {
+      Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
+    });
     
     innerAnimation = parameter.get();
   };
@@ -87,8 +94,6 @@ protected:
     View::_mousePressed(e);
     
     parameter.set(!parameter.get());
-    
-    Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
   }
   
   // Members

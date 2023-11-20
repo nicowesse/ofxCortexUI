@@ -245,7 +245,7 @@ void DisplayObject::draw()
     
     if (_doDrawChildren) _drawChildren();
     
-    if (_useMask) Stencil::stopUsingMask();
+    if (_useMask) Stencil::endUsingMask();
   }
   ofPopMatrix();
 }

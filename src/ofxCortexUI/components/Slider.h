@@ -51,6 +51,9 @@ public:
   void drawSlider();
   void drawZero();
   
+  virtual bool hasParameter() const override { return true; }
+  virtual ofParameter<T> & getParameter() { return parameter; }
+  
 protected:
   virtual string _getModule() const override { return "Slider"; };
   

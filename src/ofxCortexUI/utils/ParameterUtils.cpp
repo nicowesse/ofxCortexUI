@@ -6,6 +6,7 @@
 #include "ofxCortexUI/components/Checkbox.h"
 
 #include "ofxCortex/types/Range.h"
+#include "ofxCortex/types/Spacer.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -61,6 +62,11 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
     views.push_back(RangeSlider::create(param.cast<ofxCortex::core::types::Range>()));
+  }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::Spacer>).name())
+  {
+    auto view = View::create();
+    views.push_back(view);
   }
   else
   {

@@ -34,6 +34,10 @@ public:
   void setFocused();
   void removeFocus();
   bool hasFocus() { return (this == _focused.get()); }
+  static shared_ptr<View> getFocused() { return _focused; }
+  
+#pragma mark - Parameter
+  virtual bool hasParameter() const { return false; }
   
 protected:
   static shared_ptr<View> _focused;
