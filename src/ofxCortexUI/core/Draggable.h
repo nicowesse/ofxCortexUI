@@ -33,7 +33,7 @@ public:
 protected:
   virtual string _getModule() const override { return "Draggable"; };
   
-  virtual void _update() override;
+  virtual void _update(float time, float delta) override;
   virtual void _debug() override;
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override;
@@ -48,6 +48,7 @@ protected:
   bool _ignoreX { false };
   bool _ignoreY { false };
   glm::vec2 _lastDragPosition;
+  glm::vec2 _pressedOffset;
 };
 
 }}

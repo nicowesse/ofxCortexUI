@@ -52,7 +52,7 @@ protected:
   
   virtual void _draw() override;
   virtual void _drawFocusOutline();
-  virtual void _update() override;
+  virtual void _update(float time, float delta) override;
   virtual void _adjustLayout() override;
   virtual void _debug() override;
   

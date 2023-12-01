@@ -31,7 +31,13 @@ namespace ofxCortex { namespace ui {
     ofxCortex::core::UUID _uuid;
     
     virtual string _getModule() const { return "DisplayObject"; }
-    string _getLogModule() const { return _getModule() + "(\"" + getPrettyID() + "\")"; }
+    string _getLogModule() const {
+      stringstream ss;
+      for (int i = 0; i < getLevel(); i++) ss << "-";
+      ss << _getModule() + "(\"" + getPrettyID() + "\")";
+      
+      return ss.str();
+    }
     
     
     
@@ -116,7 +122,6 @@ namespace ofxCortex { namespace ui {
     
     virtual void draw();
     
-    virtual void update();
     virtual void update(float time, float delta);
     
     void debug(bool debugChildren = false);
@@ -141,7 +146,6 @@ namespace ofxCortex { namespace ui {
     virtual void _drawChildren();
     virtual void _drawMask();
     
-    virtual void _update();
     virtual void _update(float time, float deltaTime);
     
     virtual void _adjustLayout();
@@ -181,6 +185,8 @@ namespace ofxCortex { namespace ui {
     
     void setParent(shared_ptr<DisplayObject> parent) { _parent = parent; }
     bool hasParent() const { return _parent != nullptr; }
+    
+    int getLevel() const;
     
     // Children
     vector<shared_ptr<DisplayObject>> children(bool recursive = false) const;

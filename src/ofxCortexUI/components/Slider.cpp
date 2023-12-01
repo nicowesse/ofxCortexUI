@@ -6,6 +6,8 @@ void Handle::drawHandle(ofFloatColor acc, ofFloatColor bg, float diameter)
 {
   ofPushStyle();
   {
+    ofDrawRectangle(getRect());
+    
     ofSetColor(bg);
     ofDrawCircle(getRect().getCenter(), (diameter + 4) * 0.5);
     
@@ -39,7 +41,7 @@ void Slider<T>::drawSlider()
     
     ofFill();
     if (parameter.getMin() < 0.0) this->drawZero();
-    handle->drawHandle(ofFloatColor(style->accentColor * _handleOpacity), ofFloatColor(style->backgroundColor * _handleOpacity), 6.0 + (2.0 * _handleOpacity));
+    handle->drawHandle(ofFloatColor(style->accentColor), ofFloatColor(style->backgroundColor), 6.0);
   }
   ofPopStyle();
 }
@@ -98,9 +100,9 @@ void Slider<T>::_init()
 }
 
 template<typename T>
-void Slider<T>::_update()
+void Slider<T>::_update(float time, float delta)
 {
-  DisplayObject::_update();
+  DisplayObject::_update(time, delta);
   
   if (!_isMousePressedInside) _handleOpacity = ofClamp(_handleOpacity - _deltaTime, 0.7, 1.0);
 }

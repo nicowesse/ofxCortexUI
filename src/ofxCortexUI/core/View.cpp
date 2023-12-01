@@ -109,9 +109,9 @@ void View::_drawFocusOutline()
   ofPopStyle();
 }
 
-void View::_update()
+void View::_update(float time, float delta)
 {
-  
+  DisplayObject::_update(time, delta);
 }
 
 void View::_adjustLayout()

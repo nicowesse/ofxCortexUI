@@ -142,9 +142,9 @@ void RangeSlider::_init()
   _adjustLayout();
 }
 
-void RangeSlider::_update()
+void RangeSlider::_update(float time, float delta)
 {
-  DisplayObject::_update();
+  DisplayObject::_update(time, delta);
 }
 
 void RangeSlider::_draw()
