@@ -52,6 +52,11 @@ protected:
     ofPopStyle();
   }
   
+  virtual void _postDraw() override
+  {
+    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
+  }
+  
   ofParameter<std::string> parameter;
 };
 

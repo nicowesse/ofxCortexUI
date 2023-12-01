@@ -9,11 +9,19 @@ namespace ofxCortex { namespace ui {
 
 class LayoutHelpers {
 public:
-  enum Axis {
+  enum class Axis {
     HORIZONTAL, VERTICAL
   };
   
-  enum Distribution {
+  static std::string getAxisString(const Axis & axis)
+  {
+    switch (axis) {
+      case Axis::HORIZONTAL: return "HORIZONTAL";
+      case Axis::VERTICAL: return "VERTICAL";
+    }
+  }
+  
+  enum class Distribution {
     STACK,
     FILL,
     FILL_EQUALLY,
@@ -22,12 +30,34 @@ public:
     EQUAL_CENTERING
   };
   
-  enum Alignment {
+  static std::string getDistributionString(const Distribution & distribution)
+  {
+    switch (distribution) {
+      case Distribution::STACK: return "STACK";
+      case Distribution::FILL: return "FILL";
+      case Distribution::FILL_EQUALLY: return "FILL_EQUALLY";
+      case Distribution::FILL_PROPORTIONAL: return "FILL_PROPORTIONAL";
+      case Distribution::EQUAL_SPACING: return "EQUAL_SPACING";
+      case Distribution::EQUAL_CENTERING: return "EQUAL_CENTERING";
+    }
+  }
+  
+  enum class Alignment {
     FILL_SPACE,
     LEADING,
     CENTER,
     TRAILING,
   };
+  
+  static std::string getAlignmentString(const Alignment & alignment)
+  {
+    switch (alignment) {
+      case Alignment::FILL_SPACE: return "FILL_SPACE";
+      case Alignment::LEADING: return "LEADING";
+      case Alignment::CENTER: return "CENTER";
+      case Alignment::TRAILING: return "TRAILING";
+    }
+  }
   
   static std::vector<kiwi::Constraint> fillWindow(std::shared_ptr<View> view)
   {
@@ -80,7 +110,7 @@ public:
   static std::vector<kiwi::Constraint> distribute(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis, Distribution distribution)
   {
     std::vector<kiwi::Constraint> constraints;
-    if (axis == Axis::HORIZONTAL)
+    if (axis == Axis::VERTICAL)
     {
       if (distribution == Distribution::FILL_EQUALLY)
       {
@@ -126,7 +156,7 @@ public:
         constraints.insert(std::end(constraints), std::begin(attachmentConstraints), std::end(attachmentConstraints));
       }
     }
-    else if (axis == Axis::VERTICAL)
+    else if (axis == Axis::HORIZONTAL)
     {
       if (distribution == Distribution::FILL_EQUALLY)
       {
@@ -197,16 +227,45 @@ public:
   static std::vector<kiwi::Constraint> equalSpacing(std::vector<std::shared_ptr<View>> views, Axis axis)
   {
     std::vector<kiwi::Constraint> constraints;
+    std::vector<std::shared_ptr<Spacer>> spacers;
     if (axis == Axis::HORIZONTAL)
     {
-      LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
-        constraints.push_back({ next->left >= current->right | kiwi::strength::strong });
+      for (int i = 0; i < views.size() - 1; i++)
+      {
+        auto spacer = Spacer::create();
+        const auto & current = views[i];
+        const auto & next = views[i + 1];
+        
+        constraints.push_back({ current->right == spacer->left | kiwi::strength::strong });
+        constraints.push_back({ next->left == spacer->right | kiwi::strength::strong });
+        constraints.push_back({ current->height == spacer->height | kiwi::strength::strong });
+        
+        spacers.push_back(spacer);
+        allSpacers.push_back(spacer);
+      }
+      
+      LayoutHelpers::for_each_pair(std::begin(spacers), std::end(spacers), [&](std::shared_ptr<Spacer> current, std::shared_ptr<Spacer> next) {
+        constraints.push_back({ next->height == current->height | kiwi::strength::strong });
       });
     }
     else if (axis == Axis::VERTICAL)
     {
-      LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
-        constraints.push_back({ next->top >= current->bottom | kiwi::strength::strong });
+      for (int i = 0; i < views.size() - 1; i++)
+      {
+        auto spacer = Spacer::create();
+        const auto & current = views[i];
+        const auto & next = views[i + 1];
+        
+        constraints.push_back({ current->bottom == spacer->top | kiwi::strength::strong });
+        constraints.push_back({ next->top == spacer->bottom | kiwi::strength::strong });
+        constraints.push_back({ current->width == spacer->width | kiwi::strength::strong });
+        
+        spacers.push_back(spacer);
+        allSpacers.push_back(spacer);
+      }
+      
+      LayoutHelpers::for_each_pair(std::begin(spacers), std::end(spacers), [&](std::shared_ptr<Spacer> current, std::shared_ptr<Spacer> next) {
+        constraints.push_back({ next->width == current->width | kiwi::strength::strong });
       });
     }
     
@@ -363,13 +422,13 @@ public:
   {
     std::vector<kiwi::Constraint> constraints;
     for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
-      if (alignment == FILL_SPACE) {
+      if (alignment == Alignment::FILL_SPACE) {
         constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
         constraints.push_back({ current->bottom == outer->content_bottom | kiwi::strength::strong });
       }
-      else if (alignment == LEADING) constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
-      else if (alignment == CENTER) constraints.push_back({ current->centerY == outer->content_centerY | kiwi::strength::strong });
-      else if (alignment == TRAILING) constraints.push_back({ current->bottom == outer->content_bottom | kiwi::strength::strong });
+      else if (alignment == Alignment::LEADING) constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
+      else if (alignment == Alignment::CENTER) constraints.push_back({ current->centerY == outer->content_centerY | kiwi::strength::strong });
+      else if (alignment == Alignment::TRAILING) constraints.push_back({ current->bottom == outer->content_bottom | kiwi::strength::strong });
       else constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
     });
     return constraints;
@@ -379,17 +438,51 @@ public:
   {
     std::vector<kiwi::Constraint> constraints;
     for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
-      if (alignment == FILL_SPACE) {
+      if (alignment == Alignment::FILL_SPACE) {
         constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
         constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });
       }
-      else if (alignment == LEADING) constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
-      else if (alignment == CENTER) constraints.push_back({ current->centerX == outer->content_centerX | kiwi::strength::strong });
-      else if (alignment == TRAILING) constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });
+      else if (alignment == Alignment::LEADING) constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
+      else if (alignment == Alignment::CENTER) constraints.push_back({ current->centerX == outer->content_centerX | kiwi::strength::strong });
+      else if (alignment == Alignment::TRAILING) constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });
       else constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
     });
+    
     return constraints;
   }
+  
+protected:
+  class Spacer {
+  public:
+    Spacer() {
+      LayoutEngine::addConstraints({
+        kiwi::Constraint { right >= left | kiwi::strength::required },
+        kiwi::Constraint { bottom >= top | kiwi::strength::required },
+        
+        kiwi::Constraint { width >= 0 | kiwi::strength::required },
+        kiwi::Constraint { height >= 0 | kiwi::strength::required },
+        kiwi::Constraint { right == left + width | kiwi::strength::required },
+        kiwi::Constraint { bottom == top + height | kiwi::strength::required },
+      });
+      
+      LayoutEngine::addEditVariable(left, kiwi::strength::weak);
+      LayoutEngine::addEditVariable(top, kiwi::strength::weak);
+      LayoutEngine::addEditVariable(width, kiwi::strength::weak);
+      LayoutEngine::addEditVariable(height, kiwi::strength::weak);
+    }
+    
+    static std::shared_ptr<Spacer> create() { return std::make_shared<Spacer>(); }
+    
+    kiwi::Variable left { "left" };
+    kiwi::Variable top { "top" };
+    
+    kiwi::Variable width { "width" };
+    kiwi::Variable height { "height" };
+    kiwi::Variable right { "right" };
+    kiwi::Variable bottom { "bottom" };
+  };
+  
+  inline static std::vector<std::shared_ptr<Spacer>> allSpacers;
   
 #pragma mark - Private Helpers
 private:

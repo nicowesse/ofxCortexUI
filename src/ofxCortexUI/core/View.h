@@ -28,10 +28,12 @@ public:
   void draw();
   void enableSubviewRendering() { _shouldDrawSubviews = true; }
   void disableSubviewRendering() { _shouldDrawSubviews = false; }
+  
   void enableMask() { _enableMask = true; }
   void disableMask() { _enableMask = false; }
-  void enableDebug() { _debugBounds = true; }
-  void disableDebug() { _debugBounds = false; }
+  
+  void enableDebug() { _enableDebug = true; }
+  void disableDebug() { _enableDebug = false; }
   
   
 #pragma mark - OBJECT: Initalizsations and Loops
@@ -41,9 +43,13 @@ protected:
   virtual void _preDraw();
   virtual void _draw();
   virtual void _postDraw();
+  
   virtual void _drawMask();
   bool _enableMask { false };
-  bool _debugBounds { false };
+  
+  virtual void _debug();
+  bool _enableDebug { false };
+  
   virtual void _drawSubviews();
   bool _shouldDrawSubviews { true };
   
@@ -474,6 +480,7 @@ protected:
   virtual void _windowResized(ofResizeEventArgs &e) {
 //    ofLogNotice(_getLogModule(__FUNCTION__)) << "Scale = " << Styling::getScale() << " Row height: " << Styling::defaultRowHeight().value() * Styling::getScale();
     this->setIntrinsicHeight(Styling::getRowHeight());
+    LayoutEngine::setNeedsSolve();
   }
 };
 

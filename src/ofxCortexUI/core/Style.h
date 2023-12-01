@@ -91,11 +91,13 @@ public:
     switch (state) {
       case ACTIVE: return getAccentColor(); break;
       case FOCUS: return get().borderColorFocused; break;
-//      case HOVER: get().borderColorHover; break;
+        //      case HOVER: get().borderColorHover; break;
       case IDLE:
       default: return get().borderColor; break;
     }
   }
+  
+  static float getDotSize() { return getScaled(3); }
   
   static void drawBackground(const ofRectangle & bounds, State mouseState = IDLE) {
     return drawBackground(bounds, getBackgroundColor(mouseState), getBorderColor(mouseState));
@@ -108,21 +110,22 @@ public:
       ofFill();
       ofDrawRectRounded(bounds, 6 * Styling::getScale());
       
-//      ofSetColor(borderColor);
-//      ofNoFill();
-//    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
-//      ofDrawRectRounded(bounds, 6 * Styling::getScale());
+      //      ofSetColor(borderColor);
+      //      ofNoFill();
+      //    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
+      //      ofDrawRectRounded(bounds, 6 * Styling::getScale());
     }
     ofPopStyle();
   }
   
   static void drawFocusBorder(const ofRectangle & bounds)
   {
+    ofRectangle scaledBounds; scaledBounds.setFromCenter(bounds.getCenter(), bounds.width - 2, bounds.height - 2);
     ofPushStyle();
     {
       ofSetColor(get().borderColorFocused);
       ofNoFill();
-      ofDrawRectRounded(bounds, 6 * Styling::getScale());
+      ofDrawRectRounded(scaledBounds, Styling::getScaled(6));
     }
     ofPopStyle();
   }
@@ -134,12 +137,12 @@ public:
     {
       ofSetColor(fillColor);
       ofFill();
-      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
+      ofDrawRectRounded(bounds, Styling::getScaled(6));
       
-//      ofSetColor(borderColor);
-//      ofNoFill();
-//    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
-//      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
+      //      ofSetColor(borderColor);
+      //      ofNoFill();
+      //    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
+      //      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
     }
     ofPopStyle();
   }
@@ -240,6 +243,7 @@ public:
   static Styling::Font getValueFont() { return get().fonts.valueFont; }
   
   static float getScale() { return get().scale; }
+  static float getScaled(float x = 1.0) { return x * get().scale; }
   
 private:
   
@@ -264,7 +268,7 @@ private:
     LayoutEngine::addEditVariable(padding_left, kiwi::strength::strong);
     LayoutEngine::addEditVariable(padding_bottom, kiwi::strength::strong);
     LayoutEngine::addEditVariable(padding_right, kiwi::strength::strong);
-
+    
     LayoutEngine::suggestValue(padding_top, initialPadding);
     LayoutEngine::suggestValue(padding_left, initialPadding);
     LayoutEngine::suggestValue(padding_bottom, initialPadding);
@@ -277,12 +281,12 @@ private:
     LayoutEngine::suggestValue(spacing_y, initialSpacing);
     
     _loadFonts(scale);
-//
-//    LayoutEngine::forceSolve();
-//    ofResizeEventArgs e;
-//    e.width = ofGetWidth();
-//    e.height = ofGetHeight();
-//    _onWindowResized(e);
+    //
+    //    LayoutEngine::forceSolve();
+    //    ofResizeEventArgs e;
+    //    e.width = ofGetWidth();
+    //    e.height = ofGetHeight();
+    //    _onWindowResized(e);
   };
   
   ~Styling() {
@@ -306,7 +310,7 @@ private:
     LayoutEngine::suggestValue(margin_left, initialMargin);
     LayoutEngine::suggestValue(margin_bottom, initialMargin);
     LayoutEngine::suggestValue(margin_right, initialMargin);
-
+    
     double initialPadding = 6 * scale;
     LayoutEngine::suggestValue(padding_top, initialPadding);
     LayoutEngine::suggestValue(padding_left, initialPadding);
@@ -321,7 +325,7 @@ private:
     
     LayoutEngine::forceSolve();
     
-//    std::cout << "Padding Right: " << padding_right.value() << std::endl;
+    //    std::cout << "Padding Right: " << padding_right.value() << std::endl;
   }
   
   float scale;
@@ -362,23 +366,23 @@ private:
   
   void _loadFonts(float scale)
   {
-    std::string labelPath = "fonts/SF-Pro-Text-Regular.otf";
+    std::string labelPath = "assets/fonts/SF-Pro-Text-Regular.otf";
     if (!ofFile::doesFileExist(labelPath)) labelPath = OF_TTF_MONO;
     ofTrueTypeFontSettings labelSettings(labelPath, 8 * scale);
     labelSettings.antialiased = true;
     labelSettings.contours = true;
+    labelSettings.addRanges(ofAlphabet::Latin);
     labelSettings.addRanges({
-      ofUnicode::Latin1Supplement,
       ofUnicode::Arrows
     });
     fonts.labelFont.load(labelSettings);
     fonts.labelFont.dimensions = ofRectangle(0, 0, fonts.labelFont.stringWidth("M"), fonts.labelFont.stringHeight("X"));
     
-    ofTrueTypeFontSettings valueSettings("fonts/SF-Mono-Medium.otf", 8 * scale);
+    ofTrueTypeFontSettings valueSettings("assets/fonts/SF-Mono-Medium.otf", 8 * scale);
     valueSettings.antialiased = true;
     valueSettings.contours = true;
+    valueSettings.addRanges(ofAlphabet::Latin);
     valueSettings.addRanges({
-      ofUnicode::Latin1Supplement,
       ofUnicode::Arrows
     });
     fonts.valueFont.load(valueSettings);

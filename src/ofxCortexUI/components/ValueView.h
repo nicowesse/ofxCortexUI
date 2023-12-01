@@ -52,6 +52,8 @@ protected:
     ofxCortex::ui::Styling::drawValue(_getFormattedString(), b);
   }
   
+  virtual void _postDraw() override { if (_isFocused()) Styling::drawFocusBorder(this->getBounds()); }
+  
   std::string _getFormattedString()
   {
     std::stringstream ss;

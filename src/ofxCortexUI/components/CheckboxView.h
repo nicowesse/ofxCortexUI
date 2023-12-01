@@ -38,6 +38,11 @@ protected:
     _drawCheckbox();
   }
   
+  virtual void _postDraw() override
+  {
+    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
+  }
+  
   virtual void _drawCheckbox()
   {
     const auto & rect = this->getContentBounds();

@@ -31,6 +31,7 @@ protected:
   
   
   virtual void _draw() override;
+  virtual void _postDraw() override { if (_isFocused()) Styling::drawFocusBorder(this->getBounds()); }
   void _drawSlider();
   void _drawZero();
   void _drawDot();

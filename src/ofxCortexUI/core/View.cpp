@@ -166,21 +166,11 @@ void View::_postDraw()
   if (_isFocused())
   {
     ofPushStyle();
-    Styling::drawBackground(getBounds(), ofColor(0, 0), Styling::getBorderColor(Styling::State::FOCUS));
+    Styling::drawFocusBorder(getBounds());
     ofPopStyle();
   }
   
-  if (_debugBounds)
-  {
-    ofPushStyle();
-    ofNoFill();
-    ofSetColor(ofColor::red);
-    ofDrawRectangle(this->getBounds());
-    
-    ofSetColor(ofColor::red, 128);
-//    ofDrawRectangle(this->getContentBounds());
-    ofPopStyle();
-  }
+  if (_enableDebug) { _debug(); }
 }
 
 void View::_drawMask()
@@ -191,6 +181,18 @@ void View::_drawMask()
 void View::_drawSubviews()
 {
   for (auto & view : subviews) view->draw();
+}
+
+void View::_debug()
+{
+  ofPushStyle();
+  ofNoFill();
+  ofSetColor(ofColor::red);
+  ofDrawRectangle(this->getBounds());
+  
+  ofSetColor(ofColor::green, 128);
+  ofDrawRectangle(this->getContentBounds());
+  ofPopStyle();
 }
 
 void View::setNeedsLayout(bool affectSubviews) {

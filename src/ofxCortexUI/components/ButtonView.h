@@ -46,6 +46,11 @@ protected:
     Styling::drawLabel(parameter.getName(), this->getContentBounds(), OF_ALIGN_HORZ_CENTER);
   }
   
+  virtual void _postDraw() override
+  {
+    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
+  }
+  
   virtual void _mousePressed(const MouseEventArgs & e) override
   {
     View::_mousePressed(e);

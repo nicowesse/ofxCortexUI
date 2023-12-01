@@ -9,7 +9,7 @@ namespace ofxCortex { namespace ui {
 class LayoutEngine {
 public:
   static void addConstraint(const kiwi::Constraint& constraint) { get().solver.addConstraint(constraint); }
-  static void addConstraints(std::vector<kiwi::Constraint>& constraints) { for (auto & constraint : constraints) get().addConstraint(constraint); }
+  static void addConstraints(const std::vector<kiwi::Constraint>& constraints) { for (auto & constraint : constraints) get().addConstraint(constraint); }
   
   static void removeConstraint(const kiwi::Constraint& constraint) { if (get().solver.hasConstraint(constraint)) get().solver.removeConstraint(constraint); }
   static void removeConstraints(const std::vector<kiwi::Constraint> & constraints) { for (auto & constraint : constraints) get().removeConstraint(constraint); }

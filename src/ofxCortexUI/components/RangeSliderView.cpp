@@ -21,7 +21,7 @@ void RangeSliderView::Bar::_update(double time, double delta)
 void RangeSliderView::Bar::_draw()
 {
   auto BB = this->getBounds();
-  BB.setFromCenter(BB.getCenter(), BB.width, MIN(24 * Styling::getScale(), BB.height));
+  BB.setFromCenter(BB.getCenter(), BB.width, MIN(Styling::getDotSize() * 2 * 4, BB.height));
   const float & scale = Styling::getScale();
   float borderRadius = BB.height * 0.5;
   ofPushStyle();
@@ -36,7 +36,7 @@ void RangeSliderView::Bar::_draw()
   ofSetColor(ofxCortex::ui::Styling::getForegroundColor(), ofMap(getHoverIntensity() + getActiveIntensity(), 0, 2, 128, 255));
   if (_enableX)
   {
-    float circleRadius = MIN(borderRadius * 0.5 * 0.75, 6 * Styling::getScale());
+    float circleRadius = MIN(borderRadius * 0.5 * 0.75, Styling::getDotSize());
     ofDrawCircle(BB.getLeft() + borderRadius, BB.getCenter().y, circleRadius);
     ofDrawCircle(BB.getRight() - borderRadius, BB.getCenter().y, circleRadius);
   }

@@ -31,7 +31,7 @@ public:
   
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
   {
-    ofLogNotice(_getLogModule(__FUNCTION__));
+//    ofLogNotice(_getLogModule(__FUNCTION__));
     
     wrapper->addSubviewAt(subview, index);
     stackViews.push_back(subview);
@@ -68,7 +68,7 @@ protected:
     wrapper->enableSubviewRendering();
     View::addSubviewAt(wrapper, subviews.size());
     
-    ofLogNotice(_getLogModule(__FUNCTION__)) << "ADD SUBVIEWS";
+//    ofLogNotice(_getLogModule(__FUNCTION__)) << "ADD SUBVIEWS";
     this->addSubviews(views);
     
 
@@ -80,6 +80,8 @@ protected:
     });
     
     this->setIntrinsicHeight(Styling::getRowHeight() * 5);
+    
+    ofLogNotice(_getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' | Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "' | Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
   }
   
   virtual void _update(double time, double delta) override
@@ -92,14 +94,17 @@ protected:
   virtual void _updateConstraints() override
   {
     ofLogNotice(_getLogModule(__FUNCTION__)) << "StackViews Size = " << stackViews.size();
+    
+    if (stackViews.size() == 0) return;
+    
     // Reset Constraints
     this->removeConstraints(stackConstraints);
     stackConstraints.clear();
     
-    std::vector<kiwi::Constraint> constraints;
     auto alignmentConstraints = LayoutHelpers::alignment(wrapper, stackViews, this->axis, this->alignment);
     auto distributeConstraints = LayoutHelpers::distribute(wrapper, stackViews, this->axis, this->distribution);
     
+    std::vector<kiwi::Constraint> constraints;
     ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
     ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
     
@@ -108,8 +113,6 @@ protected:
     this->addConstraints(constraints);
     stackConstraints = constraints;
   }
-  
-  
   
   virtual void _preDraw() override
   {
@@ -123,6 +126,9 @@ protected:
   virtual void _postDraw() override {
 
     ofPushStyle();
+    
+    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
+    
     if (wrapper->getHeight() > this->getHeight())
     {
       float scrollbarAvailableHeight = this->getContentHeight();
@@ -167,7 +173,7 @@ protected:
     
     virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
     {
-      ofLogNotice(_getLogModule(__FUNCTION__));
+//      ofLogNotice(_getLogModule(__FUNCTION__));
       
       subview->setParent(this->getParent());
       subview->setLevel(this->level + 1);

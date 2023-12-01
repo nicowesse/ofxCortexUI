@@ -74,10 +74,10 @@ void SliderView<T>::_drawDot()
   
   ofPushStyle();
   ofSetColor(Styling::getForegroundColor());
-  ofDrawCircle(x, BB.getCenter().y, 3 * Styling::getScale());
+  ofDrawCircle(x, BB.getCenter().y, Styling::getDotSize());
   
   ofSetColor(Styling::getAccentColor());
-  ofDrawCircle(x, BB.getCenter().y, 1.5 * getHoverIntensity() + 1 * getActiveIntensity() * Styling::getScale());
+  ofDrawCircle(x, BB.getCenter().y, Styling::getDotSize() * 0.5 * getHoverIntensity() + 1 * getActiveIntensity() * Styling::getScale());
   ofPopStyle();
 }
 
@@ -118,7 +118,7 @@ void SliderView<T>::_mouseScrolled(const MouseEventArgs & e)
     else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
     else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
     
-    parameter -= e.scrollX * delta;
+    parameter += e.scrollX * delta;
   }
 }
 
