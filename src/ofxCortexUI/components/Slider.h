@@ -42,6 +42,8 @@ public:
     this->disableChildRendering();
   };
   
+  ~Slider() { _getShader().unload(); }
+  
   static shared_ptr<Slider<T>> create(ofParameter<T> param) {
     auto ptr = make_shared<Slider<T>>(param);
     ptr->_init();
