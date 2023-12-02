@@ -6,7 +6,7 @@ void Handle::drawHandle(ofFloatColor acc, ofFloatColor bg, float diameter)
 {
   ofPushStyle();
   {
-    ofDrawRectangle(getRect());
+//    ofDrawRectangle(getRect());
     
     ofSetColor(bg);
     ofDrawCircle(getRect().getCenter(), (diameter + 4) * 0.5);
