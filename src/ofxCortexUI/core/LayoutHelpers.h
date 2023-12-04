@@ -114,7 +114,7 @@ public:
     {
       if (distribution == Distribution::FILL_EQUALLY)
       {
-        auto equalWidthConstraints = equalWidth(views);
+        auto equalWidthConstraints = equalHeight(views);
         constraints.insert(std::end(constraints), std::begin(equalWidthConstraints), std::end(equalWidthConstraints));
         
         auto attachmentConstraints = attachEnds(outer, views, axis);
@@ -160,7 +160,7 @@ public:
     {
       if (distribution == Distribution::FILL_EQUALLY)
       {
-        auto equalWidthConstraints = equalHeight(views);
+        auto equalWidthConstraints = equalWidth(views);
         constraints.insert(std::end(constraints), std::begin(equalWidthConstraints), std::end(equalWidthConstraints));
         
         auto attachmentConstraints = attachEnds(outer, views, axis);
@@ -238,7 +238,7 @@ public:
         
         constraints.push_back({ current->right == spacer->left | kiwi::strength::strong });
         constraints.push_back({ next->left == spacer->right | kiwi::strength::strong });
-        constraints.push_back({ current->height == spacer->height | kiwi::strength::strong });
+//        constraints.push_back({ current->height == spacer->height | kiwi::strength::strong });
         
         spacers.push_back(spacer);
         allSpacers.push_back(spacer);
@@ -258,14 +258,14 @@ public:
         
         constraints.push_back({ current->bottom == spacer->top | kiwi::strength::strong });
         constraints.push_back({ next->top == spacer->bottom | kiwi::strength::strong });
-        constraints.push_back({ current->width == spacer->width | kiwi::strength::strong });
+//        constraints.push_back({ current->width == spacer->width | kiwi::strength::strong });
         
         spacers.push_back(spacer);
         allSpacers.push_back(spacer);
       }
       
       LayoutHelpers::for_each_pair(std::begin(spacers), std::end(spacers), [&](std::shared_ptr<Spacer> current, std::shared_ptr<Spacer> next) {
-        constraints.push_back({ next->width == current->width | kiwi::strength::strong });
+        constraints.push_back({ current->height == next->height | kiwi::strength::strong });
       });
     }
     
@@ -399,13 +399,13 @@ public:
     if (axis == Axis::HORIZONTAL)
     {
       return std::vector<kiwi::Constraint>{
-        { outer->content_right == views.front()->right | kiwi::strength::strong }
+        { outer->content_right == views.back()->right | kiwi::strength::strong }
       };
     }
     else if (axis == Axis::VERTICAL)
     {
       return std::vector<kiwi::Constraint>{
-       { outer->content_bottom == views.front()->bottom | kiwi::strength::strong }
+       { outer->content_bottom == views.back()->bottom | kiwi::strength::strong }
      };
     }
   }

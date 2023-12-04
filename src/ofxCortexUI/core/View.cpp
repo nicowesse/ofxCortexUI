@@ -23,10 +23,10 @@ View::View(std::string name)
   });
     
   this->addConstraints({
-//    kiwi::Constraint { width == intrinsic_width | kiwi::strength::medium },
-//    kiwi::Constraint { height == intrinsic_height | kiwi::strength::medium },
-    kiwi::Constraint { width >= intrinsic_width | kiwi::strength::medium },
-    kiwi::Constraint { height >= intrinsic_height | kiwi::strength::medium },
+    kiwi::Constraint { width == intrinsic_width | kiwi::strength::medium },
+    kiwi::Constraint { height == intrinsic_height | kiwi::strength::medium },
+//    kiwi::Constraint { width >= intrinsic_width | kiwi::strength::medium },
+//    kiwi::Constraint { height >= intrinsic_height | kiwi::strength::medium },
 //    kiwi::Constraint { width <= intrinsic_width | kiwi::strength::weak },
 //    kiwi::Constraint { height <= intrinsic_height | kiwi::strength::weak }
   });
