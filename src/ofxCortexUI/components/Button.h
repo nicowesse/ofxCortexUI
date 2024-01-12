@@ -31,6 +31,9 @@ public:
   static shared_ptr<Button> create(ofParameter<void> param) { return make_shared<Button>(param); }
   static shared_ptr<Button> create(string name, function<void()> func) { return make_shared<Button>(name, func); }
   
+  virtual bool hasParameter() const override { return true; }
+  virtual ofParameter<void> & getParameter() { return parameter; }
+  
 protected:
   virtual string _getModule() const override { return "Button"; };
   
@@ -40,7 +43,7 @@ protected:
     background->setName("Button::Background");
     background->disableEvents();
     
-    backgroundColor = style->backgroundColor;
+    backgroundColor = style->foregroundColor;
     
     label = ui::Label::create(parameter);
     label->setName("Button::Label");
@@ -65,14 +68,14 @@ protected:
   {
     View::_mouseEnter(e);
     
-    backgroundColor = style->foregroundColor;
+    backgroundColor = style->foregroundColor * 1.2;
   }
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override
   {
     View::_mousePressed(e);
     
-    backgroundColor *= 1.4;
+    backgroundColor = style->foregroundColor * 1.4;
     
     parameter.trigger();
   }
@@ -95,7 +98,7 @@ protected:
   {
     View::_mousePressed(e);
     
-    backgroundColor = style->backgroundColor;
+    backgroundColor = style->foregroundColor;
   }
   
   // Members

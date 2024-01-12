@@ -35,6 +35,8 @@ View* View::setWidthWithEvent(float width, bool adjustLayout)
   ofRectangle r = getRect();
   _onResize(r);
   onResizedE.notify(this, r);
+  
+  return this;
 }
 
 View* View::setHeightWithEvent(float width, bool adjustLayout)
@@ -44,6 +46,8 @@ View* View::setHeightWithEvent(float width, bool adjustLayout)
   ofRectangle r = getRect();
   _onResize(r);
   onResizedE.notify(this, r);
+  
+  return this;
 }
 
 View* View::setSizeWithEvent(glm::vec2 size, bool adjustLayout)
@@ -53,6 +57,8 @@ View* View::setSizeWithEvent(glm::vec2 size, bool adjustLayout)
   ofRectangle r = getRect();
   _onResize(r);
   onResizedE.notify(this, r);
+  
+  return this;
 }
 
 View* View::setSizeWithEvent(float width, float height, bool adjustLayout)
@@ -62,6 +68,8 @@ View* View::setSizeWithEvent(float width, float height, bool adjustLayout)
   ofRectangle r = getRect();
   _onResize(r);
   onResizedE.notify(this, r);
+  
+  return this;
 }
 
 View* View::setRectWithEvent(const ofRectangle & rect, bool adjustLayout)
@@ -71,6 +79,8 @@ View* View::setRectWithEvent(const ofRectangle & rect, bool adjustLayout)
   ofRectangle r = getRect();
   _onResize(r);
   onResizedE.notify(this, r);
+  
+  return this;
 }
 
 void View::setFocused()

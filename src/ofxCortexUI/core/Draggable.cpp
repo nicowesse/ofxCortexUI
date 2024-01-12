@@ -114,8 +114,6 @@ void Draggable::_update(float time, float deltaTime)
   
   if (!_ignoreX) potentialRect.setX(e.x - _pressedOffset.x);
   if (!_ignoreY) potentialRect.setY(e.y - _pressedOffset.y);
-  
-  cout << "Mouse down: " << _isMouseDown << " Delta: " << delta << " New position: " << e - _pressedOffset << endl;
 
   float epsilon = 0.5f;
   if (_isMouseDown && potentialRect.getLeft() >= _dragBounds.getLeft() - epsilon && potentialRect.getRight() <= _dragBounds.getRight() + epsilon && potentialRect.getTop() >= _dragBounds.getTop() - epsilon && potentialRect.getBottom() <= _dragBounds.getBottom() + epsilon)

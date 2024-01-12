@@ -54,7 +54,7 @@ common:
 
 	# some addons need resources to be copied to the bin/data folder of the project
 	# specify here any files that need to be copied, you can use wildcards like * and ?
-	# ADDON_DATA =
+	ADDON_DATA = data/assets/
 
 	# when parsing the file system looking for libraries exclude this for all or
 	# a specific platform
@@ -62,10 +62,7 @@ common:
 
 osx:
 	ADDON_INCLUDES = src
-	ADDON_DEPENDENCIES = ofxTweenzor ofxCortex
-	ADDON_DATA = data/assets/fonts
+	
 
 vs:
 	ADDON_INCLUDES = src
-	ADDON_DEPENDENCIES = ofxTweenzor ofxCortex
-	ADDON_DATA = data/assets/fonts

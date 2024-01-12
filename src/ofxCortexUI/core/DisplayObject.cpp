@@ -380,7 +380,7 @@ void DisplayObject::removeChild(shared_ptr<DisplayObject> child)
 
 void DisplayObject::removeChildAt(unsigned int index)
 {
-  if (index < 0 || index >= _children.size()) ofLogWarning("DisplayObject") << "Index is out of bounds. Returning.."; return;
+  if (index < 0 || index >= _children.size()) { ofLogWarning("DisplayObject") << "Index is out of bounds. Returning.."; return; }
   
   _children[index]->_setParent(nullptr);
   _children.erase(_children.begin() + index);
@@ -843,7 +843,7 @@ bool DisplayObject::_isInsideLocalRect(glm::vec2 pos)
 
 bool DisplayObject::_isHovering(glm::vec2 pos, bool isCovered)
 {
-  
+  return false;
 }
 
 bool DisplayObject::_isCovered(const glm::vec2 & pos)
@@ -852,6 +852,8 @@ bool DisplayObject::_isCovered(const glm::vec2 & pos)
   {
     if (child->isInsideRectangle(pos, true)) return true;
   }
+  
+  return false;
 }
 
 }}
