@@ -59,10 +59,12 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   {
     views.push_back(Button::create(param.cast<void>()));
   }
+#ifdef TARGET_OSX
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
     views.push_back(RangeSlider::create(param.cast<ofxCortex::core::types::Range>()));
   }
+#endif
   else if (type == typeid(ofParameter<ofxCortex::core::types::Spacer>).name())
   {
     auto view = View::create();

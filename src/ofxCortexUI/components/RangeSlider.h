@@ -1,12 +1,12 @@
 #pragma once
 
 #include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/Draggable.h"
+#include "ofxCortex/utils/Helpers.h"
 #include "ofxCortexUI/components/Background.h"
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortexUI/components/Value.h"
 #include "ofxCortexUI/components/Slider.h"
-#include "ofxCortexUI/core/Draggable.h"
-#include "ofxCortex/utils/Helpers.h"
 #include "ofxTweenzor.h"
 
 #define STRINGIFY(A) #A
@@ -63,7 +63,7 @@ protected:
   virtual void _debug() override;
   virtual void _adjustLayout() override;
   
-  virtual void _mousePressed(const ofMouseEventArgs & e) override;
+  virtual void _mousePressed(const ofMouseEventArgs& e) override;
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   
@@ -72,12 +72,12 @@ protected:
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;
   shared_ptr<ui::Value<ofxCortex::core::types::Range>> value;
-  shared_ptr<Handle> fromHandle;
-  shared_ptr<Handle> toHandle;
+  shared_ptr<ofxCortex::ui::Handle> fromHandle;
+  shared_ptr<ofxCortex::ui::Handle> toHandle;
   shared_ptr<Bar> bar;
   
-  shared_ptr<Handle> _getMinHandle() { return fromHandle; } //(fromHandle->getX() <= toHandle->getX()) ? fromHandle : toHandle; }
-  shared_ptr<Handle> _getMaxHandle() { return toHandle; } //(fromHandle->getX() > toHandle->getX()) ? fromHandle : toHandle; }
+  shared_ptr<ofxCortex::ui::Handle> _getMinHandle() { return fromHandle; } //(fromHandle->getX() <= toHandle->getX()) ? fromHandle : toHandle; }
+  shared_ptr<ofxCortex::ui::Handle> _getMaxHandle() { return toHandle; } //(fromHandle->getX() > toHandle->getX()) ? fromHandle : toHandle; }
   
 //  static ofShader & _getShader();
   

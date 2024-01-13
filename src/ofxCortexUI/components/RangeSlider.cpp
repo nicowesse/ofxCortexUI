@@ -39,10 +39,10 @@ void RangeSlider::drawSlider()
   {
     bar->drawBar(ofFloatColor(style->foregroundColor, 1.0), fromHandle->getWidth() + toHandle->getWidth() + 2);
     
-    Slider<float>::_getShader().begin();
-    Slider<float>::_getShader().setUniform1f("u_center", centerBulge);
+    //Slider<float>::_getShader().begin();
+    //Slider<float>::_getShader().setUniform1f("u_center", centerBulge);
     ofDrawPlane(rect.getCenter(), rect.width, 1);
-    Slider<float>::_getShader().end();
+    //Slider<float>::_getShader().end();
     
     if (parameter->min < 0.0) this->drawZero();
     fromHandle->drawHandle(style->accentColor, ofFloatColor(0, 0), 8);

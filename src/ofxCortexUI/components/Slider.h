@@ -6,7 +6,6 @@
 #include "ofxCortexUI/components/Background.h"
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortexUI/components/Value.h"
-#include "ofxCortexUI/components/RangeSlider.h"
 #include "ofxTweenzor.h"
 
 #define STRINGIFY(A) #A
@@ -82,8 +81,6 @@ protected:
   float _handleOpacity{1.0f};
   
   static ofShader & _getShader();
-  
-  friend class RangeSlider;
   
 };
 
