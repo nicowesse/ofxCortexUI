@@ -10,6 +10,8 @@
 
 #define STRINGIFY(A) #A
 
+class RangeSlider;
+
 namespace ofxCortex { namespace ui {
 
 class Handle : public Draggable {
@@ -81,6 +83,8 @@ protected:
   float _handleOpacity{1.0f};
   
   static ofShader & _getShader();
+  
+  friend class RangeSlider;
   
 };
 

@@ -76,8 +76,8 @@ protected:
   shared_ptr<ofxCortex::ui::Handle> toHandle;
   shared_ptr<Bar> bar;
   
-  shared_ptr<ofxCortex::ui::Handle> _getMinHandle() { return fromHandle; } //(fromHandle->getX() <= toHandle->getX()) ? fromHandle : toHandle; }
-  shared_ptr<ofxCortex::ui::Handle> _getMaxHandle() { return toHandle; } //(fromHandle->getX() > toHandle->getX()) ? fromHandle : toHandle; }
+  shared_ptr<ofxCortex::ui::Handle> _getMinHandle() { return fromHandle; }
+  shared_ptr<ofxCortex::ui::Handle> _getMaxHandle() { return toHandle; }
   
 //  static ofShader & _getShader();
   
