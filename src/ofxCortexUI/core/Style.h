@@ -106,7 +106,7 @@ public:
       ttf = std::make_shared<ofTrueTypeFont>();
     }
     
-    void load(std::string path = "assets/fonts/SF-Pro-Text-Regular.otf");
+    void load(std::string path = ofToDataPath("assets/fonts/SF-Pro-Text-Regular.otf", true));
   };
   
   struct FontLibrary {
@@ -114,8 +114,8 @@ public:
     Font value;
     
     FontLibrary() {
-      label.load("assets/fonts/SF-Pro-Text-Regular.otf");
-      value.load("assets/fonts/SF-Pro-Text-Regular.otf");
+      label.load(ofToDataPath("assets/fonts/SF-Pro-Text-Regular.otf", true));
+      value.load(ofToDataPath("assets/fonts/SF-Pro-Text-Regular.otf", true));
     }
   } fonts;
   
