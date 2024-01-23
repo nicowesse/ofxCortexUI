@@ -3,6 +3,7 @@
 #include "ofxCortexUI/components/Value.h"
 #include "ofxCortexUI/components/Button.h"
 #include "ofxCortexUI/components/Slider.h"
+#include "ofxCortexUI/components/RangeSlider.h"
 #include "ofxCortexUI/components/Checkbox.h"
 
 #include "ofxCortex/types/Range.h"
@@ -59,12 +60,10 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   {
     views.push_back(Button::create(param.cast<void>()));
   }
-#ifdef TARGET_OSX
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
     views.push_back(RangeSlider::create(param.cast<ofxCortex::core::types::Range>()));
   }
-#endif
   else if (type == typeid(ofParameter<ofxCortex::core::types::Spacer>).name())
   {
     auto view = View::create();
