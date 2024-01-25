@@ -9,11 +9,11 @@ class View : public ofxCortex::ui::DisplayObject {
   
 public:
   
-  View(string name = "");
-  static shared_ptr<View> create(string name = "") { return make_shared<View>(name); }
+  View(std::string name = "");
+  static std::shared_ptr<View> create(std::string name = "") { return std::make_shared<View>(name); }
   
-  virtual void setStyle(shared_ptr<Style> style, bool affectChildren = true);
-  shared_ptr<Style> getStyle() { return style; }
+  virtual void setStyle(std::shared_ptr<Style> style, bool affectChildren = true);
+  std::shared_ptr<Style> getStyle() { return style; }
   
   ofEvent<ofRectangle> onResizedE;
   void onResized(function<void(ofRectangle)> callback);
@@ -34,13 +34,12 @@ public:
   void setFocused();
   void removeFocus();
   bool hasFocus() { return (this == _focused.get()); }
-  static shared_ptr<View> getFocused() { return _focused; }
+  static std::shared_ptr<View> getFocused() { return _focused; }
   
 #pragma mark - Parameter
-  virtual bool hasParameter() const { return false; }
   
 protected:
-  static shared_ptr<View> _focused;
+  static std::shared_ptr<View> _focused;
   bool _hasFocus { false };
   bool _isFocusEnabled { true };
   
@@ -59,7 +58,7 @@ protected:
   ofRectangle _renderRect;
   void _recalculateRenderRect();
   
-  shared_ptr<ofxCortex::ui::Style> style;
+  std::shared_ptr<ofxCortex::ui::Style> style;
   
   
   

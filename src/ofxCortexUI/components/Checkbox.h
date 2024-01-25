@@ -4,27 +4,17 @@
 
 namespace ofxCortex { namespace ui {
 
-class Checkbox : public ofxCortex::ui::View {
+class Checkbox : public ofxCortex::ui::ParameterView<bool> {
 public:
   
-  Checkbox(ofParameter<bool> & param)
+  Checkbox(ofAbstractParameter & param)
+  : ParameterView<bool>(param)
   {
-    setName(param.getName());
-    parameter.makeReferenceTo(param);
-    
     _init();
     _adjustLayout();
   };
   
-//  ~Checkbox()
-//  {
-//    Tweenzor::removeTween(&innerAnimation);
-//  }
-  
-  static shared_ptr<Checkbox> create(ofParameter<bool> & param) { return make_shared<Checkbox>(param); }
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<bool> & getParameter() { return parameter; }
+  static shared_ptr<Checkbox> create(ofAbstractParameter & param) { return make_shared<Checkbox>(param); }
   
 protected:
   virtual string _getModule() const override { return "Checkbox"; };
@@ -35,7 +25,7 @@ protected:
     background->setName("Checkbox::Background");
     background->disableEvents();
     
-    label = ui::Label::create(parameter);
+    label = ui::Label::create(ParameterView<bool>::getParameter());
     label->setName("Checkbox::Label");
     label->disableEvents();
     
@@ -43,11 +33,11 @@ protected:
     outerRing.circle(0, 0, 10 * 0.5);
     outerRing.setFillColor(style->accentColor);
     
-    onParameterTrigger = parameter.newListener([this](bool & param) {
-      Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
+    onParameterTrigger = getParameter().newListener([this](bool & param) {
+      Tweenzor::add(&innerAnimation, innerAnimation, getParameter().get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
     });
     
-    innerAnimation = parameter.get();
+    innerAnimation = ParameterView<bool>::getValue();
   };
   
   virtual void _draw() override
@@ -93,11 +83,10 @@ protected:
   {
     View::_mousePressed(e);
     
-    parameter.set(!parameter.get());
+    getParameter().set(!getValue());
   }
   
   // Members
-  ofParameter<bool> parameter;
   ofEventListener onParameterTrigger;
   
   shared_ptr<ui::Background> background;

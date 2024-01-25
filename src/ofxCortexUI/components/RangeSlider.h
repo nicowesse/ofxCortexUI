@@ -13,7 +13,7 @@
 
 namespace ofxCortex { namespace ui {
 
-class RangeSlider : public ofxCortex::ui::View {
+class RangeSlider : public ofxCortex::ui::ParameterView<ofxCortex::core::types::Range> {
 public:
   class Bar : public Draggable {
   public:
@@ -36,15 +36,13 @@ public:
   };
 public:
   
-  RangeSlider(ofParameter<ofxCortex::core::types::Range> param)
+  RangeSlider(ofAbstractParameter & param)
+  : ofxCortex::ui::ParameterView<ofxCortex::core::types::Range>(param)
   {
-    setName(param.getName());
-    
-    parameter.makeReferenceTo(param);
     this->disableChildRendering();
   };
   
-  static shared_ptr<RangeSlider> create(ofParameter<ofxCortex::core::types::Range> param) {
+  static shared_ptr<RangeSlider> create(ofAbstractParameter & param) {
     auto ptr = make_shared<RangeSlider>(param);
     ptr->_init();
     return ptr;
@@ -66,8 +64,6 @@ protected:
   virtual void _mousePressed(const ofMouseEventArgs& e) override;
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
-  
-  ofParameter<ofxCortex::core::types::Range> parameter;
   
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;

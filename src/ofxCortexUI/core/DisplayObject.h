@@ -30,8 +30,8 @@ namespace ofxCortex { namespace ui {
     string _name;
     ofxCortex::core::UUID _uuid;
     
-    virtual string _getModule() const { return "DisplayObject"; }
-    string _getLogModule() const {
+    virtual std::string _getModule() const { return "DisplayObject"; }
+    std::string _getLogModule() const {
       stringstream ss;
       for (int i = 0; i < getLevel(); i++) ss << "-";
       ss << _getModule() + "(\"" + getPrettyID() + "\")";

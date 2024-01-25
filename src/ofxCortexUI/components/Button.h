@@ -1,38 +1,35 @@
 #pragma once
 
-#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/ParameterView.h"
 #include "ofxCortexUI/components/Label.h"
 
 namespace ofxCortex { namespace ui {
 
-class Button : public ofxCortex::ui::View {
+class Button : public ofxCortex::ui::ParameterView<void> {
 public:
-  
-  Button(ofParameter<void> param)
-  {
-    setName(param.getName());
-    parameter.makeReferenceTo(param);
-    
-    _init();
-    _adjustLayout();
-  };
-  
-  Button(string name, function<void()> func)
+  Button(std::string name, std::function<void()> func)
+  : ParameterView<void>()
   {
     setName(name);
-    parameter.setName(name);
+    getParameter().setName(name);
     
-    onParameterTrigger = parameter.newListener(func);
-    
-    _init();
-    _adjustLayout();
+    onParameterTrigger = getParameter().newListener(func);
   };
+  static shared_ptr<Button> create(string name, function<void()> func) {
+    auto btn = std::make_shared<Button>(name, func);
+    btn->_init();
+    return btn;
+  }
   
-  static shared_ptr<Button> create(ofParameter<void> param) { return make_shared<Button>(param); }
-  static shared_ptr<Button> create(string name, function<void()> func) { return make_shared<Button>(name, func); }
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<void> & getParameter() { return parameter; }
+  Button(ofAbstractParameter & param)
+  : ParameterView<void>(param)
+  {
+  };
+  static shared_ptr<Button> create(ofParameter<void> param) {
+    auto btn = make_shared<Button>(param);
+    btn->_init();
+    return btn;
+  }
   
 protected:
   virtual string _getModule() const override { return "Button"; };
@@ -45,9 +42,11 @@ protected:
     
     backgroundColor = style->foregroundColor;
     
-    label = ui::Label::create(parameter);
+    label = ui::Label::create(getParameter().cast<string>());
     label->setName("Button::Label");
     label->disableEvents();
+    
+    _adjustLayout();
   };
   
   virtual void _draw() override
@@ -77,7 +76,7 @@ protected:
     
     backgroundColor = style->foregroundColor * 1.4;
     
-    parameter.trigger();
+    getParameter().trigger();
   }
   
   virtual void _mouseReleased(const ofMouseEventArgs & e) override
@@ -102,7 +101,6 @@ protected:
   }
   
   // Members
-  ofParameter<void> parameter;
   ofEventListener onParameterTrigger;
   
   shared_ptr<ui::Background> background;

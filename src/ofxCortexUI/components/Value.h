@@ -1,68 +1,73 @@
 #pragma once
 
-#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/ParameterView.h"
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortex/types/Range.h"
 #include "ofxCortex/types/Image.h"
+#include "ofxCortex/types/Parameter.h"
 
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class Value : public ofxCortex::ui::View {
+class Value : public ofxCortex::ui::ParameterView<T> {
 public:
   
-  Value(string name, T value)
+  Value(const std::string & name, T value)
+  : ParameterView<T>()
   {
-    setName(name);
+//    setName(name);
     
-    parameter.setName(name);
-    parameter.set(value);
+    ofParameter<T> param { name, value };
+    ParameterView<T>::parameter = param.newReference();
     
     _init();
     _adjustLayout();
   }
   static shared_ptr<Value<T>> create(string name, T value) { return make_shared<Value<T>>(name, value); }
   
-  Value(ofParameter<T> param)
+  Value(ofAbstractParameter && param)
+  : ParameterView<T>(std::move(param))
   {
-    setName(param.getName());
-    parameter.makeReferenceTo(param);
-    
     _init();
     _adjustLayout();
   }
-  static shared_ptr<Value<T>> create(ofParameter<T> parameter) { return make_shared<Value<T>>(parameter); }
+  static shared_ptr<Value<T>> create(ofAbstractParameter && param) { return make_shared<Value<T>>(std::move(param)); }
+  
+  Value(ofParameter<T> & param)
+  : ParameterView<T>(param)
+  {
+    _init();
+    _adjustLayout();
+  }
+  static shared_ptr<Value<T>> create(ofParameter<T> & param) { return make_shared<Value<T>>(param); }
   
   
   void drawValue(ofFloatColor color)
   {
-    const auto & rect = getRenderRect();
+    const auto & rect = View::getRenderRect();
     
-    if (!style->getValueFont()->isLoaded())
+    if (!View::style->getValueFont()->isLoaded())
     {
-      ofLogWarning(_getLogModule()) << "Value font is not loaded. Please make sure the paths are correct. Returning.."; return;
+      ofLogWarning(DisplayObject::_getLogModule()) << "Value font is not loaded. Please make sure the paths are correct. Returning.."; return;
     }
     
     string value = _getFormattedString();
-    float valueWidth = style->getValueFont()->stringWidth(value);
+    float valueWidth = View::style->getValueFont()->stringWidth(value);
     float x = rect.getRight() - 12 - valueWidth;
-    float y = rect.getCenter().y + (style->getFontXHeight() * 0.5);
+    float y = rect.getCenter().y + (View::style->getFontXHeight() * 0.5);
     
     ofPushStyle();
     {
       ofSetColor(color);
-      style->getValueFont()->drawString(value, x, y);
+      View::style->getValueFont()->drawString(value, x, y);
     }
     ofPopStyle();
   }
   
   void drawValue()
   {
-    this->drawValue(style->valueFontColor);
+    this->drawValue(View::style->valueFontColor);
   }
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<T> & getParameter() { return parameter; }
   
 protected:
   virtual string _getModule() const override { return "Value"; };
@@ -73,7 +78,7 @@ protected:
     background->setName("Value::Background");
     background->disableEvents();
     
-    label = ui::Label::create(parameter);
+    label = ui::Label::create("Value");
     label->setName("Value::Label");
     label->disableEvents();
   }
@@ -93,17 +98,15 @@ protected:
     View::_adjustLayout();
   }
   
-  string _getFormattedString()
+  std::string _getFormattedString()
   {
     stringstream ss;
-    ss << parameter;
+    ss << ParameterView<T>::getParameter().toString();
     return ofToString(ss.str(), 1);
   }
   
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;
-  ofParameter<T> parameter;
-
 };
 
 template<>
@@ -111,7 +114,7 @@ inline string Value<float>::_getFormattedString()
 {
   int precision = 3;
   stringstream ss;
-  ss << ofToString(parameter.get(), precision);
+  ss << ofToString(getValue(), precision);
   return ss.str();
 }
 
@@ -120,7 +123,7 @@ inline string Value<glm::vec2>::_getFormattedString()
 {
   int precision = 3;
   stringstream ss;
-  ss << ofToString(parameter->x, precision) << ", " << ofToString(parameter->y, precision);
+  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision);
   return ss.str();
 }
 
@@ -129,7 +132,7 @@ inline string Value<glm::vec3>::_getFormattedString()
 {
   int precision = 3;
   stringstream ss;
-  ss << ofToString(parameter->x, precision) << ", " << ofToString(parameter->y, precision) << ", " << ofToString(parameter->z, precision);
+  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision) << ", " << ofToString(getParameter()->z, precision);
   return ss.str();
 }
 
@@ -138,7 +141,7 @@ inline string Value<ofxCortex::core::types::Range>::_getFormattedString()
 {
   int precision = 2;
   stringstream ss;
-  ss << ofToString(parameter->from, precision) << " ←→ " << ofToString(parameter->to, precision);
+  ss << ofToString(getParameter()->from, precision) << " ←→ " << ofToString(getParameter()->to, precision);
   return ss.str();
 }
 
@@ -146,7 +149,7 @@ template<>
 inline string Value<ofxCortex::core::types::Image>::_getFormattedString()
 {
   stringstream ss;
-  ss << parameter->path;
+  ss << getParameter()->path;
   string original = ss.str();
   
   int length = MIN(28, original.size());

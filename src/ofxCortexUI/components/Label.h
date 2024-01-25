@@ -1,36 +1,33 @@
 #pragma once
 
-#include "ofxCortexUI/core/View.h"
+#include "ofxCortexUI/core/ParameterView.h"
 #include "ofxCortexUI/components/Background.h"
 
 namespace ofxCortex { namespace ui {
 
-class Label : public ofxCortex::ui::View {
+class Label : public ofxCortex::ui::ParameterView<string> {
 public:
   
-  Label(string name)
-  : ofxCortex::ui::View(name)
+  Label(const std::string & name)
+  : ParameterView<std::string>(name)
   {
-    parameter.setName(name);
+    setName(name);
     
     _init();
   }
-  static shared_ptr<Label> create(string name) { return make_shared<Label>(name); }
+  static std::shared_ptr<Label> create(const std::string & name) { return std::make_shared<Label>(name); }
   
-  Label(ofAbstractParameter & param)
-  : ofxCortex::ui::View()
+  Label(ofAbstractParameter && param)
+  : ParameterView<string>(std::move(param))
   {
-    parameter.makeReferenceTo(param.cast<string>());
-    setName(param.cast<string>().getName());
-    
     _init();
   }
-  static shared_ptr<Label> create(ofAbstractParameter & parameter) { return make_shared<Label>(parameter); }
+  static std::shared_ptr<Label> create(ofAbstractParameter && parameter) { return std::make_shared<Label>(std::move(parameter)); }
   
   
   void drawLabel(ofFloatColor color, ofAlignHorz labelAlignment = OF_ALIGN_HORZ_LEFT)
   {
-    const auto & rect = getRenderRect();
+    const auto & rect = View::getRenderRect();
     
     if (!style->getLabelFont()->isLoaded())
     {
@@ -40,7 +37,7 @@ public:
     
     float labelInset = 12.0f;
     
-    string label = parameter.cast<string>().getName();
+    string label = getParameter().cast<string>().getName();
     float labelWidth = style->getLabelFont()->stringWidth(label);
     
     float x = rect.getLeft() + 12;
@@ -83,7 +80,7 @@ protected:
     
     if (style->getLabelFont()->isLoaded())
     {
-      float labelWidth = style->getLabelFont()->stringWidth(parameter.getName());
+      float labelWidth = style->getLabelFont()->stringWidth(getParameterName());
       if (this->getWidth() < labelWidth) { this->setWidth(labelWidth); }
     }
     else
@@ -95,7 +92,6 @@ protected:
   }
   
   shared_ptr<ofxCortex::ui::Background> background;
-  ofParameter<string> parameter;
 };
 
 }}

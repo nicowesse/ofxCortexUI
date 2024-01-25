@@ -20,9 +20,9 @@ void Handle::drawHandle(ofFloatColor acc, ofFloatColor bg, float diameter)
 template<typename T>
 void Slider<T>::drawSlider()
 {
-  const auto & rect = getRenderRect();
+  const auto & rect = View::getRenderRect();
   float centerY = rect.getCenter().y;
-  float centerBulge = (parameter.getMin() < 0.0) ? ofMap(0, parameter.getMin(), parameter.getMax(), 0, 1, true) : 0.5;
+  float centerBulge = (ParameterView<T>::getMin() < 0.0) ? ofMap(0, ParameterView<T>::getMin(), ParameterView<T>::getMax(), 0, 1, true) : 0.5;
   
   ofPushStyle();
   {
@@ -40,8 +40,8 @@ void Slider<T>::drawSlider()
     
     
     ofFill();
-    if (parameter.getMin() < 0.0) this->drawZero();
-    handle->drawHandle(ofFloatColor(style->accentColor), ofFloatColor(style->backgroundColor), 6.0);
+    if (ParameterView<T>::getMin() < 0.0) this->drawZero();
+    handle->drawHandle(ofFloatColor(View::style->accentColor), ofFloatColor(View::style->backgroundColor), 6.0);
   }
   ofPopStyle();
 }
@@ -49,18 +49,18 @@ void Slider<T>::drawSlider()
 template<typename T>
 void Slider<T>::drawZero()
 {
-  const auto & rect = getRenderRect();
-  float zeroPoint = ofMap(0, parameter.getMin(), parameter.getMax(), rect.getLeft(), rect.getRight());
+  const auto & rect = View::getRenderRect();
+  float zeroPoint = ofMap(0, ParameterView<T>::getMin(), ParameterView<T>::getMax(), rect.getLeft(), rect.getRight());
   
   float r = 4;
   float alpha = 0.6;
   
   ofPushStyle();
   {
-    ofSetColor(style->backgroundColor);
+    ofSetColor(View::style->backgroundColor);
     ofDrawCircle(zeroPoint, rect.getCenter().y, (r + 2) * 0.5);
     
-    ofSetColor(style->accentColor, 255 * alpha);
+    ofSetColor(View::style->accentColor, 255 * alpha);
     ofDrawCircle(zeroPoint, rect.getCenter().y, r * 0.5);
   }
   ofPopStyle();
@@ -74,28 +74,28 @@ void Slider<T>::_init()
   background->disableEvents();
   this->addChild(background);
   
-  label = ofxCortex::ui::Label::create(parameter);
+  label = ofxCortex::ui::Label::create(ParameterView<T>::getParameter());
   label->setName("Slider::Label");
   label->disableEvents();
   this->addChild(label);
   
-  value = ofxCortex::ui::Value<T>::create(parameter);
+  value = ofxCortex::ui::Value<T>::create(ParameterView<T>::getParameter());
   value->setName("Slider::Value");
   value->disableEvents();
   this->addChild(value);
   
-  handle = make_shared<Handle>(getRenderRect());
+  handle = std::make_shared<Handle>(View::getRenderRect());
   handle->setName("Slider::Handle");
   handle->setWidth(16);
   this->addChild(handle);
   
-  _eventListeners.push(handle->onDragE.newListener([this](Draggable::DraggableEventArgs e) {
-    parameter.set(ofMap(handle->getNormalizedPosition().x, 0, 1, parameter.getMin(), parameter.getMax()));
+  ofxCortex::core::listeners.push(handle->onDragE.newListener([this](Draggable::DraggableEventArgs e) {
+    ParameterView<T>::setValue(ofMap(handle->getNormalizedPosition().x, 0, 1, ParameterView<T>::getMin(), ParameterView<T>::getMax()));
     _handleOpacity = ofClamp(_handleOpacity + abs(e.delta.x), 0.7, 1.0);
   }));
   
-  _eventListeners.push(parameter.newListener([this](const T & value) {
-    handle->setFromNormalizedX(ofMap(value, parameter.getMin(), parameter.getMax(), 0, 1, true));
+  ofxCortex::core::listeners.push(ParameterView<T>::getParameter().newListener([this](const T & value) {
+    handle->setFromNormalizedX(ofMap(value, ParameterView<T>::getMin(), ParameterView<T>::getMax(), 0, 1, true));
   }));
 }
 
@@ -104,7 +104,7 @@ void Slider<T>::_update(float time, float delta)
 {
   DisplayObject::_update(time, delta);
   
-  if (!_isMousePressedInside) _handleOpacity = ofClamp(_handleOpacity - _deltaTime, 0.7, 1.0);
+  if (!DisplayObject::_isMousePressedInside) _handleOpacity = ofClamp(_handleOpacity - delta, 0.7, 1.0);
 }
 
 template<typename T>
@@ -113,8 +113,8 @@ void Slider<T>::_draw()
   background->drawBackground();
   this->drawSlider();
   
-  label->drawLabel(ofFloatColor(style->labelFontColor, _textOpacity));
-  value->drawValue(ofFloatColor(style->valueFontColor, _textOpacity));
+  label->drawLabel(ofFloatColor(View::style->labelFontColor, _textOpacity));
+  value->drawValue(ofFloatColor(View::style->valueFontColor, _textOpacity));
   
   View::_drawFocusOutline();
 }
@@ -136,7 +136,7 @@ void Slider<T>::_adjustLayout()
   label->setRect(this->getRect());
   value->setRect(this->getRect());
   
-  ofRectangle dragBounds = getRenderRect();
+  ofRectangle dragBounds = View::getRenderRect();
   dragBounds.setFromCenter(dragBounds.getCenter(), dragBounds.width - 12, dragBounds.height);
   
   handle->setDragBounds(dragBounds);
@@ -152,14 +152,14 @@ void Slider<T>::_mousePressed(const ofMouseEventArgs & e)
 {
   View::_mousePressed(e);
   
-  glm::vec2 localCoord = globalToLocal(e);
+  glm::vec2 localCoord = DisplayObject::globalToLocal(e);
   
-  if (hasFocus() && !handle->isInsideRectangle(e, true))
+  if (View::hasFocus() && !handle->isInsideRectangle(e, true))
   {
     ofRectangle sliderRect = handle->getDragBounds();
     sliderRect.setFromCenter(sliderRect.getCenter(), sliderRect.width - handle->getWidth(), sliderRect.height);
     float normalizedFromX = ofMap(localCoord.x, sliderRect.getLeft(), sliderRect.getRight(), 0, 1, true);
-    parameter.set(ofMap(normalizedFromX, 0, 1, parameter.getMin(), parameter.getMax()));
+    ParameterView<T>::setValue(ofMap(normalizedFromX, 0, 1, ParameterView<T>::getMin(), ParameterView<T>::getMax()));
   }
   
   _handleOpacity = 1.0f;
@@ -168,11 +168,11 @@ void Slider<T>::_mousePressed(const ofMouseEventArgs & e)
 template<typename T>
 void Slider<T>::_mouseScrolled(const ofMouseEventArgs & e)
 {
-  if (!hasFocus()) return;
+  if (!View::hasFocus()) return;
   
   if (e.modifiers == OF_KEY_SHIFT)
   {
-    parameter = (e.scrollX < 0.0f) ? floor(parameter.get() - 0.00001f) : ceil(parameter.get() + 0.00001f);
+    ParameterView<T>::getParameter() = (e.scrollX < 0.0f) ? floor(ParameterView<T>::getParameter().get() - 0.00001f) : ceil(ParameterView<T>::getParameter().get() + 0.00001f);
   }
   else
   {
@@ -182,7 +182,7 @@ void Slider<T>::_mouseScrolled(const ofMouseEventArgs & e)
     else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
     else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
     
-    parameter += e.scrollX * delta;
+    ParameterView<T>::getParameter() += e.scrollX * delta;
   }
   
   _handleOpacity = ofClamp(_handleOpacity + abs(e.scrollX), 0.7, 1.0);
@@ -191,7 +191,7 @@ void Slider<T>::_mouseScrolled(const ofMouseEventArgs & e)
 template<typename T>
 void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
 {
-  if (!hasFocus()) return;
+  if (!View::hasFocus()) return;
   
   switch(e.key)
   {
@@ -199,7 +199,7 @@ void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
     {
       if (e.modifiers == OF_KEY_SHIFT)
       {
-        parameter = floor(parameter.get() - 0.000001f) + 1;
+        ParameterView<T>::getParameter() = floor(ParameterView<T>::getParameter().get() - 0.000001f) + 1;
       }
       
       float delta = -1.0f;
@@ -208,7 +208,7 @@ void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
       
-      parameter += delta;
+      ParameterView<T>::getParameter() += delta;
       
       _handleOpacity = 1.0f;
     }
@@ -217,7 +217,7 @@ void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
     {
       if (e.modifiers == OF_KEY_SHIFT)
       {
-        parameter = ceil(parameter.get() + 0.000001f) - 1;
+        ParameterView<T>::getParameter() = ceil(ParameterView<T>::getParameter().get() + 0.000001f) - 1;
       }
       
       float delta = 1.0f;
@@ -226,7 +226,7 @@ void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
       
-      parameter += delta;
+      ParameterView<T>::getParameter() += delta;
       
       _handleOpacity = 1.0f;
     }

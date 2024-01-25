@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ofxCortex/utils/Helpers.h"
+#include "ofxCortex.h"
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/core/Draggable.h"
 #include "ofxCortexUI/components/Background.h"
@@ -31,31 +31,26 @@ protected:
 };
 
 template<typename T>
-class Slider : public ofxCortex::ui::View {
+class Slider : public ofxCortex::ui::ParameterView<T> {
   static_assert(std::is_arithmetic<T>::value, "Slider: T must be numeric!");
   
 public:
-  Slider(ofParameter<T> param)
+  Slider(ofAbstractParameter & param)
+  : ParameterView<T>(param)
   {
-    setName(param.getName());
-    
-    parameter.makeReferenceTo(param);
     this->disableChildRendering();
   };
   
   ~Slider() { _getShader().unload(); }
   
-  static shared_ptr<Slider<T>> create(ofParameter<T> param) {
-    auto ptr = make_shared<Slider<T>>(param);
+  static shared_ptr<Slider<T>> create(ofAbstractParameter & param) {
+    auto ptr = std::make_shared<Slider<T>>(param);
     ptr->_init();
     return ptr;
   }
   
   void drawSlider();
   void drawZero();
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<T> & getParameter() { return parameter; }
   
 protected:
   virtual string _getModule() const override { return "Slider"; };
@@ -71,8 +66,7 @@ protected:
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   
-  ofParameter<T> parameter;
-  T getNormalizedParameter() { return ofMap(parameter.get(), parameter.getMin(), parameter.getMax(), 0, 1, true); }
+  T getNormalizedParameter() { return ofMap(ParameterView<T>::getValue(), ParameterView<T>::getMin(), ParameterView<T>::getMax(), 0, 1, true); }
   
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;

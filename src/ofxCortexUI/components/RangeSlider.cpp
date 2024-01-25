@@ -33,7 +33,7 @@ void RangeSlider::drawSlider()
 {
   const auto & rect = getRenderRect();
   float centerY = rect.getCenter().y;
-  float centerBulge = (parameter->min < 0.0) ? ofMap(0, parameter->min, parameter->max, 0, 1, true) : 0.5;
+  float centerBulge = (getParameter()->min < 0.0) ? ofMap(0, getParameter()->min, getParameter()->max, 0, 1, true) : 0.5;
   
   ofPushStyle();
   {
@@ -44,7 +44,7 @@ void RangeSlider::drawSlider()
     ofDrawPlane(rect.getCenter(), rect.width, 1);
     Slider<float>::_getShader().end();
     
-    if (parameter->min < 0.0) this->drawZero();
+    if (getParameter()->min < 0.0) this->drawZero();
     fromHandle->drawHandle(style->accentColor, ofFloatColor(0, 0), 8);
     toHandle->drawHandle(style->accentColor, ofFloatColor(0, 0), 8);
   }
@@ -54,7 +54,7 @@ void RangeSlider::drawSlider()
 void RangeSlider::drawZero()
 {
   const auto & rect = getRenderRect();
-  float zeroPoint = ofMap(0, parameter->min, parameter->max, rect.getLeft(), rect.getRight());
+  float zeroPoint = ofMap(0, getParameter()->min, getParameter()->max, rect.getLeft(), rect.getRight());
   
   float r = 4;
   float alpha = 0.6;
@@ -77,12 +77,12 @@ void RangeSlider::_init()
   background->disableEvents();
   this->addChild(background);
   
-  label = ofxCortex::ui::Label::create(parameter);
+  label = ofxCortex::ui::Label::create(ParameterView<ofxCortex::core::types::Range>::getParameter());
   label->setName("RangeSlider::Label");
   label->disableEvents();
   this->addChild(label);
   
-  value = ofxCortex::ui::Value<ofxCortex::core::types::Range>::create(parameter);
+  value = ofxCortex::ui::Value<ofxCortex::core::types::Range>::create(ParameterView<ofxCortex::core::types::Range>::getParameter());
   value->setName("RangeSlider::Value");
   value->disableEvents();
   this->addChild(value);
@@ -101,10 +101,10 @@ void RangeSlider::_init()
     auto minHandle = _getMinHandle();
     auto maxHandle = _getMaxHandle();
     
-    ofxCortex::core::types::Range range = parameter.get();
-    range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
-    range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
-    parameter.set(range);
+    ofxCortex::core::types::Range range = ParameterView<ofxCortex::core::types::Range>::getValue();
+    range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, getParameter()->min, getParameter()->max);
+    range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, getParameter()->min, getParameter()->max);
+    getParameter().set(range);
     
     bar->setLeft(minHandle->getRect().getRight());
     bar->setRight(maxHandle->getRect().getLeft());
@@ -125,13 +125,13 @@ void RangeSlider::_init()
     auto minHandle = _getMinHandle();
     auto maxHandle = _getMaxHandle();
     
-    ofxCortex::core::types::Range range = parameter.get();
-    range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
-    range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, parameter->min, parameter->max);
-    parameter.set(range);
+    ofxCortex::core::types::Range range = getValue();
+    range.from = ofMap(minHandle->getNormalizedPosition().x, 0, 1, getParameter()->min, getParameter()->max);
+    range.to = ofMap(maxHandle->getNormalizedPosition().x, 0, 1, getParameter()->min, getParameter()->max);
+    setValue(range);
   }));
   
-  _eventListeners.push(parameter.newListener([this](const ofxCortex::core::types::Range & value) {
+  _eventListeners.push(getParameter().newListener([this](const ofxCortex::core::types::Range & value) {
     fromHandle->setFromNormalizedX(ofMap(value.from, value.min, value.max, 0, 1, true));
     toHandle->setFromNormalizedX(ofMap(value.to, value.min, value.max, 0, 1, true));
     
@@ -180,12 +180,12 @@ void RangeSlider::_adjustLayout()
   fromHandle->setDragBounds(dragBounds);
   fromHandle->setHeight(dragBounds.height);
   fromHandle->setY(dragBounds.y);
-  fromHandle->setFromNormalizedX(parameter->getNormalizedFrom());
+  fromHandle->setFromNormalizedX(getParameter()->getNormalizedFrom());
   
   toHandle->setDragBounds(dragBounds);
   toHandle->setHeight(dragBounds.height);
   toHandle->setY(dragBounds.y);
-  toHandle->setFromNormalizedX(parameter->getNormalizedTo());
+  toHandle->setFromNormalizedX(getParameter()->getNormalizedTo());
   
 //  dragBounds.setFromCenter(dragBounds.getCenter(), dragBounds.width - (fromHandle->getWidth() + toHandle->getWidth()), dragBounds.height);
   
@@ -215,7 +215,7 @@ void RangeSlider::_mouseScrolled(const ofMouseEventArgs & e)
   else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
   else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
   
-  parameter += e.scrollX * delta;
+  getParameter() += e.scrollX * delta;
 }
 
 void RangeSlider::_keyPressed(const ofKeyEventArgs & e)
@@ -232,7 +232,7 @@ void RangeSlider::_keyPressed(const ofKeyEventArgs & e)
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
       
-      parameter -= delta;
+      getParameter() -= delta;
     }
     break;
     case OF_KEY_RIGHT:
@@ -243,7 +243,7 @@ void RangeSlider::_keyPressed(const ofKeyEventArgs & e)
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
       
-      parameter += delta;
+      getParameter() += delta;
     }
     break;
   }
