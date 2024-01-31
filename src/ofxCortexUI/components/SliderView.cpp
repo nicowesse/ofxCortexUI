@@ -83,6 +83,8 @@ void SliderView<T>::_mousePressed(const MouseEventArgs & e)
 {
   View::_mousePressed(e);
   
+  if (e.isOverlapped) return;
+  
   float normalizedX = ofMap(e.x - 2, this->content_left.value() + _inset, this->content_right.value() - _inset, 0, 1, true);
   float parameterValue = ofMap(normalizedX, 0, 1, parameter.getMin(), parameter.getMax());
   parameter.set(parameterValue);
@@ -92,6 +94,8 @@ template<typename T>
 void SliderView<T>::_mouseDragged(const DeltaMouseEvent & e)
 {
   View::_mousePressed(e);
+  
+  if (e.isOverlapped) return;
   
   float normalizedX = ofMap(e.x - 2, this->content_left.value() + _inset, this->content_right.value() - _inset, 0, 1, true);
   float parameterValue = ofMap(normalizedX, 0, 1, parameter.getMin(), parameter.getMax());
@@ -284,8 +288,6 @@ void SliderView<int>::_mousePressed(const MouseEventArgs & e)
 {
   View::_mousePressed(e);
   
-  if (!_wasMousePressedInside) return;
-  
   float parameterRange = parameter.getMax() - parameter.getMin();
   float halfStepWidth = this->getContentBounds().width / parameterRange * 0.5;
   
@@ -298,8 +300,6 @@ template<>
 void SliderView<int>::_mouseDragged(const DeltaMouseEvent & e)
 {
   View::_mousePressed(e);
-  
-  if (!_wasMousePressedInside) return;
   
   float parameterRange = parameter.getMax() - parameter.getMin();
   float halfStepWidth = this->getContentBounds().width / parameterRange * 0.5;

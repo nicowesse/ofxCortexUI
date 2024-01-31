@@ -45,7 +45,6 @@ protected:
   
   void _setup();
   virtual void _draw() override;
-  virtual void _postDraw() override { if (_isFocused()) Styling::drawFocusBorder(this->getBounds()); }
   virtual void _updateConstraints() override;
   
   virtual void _mouseScrolled(const MouseEventArgs & e) override;

@@ -76,7 +76,7 @@ protected:
       { wrapper->left == this->left | kiwi::strength::strong },
       { wrapper->right == this->right | kiwi::strength::strong },
       { wrapper->top <= this->top | kiwi::strength::strong },
-      { wrapper->top == this->scroll_y | kiwi::strength::strong },
+      { wrapper->top == this->scroll_y + Styling::marginTop() | kiwi::strength::strong },
     });
     
     this->setIntrinsicHeight(Styling::getRowHeight() * 5);
@@ -116,6 +116,8 @@ protected:
   
   virtual void _preDraw() override
   {
+    View::_preDraw();
+    
     ofPushStyle();
     {
       if (this->_enableBackground) Styling::drawContainerBackground(this->getBounds(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
@@ -124,10 +126,9 @@ protected:
   }
   
   virtual void _postDraw() override {
+    View::_postDraw();
 
     ofPushStyle();
-    
-    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
     
     if (wrapper->getHeight() > this->getHeight())
     {

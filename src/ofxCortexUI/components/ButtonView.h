@@ -35,20 +35,10 @@ public:
 protected:
   virtual std::string _getComponentName() const override { return "ButtonView"; };
   
-  void _setup()
-  {
-    
-  };
-  
   virtual void _draw() override
   {
     Styling::drawBackground(this->getBounds(), getMouseState());
     Styling::drawLabel(parameter.getName(), this->getContentBounds(), OF_ALIGN_HORZ_CENTER);
-  }
-  
-  virtual void _postDraw() override
-  {
-    if (_isFocused()) Styling::drawFocusBorder(this->getBounds());
   }
   
   virtual void _mousePressed(const MouseEventArgs & e) override

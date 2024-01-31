@@ -323,7 +323,7 @@ bool View::isOverlapped(const glm::vec2 & point)
   {
     if (view.get() == this || !view->isInside(point) || view->_includeInOverlap == false) continue;
     
-    return view->_getActualZ() > this->_getActualZ(); // || view->getZ() > this->getZ();
+    return view->_getActualZ() >= this->_getActualZ(); // || view->getZ() > this->getZ();
   }
   
   return false;
