@@ -71,7 +71,6 @@ protected:
 //    ofLogNotice(_getLogModule(__FUNCTION__)) << "ADD SUBVIEWS";
     this->addSubviews(views);
     
-
     this->addConstraints({
       { wrapper->left == this->left | kiwi::strength::strong },
       { wrapper->right == this->right | kiwi::strength::strong },
@@ -93,12 +92,12 @@ protected:
   
   virtual void _updateConstraints() override
   {
-    ofLogNotice(_getLogModule(__FUNCTION__)) << "StackViews Size = " << stackViews.size();
-    
     if (stackViews.size() == 0) return;
     
+    ofLogNotice(_getLogModule(__FUNCTION__)) << "StackViews Size = " << stackViews.size();
+    
     // Reset Constraints
-    this->removeConstraints(stackConstraints);
+    wrapper->removeConstraints(stackConstraints);
     stackConstraints.clear();
     
     auto alignmentConstraints = LayoutHelpers::alignment(wrapper, stackViews, this->axis, this->alignment);
@@ -106,11 +105,15 @@ protected:
     
     std::vector<kiwi::Constraint> constraints;
     ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
-    ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
+//    ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
     
     ofLogNotice(_getLogModule(__FUNCTION__)) << "Constraints Size = " << constraints.size();
     
-    this->addConstraints(constraints);
+    wrapper->addConstraints({
+      { subviews.front()->top == this->content_top | kiwi::strength::strong },
+    });
+    
+    wrapper->addConstraints(constraints);
     stackConstraints = constraints;
   }
   
@@ -174,8 +177,6 @@ protected:
     
     virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
     {
-//      ofLogNotice(_getLogModule(__FUNCTION__));
-      
       subview->setParent(this->getParent());
       subview->setLevel(this->level + 1);
       subview->disableInteractionOutsideParent();

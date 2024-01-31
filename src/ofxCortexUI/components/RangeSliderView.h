@@ -24,9 +24,10 @@ public:
       return instance;
     }
     
+  protected:
+    
     virtual void _update(double time, double delta) override;
     virtual void _draw() override;
-    virtual void _postDraw() override {};
     
     float _intensity { 1.0f };
   };

@@ -68,8 +68,9 @@ void RangeSliderView::_setup()
   
   bar = Bar::create("RangeSliderView::Bar");
   bar->disableY();
+  bar->enableDebug();
   bar->disableOverlap();
-  bar->setIntrinsicSize(1, 1);
+  bar->setIntrinsicSize(1, Styling::getRowHeight());
   bar->setWidth(this->getWidth());
   bar->setGrabAreaDimensions(glm::vec2(16 * Styling::getScale(), 16 * Styling::getScale()));
   bar->onResized([this](const ResizeableView::ResizeEvent & e) {
