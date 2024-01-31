@@ -611,17 +611,17 @@ void View::_drawHandler(ofEventArgs &e)
 
 void View::_mousePressedHandler(ofMouseEventArgs &e)
 {
-  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  bool isPressedInside = isInside(e);
+  bool isPressedInsideParent = hasParent() ? getParent()->isInside(e) : true;
   
-  if (isInside(e)) ofLogNotice(_getLogModule(__FUNCTION__)) << "Should trigger? " << shouldTrigger << std::endl;
+  bool shouldTrigger = isPressedInside && (isPressedInsideParent || _enableInteractionOutsideParent);
   
-  bool isPressedInside = isInside(e) && shouldTrigger;
+  ofLogVerbose(_getLogModule(__FUNCTION__)) << std::boolalpha << "Pressed inside = " << isPressedInside << " Inside parent = " << isPressedInsideParent << " => Should trigger = " << shouldTrigger;
   
   MouseEventArgs customE(e);
   customE.isOverlapped = isOverlapped(e);
   
-  if (isPressedInside) {
+  if (shouldTrigger) {
     _triggerMousePressed(customE);
     if (_includeInOverlap) View::focused = shared_from_this();
   }
@@ -633,14 +633,14 @@ void View::_mousePressedHandler(ofMouseEventArgs &e)
 
 void View::_mouseReleasedHandler(ofMouseEventArgs &e)
 {
-  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
-  bool isReleasedInside = isInside(e) && shouldTrigger;
+  bool isReleasedInside = isInside(e);
+  bool isReleasedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isReleasedInside && (isReleasedInsideParent || _enableInteractionOutsideParent);
   
   MouseEventArgs customE(e);
   customE.isOverlapped = isOverlapped(e);
   
-  if (_wasMousePressedInside) _triggerMouseReleased(customE);
+  if (shouldTrigger) _triggerMouseReleased(customE);
   if (_wasMousePressedInside && !isReleasedInside) _triggerMouseReleasedOutside(customE);
   
   _isMousePressed = false;
@@ -650,16 +650,15 @@ void View::_mouseReleasedHandler(ofMouseEventArgs &e)
 
 void View::_mouseMovedHandler(ofMouseEventArgs &e)
 {
-  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
-  
-  bool isMovedInside = isInside(e) && shouldTrigger;
+  bool isMovedInside = isInside(e);
+  bool isMovedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isMovedInside && (isMovedInsideParent || _enableInteractionOutsideParent);
   
   auto deltaEvent = DeltaMouseEvent(e);
   deltaEvent.isOverlapped = isOverlapped(e);
   deltaEvent.delta = e - _lastMousePosition;
   
-  if (isMovedInside) _triggerMouseMoved(deltaEvent);
+  if (shouldTrigger) _triggerMouseMoved(deltaEvent);
   
   if (!_isMouseOver && isMovedInside) {
     _triggerMouseEnter(deltaEvent);
@@ -679,35 +678,34 @@ void View::_mouseDraggedHandler(ofMouseEventArgs &e)
   deltaEvent.isOverlapped = isOverlapped(e);
   deltaEvent.delta = e - _lastMousePosition;
   
-  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
+  bool isDraggedInside = isInside(e);
+  bool isDraggedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isDraggedInside && (isDraggedInsideParent || _enableInteractionOutsideParent);
   
-  bool isMovedInside = isInside(e) && shouldTrigger;
   
-  if (_wasMousePressedInside) _triggerMouseDragged(deltaEvent);
+  if (shouldTrigger) _triggerMouseDragged(deltaEvent);
   
-  if (!_isMouseOver && isMovedInside) {
+  if (!_isMouseOver && isDraggedInside) {
     _triggerMouseEnter(deltaEvent);
   }
   
-  if (_isMouseOver && !isMovedInside) {
+  if (_isMouseOver && !isDraggedInside) {
     _triggerMouseExit(deltaEvent);
   }
   
-  _isMouseOver = isMovedInside;
+  _isMouseOver = isDraggedInside;
   _lastMousePosition = e;
 }
 
 void View::_mouseScrolledHandler(ofMouseEventArgs &e)
 {
-  bool isInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isInsideParent || _enableInteractionOutsideParent;
-  
-  bool isScrolledInside = isInside(e) && shouldTrigger;
+  bool isScrolledInside = isInside(e);
+  bool isScrolledInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  bool shouldTrigger = isScrolledInside && (isScrolledInsideParent || _enableInteractionOutsideParent);
   
   MouseEventArgs event(e);
   event.isOverlapped = isOverlapped(e);
-  if (isScrolledInside) _triggerMouseScrolled(event);
+  if (shouldTrigger) _triggerMouseScrolled(event);
 }
 
 

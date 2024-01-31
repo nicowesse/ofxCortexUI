@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stack>
+
 #include "kiwi.h"
 #include "ofEvents.h"
 #include "ofLog.h"
@@ -36,10 +38,12 @@ public:
   void disableDebug() { _enableDebug = false; }
   
   
-#pragma mark - OBJECT: Initalizsations and Loops
+#pragma mark - OBJECT: Initialisation and Loops
 protected:
   void _setup();
+  
   virtual void _update(double time, double delta);
+  
   virtual void _preDraw();
   virtual void _draw();
   virtual void _postDraw();

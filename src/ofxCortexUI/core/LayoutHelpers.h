@@ -372,6 +372,8 @@ public:
        { outer->content_bottom == views.back()->bottom | kiwi::strength::strong }
      };
     }
+    
+    return std::vector<kiwi::Constraint>();
   }
   
   static std::vector<kiwi::Constraint> attachLeading(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
@@ -390,6 +392,8 @@ public:
        { outer->content_top == views.front()->top | kiwi::strength::strong }
      };
     }
+    
+    return std::vector<kiwi::Constraint>();
   }
   
   static std::vector<kiwi::Constraint> attachTrailing(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
@@ -408,6 +412,8 @@ public:
        { outer->content_bottom == views.back()->bottom | kiwi::strength::strong }
      };
     }
+    
+    return std::vector<kiwi::Constraint>();
   }
   
   
@@ -416,6 +422,8 @@ public:
   {
     if (axis == Axis::HORIZONTAL) return alignHorizontal(outer, views, alignment);
     else if (axis == Axis::VERTICAL) return alignVertical(outer, views, alignment);
+    
+    return std::vector<kiwi::Constraint>();
   }
   
   static std::vector<kiwi::Constraint> alignHorizontal(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment)
@@ -431,6 +439,7 @@ public:
       else if (alignment == Alignment::TRAILING) constraints.push_back({ current->bottom == outer->content_bottom | kiwi::strength::strong });
       else constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
     });
+    
     return constraints;
   }
   
