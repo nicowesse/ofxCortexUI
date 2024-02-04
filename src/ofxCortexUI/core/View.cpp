@@ -21,8 +21,8 @@ View::View(const std::string & name)
   });
     
   this->addConstraints({
-    kiwi::Constraint { width == intrinsic_width | kiwi::strength::medium },
-    kiwi::Constraint { height == intrinsic_height | kiwi::strength::medium },
+    kiwi::Constraint { width == intrinsic_width | kiwi::strength::weak },
+    kiwi::Constraint { height == intrinsic_height | kiwi::strength::weak },
 //    kiwi::Constraint { width >= intrinsic_width | kiwi::strength::medium },
 //    kiwi::Constraint { height >= intrinsic_height | kiwi::strength::medium },
 //    kiwi::Constraint { width <= intrinsic_width | kiwi::strength::weak },
@@ -113,7 +113,7 @@ void View::onDraw()
 {
   ofPushStyle();
   ofSetColor(255);
-  Styling::drawBackground(this->getBounds());
+  Styling::drawBackground(this->frame, this->getMouseState());
   ofPopStyle();
 }
 
@@ -122,7 +122,7 @@ void View::onPostDraw()
   if (this->isFocused())
   {
     ofPushStyle();
-    Styling::drawFocusBorder(this->getBounds());
+    Styling::drawFocusBorder(this->frame);
     ofPopStyle();
   }
   
@@ -131,7 +131,7 @@ void View::onPostDraw()
 
 void View::onDrawMask()
 {
-  ofDrawRectangle(this->getBounds());
+  ofDrawRectangle(this->frame);
 }
 
 void View::onDrawSubviews()
@@ -144,10 +144,17 @@ void View::onDebug()
   ofPushStyle();
   ofNoFill();
   ofSetColor(ofColor::red);
-  ofDrawRectangle(this->getBounds());
+  ofDrawRectangle(this->frame);
   
-  ofSetColor(ofColor::green, 128);
-  ofDrawRectangle(this->getContentBounds());
+  ofSetColor(ofColor::green);
+  ofDrawRectangle(this->contentFrame);
+  
+//  ofFill();
+//  ofSetColor(Styling::getBackgroundColor(getMouseState()));
+//  ofDrawRectangle(this->contentFrame);
+  
+  ofSetColor(255, 192);
+  ofDrawBitmapString(getName() + " - " + ofToString(frame), this->getContentBounds().x + 2, this->getContentBounds().y + 11 + 2);
   ofPopStyle();
 }
 
@@ -403,6 +410,9 @@ void View::updateConstraints()
 void View::layoutSubviews()
 {
   ofLogNotice(_getLogModule(__FUNCTION__));
+  
+  frame = getBounds();
+  contentFrame = getContentBounds();
 }
 
 ofRectangle View::getBounds() const
@@ -438,6 +448,20 @@ std::string View::_getLogModule(const std::string & func)
 
 
 #pragma mark - Event Handling
+void View::enableInteraction()
+{
+  this->enableMouseEvents();
+  this->enableKeyEvents();
+  this->isInteractionEnabled = true;
+}
+
+void View::disableInteraction()
+{
+  this->disableMouseEvents();
+  this->disableKeyEvents();
+  this->isInteractionEnabled = false;
+}
+
 void View::bindEvents()
 {
   ofLogNotice("View('" + _name + "')::bindEvents()");
@@ -508,8 +532,6 @@ void View::mouseReleasedHandler(ofMouseEventArgs & e)
   if (isInsideView) { onMouseReleased(customE); }
   else if (this->wasMousePressedInside && !isInsideView) {
     onMouseReleasedOutside(customE);
-    
-    if (isFocused()) View::focused = nullptr;
   }
   
   this->isMousePressed = false;

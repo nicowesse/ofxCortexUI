@@ -198,18 +198,26 @@ public:
   ofRectangle getContentBounds() const;
   
   
-  
 #pragma mark - LAYOUT: Helpers
 protected:  
+  void updateFrames()
+  {
+    this->frame = getBounds();
+    this->contentFrame = getContentBounds();
+  }
   virtual void layoutSubviews();
   void layoutIfNeeded() {
     if (this->needsLayout) {
+      this->updateFrames();
       this->layoutSubviews();
       this->needsLayout = false;
     }
   }
   void setNeedsLayout() { this->needsLayout = true; };
   bool needsLayout { true };
+  
+  ofRectangle frame;
+  ofRectangle contentFrame;
   
   
   
@@ -282,6 +290,9 @@ protected:
   
 #pragma mark - EVENTS
 public:
+  void enableInteraction();
+  void disableInteraction();
+  
   void disableEvents() { this->unbindEvents(); }
   void enableUpdateEvent() { this->bindUpdateListener(); }
   void disableUpdateEvent() { this->unbindUpdateListener(); }
@@ -299,6 +310,8 @@ public:
   
 protected:
   inline static ofEventListeners eventListeners;
+  
+  bool isInteractionEnabled { true };
   // All Events
   void bindEvents();
   void unbindEvents();
@@ -346,12 +359,12 @@ protected:
   void mouseDraggedHandler(ofMouseEventArgs & e);
   void mouseScrolledHandler(ofMouseEventArgs & e);
   
-  
-  
   ofxCortex::ui::Styling::State getMouseState() const {
-    if (isMouseInside && isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
-    else if (isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
-    else if (isMouseInside) return ofxCortex::ui::Styling::State::HOVER;
+    if (!this->isInteractionEnabled) return ofxCortex::ui::Styling::State::IDLE;
+    
+    if (this->isMouseInside && this->isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
+    else if (this->isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
+    else if (this->isMouseInside) return ofxCortex::ui::Styling::State::HOVER;
     
     return ofxCortex::ui::Styling::State::IDLE;
   }
