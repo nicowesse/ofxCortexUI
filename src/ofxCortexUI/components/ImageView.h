@@ -76,7 +76,7 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _draw() override
+  virtual void onDraw() override
   {
 //    background->drawBackground();
     Styling::drawBackground(this->getBounds(), View::getMouseState());
@@ -84,12 +84,12 @@ protected:
     this->_drawOverlay(_overlayOpacity);
   }
   
-  virtual void _mouseEnter(const MouseEventArgs & e) override
+  virtual void onMouseEnter(const MouseEventArgs & e) override
   {
     Tweenzor::add(&_overlayOpacity, _overlayOpacity, 1.0f, 0.0f, 0.25f, EASE_IN_OUT_QUART);
   }
   
-  virtual void _mousePressed(const MouseEventArgs & e) override
+  virtual void onMousePressed(const MouseEventArgs & e) override
   {
     auto result = ofSystemLoadDialog("Image Path");
     if (result.bSuccess) {
@@ -101,7 +101,7 @@ protected:
     }
   }
   
-  virtual void _mouseExit(const MouseEventArgs & e) override
+  virtual void onMouseExit(const MouseEventArgs & e) override
   {
     Tweenzor::add(&_overlayOpacity, _overlayOpacity, 0.0f, 0.0f, 0.25f, EASE_IN_OUT_QUART);
   }
@@ -125,22 +125,28 @@ protected:
 };
 
 class Image : public ofxCortex::ui::View {
-public:
+protected:
   Image(ofParameter<ofxCortex::core::types::Image> param) : View(param.getName())
   {
     parameter.makeReferenceTo(param);
   }
   
-  static std::shared_ptr<Image> create(ofParameter<ofxCortex::core::types::Image> param) {
-    auto ptr = std::make_shared<Image>(param);
-    ptr->_setup();
-    return ptr;
-  };
+public:
+  template<typename ... T>
+  static std::shared_ptr<Image> create(T&& ... t) {
+    struct EnableMakeShared : public Image { EnableMakeShared(T&&... arg) : Image(std::forward<T>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<T>(t)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
+  }
   
 protected:
   virtual std::string _getComponentName() const override { return "Image"; };
   
-  void _setup()
+  virtual void viewDidLoad() override
   {
     heading = ui::ValueView<ofxCortex::core::types::Image>::create(parameter);
     heading->setName(getName() + "::Value");
@@ -154,7 +160,7 @@ protected:
     this->disableSubviewRendering();
   }
   
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     heading->draw();
     imageViewer->draw();

@@ -12,16 +12,24 @@ template<typename T>
 class SliderView : public ofxCortex::ui::View {
   static_assert(std::is_arithmetic<T>::value, "SliderView: T must be numeric!");
   
-public:
+protected:
   SliderView(ofParameter<T> param) : View(param.getName())
   {
     parameter.makeReferenceTo(param);
   };
   
-  static shared_ptr<SliderView<T>> create(ofParameter<T> param) {
-    auto ptr = make_shared<SliderView<T>>(param);
-    ptr->_setup();
-    return ptr;
+public:
+  
+  
+  template<typename ... F>
+  static std::shared_ptr<SliderView<T>> create(F&& ... f) {
+    struct EnableMakeShared : public SliderView<T> { EnableMakeShared(F&&... arg) : SliderView<T>(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
   
   
@@ -30,15 +38,15 @@ protected:
   virtual string _getComponentName() const override { return "SliderView"; };
   
   
-  virtual void _draw() override;
+  virtual void onDraw() override;
   void _drawSlider();
   void _drawZero();
   void _drawDot();
   
-  virtual void _mousePressed(const MouseEventArgs & e) override;
-  virtual void _mouseDragged(const View::DeltaMouseEvent & e) override;
-  virtual void _mouseScrolled(const MouseEventArgs & e) override;
-  virtual void _keyPressed(const ofKeyEventArgs & e) override;
+  virtual void onMousePressed(const MouseEventArgs & e) override;
+  virtual void onMouseDragged(const MouseEventArgs & e) override;
+  virtual void onMouseScrolled(const MouseEventArgs & e) override;
+  virtual void onKeyPressed(const ofKeyEventArgs & e) override;
   
   ofParameter<T> parameter;
   T getNormalizedParameter() { return ofMap(parameter.get(), parameter.getMin(), parameter.getMax(), 0, 1, true); }

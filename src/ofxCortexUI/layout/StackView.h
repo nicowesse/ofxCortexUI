@@ -8,8 +8,7 @@
 namespace ofxCortex { namespace ui {
 
 class StackView : public ofxCortex::ui::View {
-public:
-  
+protected:
   StackView(LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Distribution distribution = LayoutHelpers::Distribution::STACK, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE)
   : View("StackView"), axis(axis), distribution(distribution), alignment(alignment)
   {
@@ -17,40 +16,37 @@ public:
     LayoutEngine::suggestValue(scroll_y, 0.0);
   }
   
-  static std::shared_ptr<StackView> create(LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Distribution distribution = LayoutHelpers::Distribution::STACK, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE) {
-    auto instance = std::make_shared<StackView>(axis, distribution, align);
-    instance->_setup();
+public:
+  static std::shared_ptr<StackView> create(std::vector<std::shared_ptr<View>> views, LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Distribution distribution = LayoutHelpers::Distribution::STACK, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE) 
+  {
+    struct EnableMakeShared : public StackView { EnableMakeShared(LayoutHelpers::Axis axis, LayoutHelpers::Distribution distribution, LayoutHelpers::Alignment align) : StackView(axis, distribution, align) {} };
+    
+    auto instance = std::make_shared<EnableMakeShared>(axis, distribution, align);
+    instance->viewDidLoad();
+    instance->setup(views);
+    
+    View::everyView.insert(instance);
+    
     return instance;
   }
   
-  static std::shared_ptr<StackView> create(std::vector<std::shared_ptr<View>> views, LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Distribution distribution = LayoutHelpers::Distribution::STACK, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE) {
-    auto instance = std::make_shared<StackView>(axis, distribution, align);
-    instance->_setup(views);
-    return instance;
-  }
-  
+  // Bypassing the
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
   {
-//    ofLogNotice(_getLogModule(__FUNCTION__));
+    ofLogNotice(_getLogModule(__FUNCTION__));
     
-    wrapper->addSubviewAt(subview, index);
+//    wrapper->addSubviewAt(subview, index);
     stackViews.push_back(subview);
     
-    this->_setNeedsUpdateConstraints();
-  }
-  
-  virtual void addSubviews(std::vector<std::shared_ptr<View>> views) override
-  {
-    View::addSubviews(views);
-    
-    this->_updateConstraintsImmediately();
+    View::addSubviewAt(subview, index);
+    this->setNeedsUpdateConstraints();
   }
   
   virtual void removeSubview(std::shared_ptr<View> subview) override
   {
     stackViews.erase(std::remove(std::begin(stackViews), std::end(stackViews), subview), std::end(stackViews));
-    wrapper->removeSubview(subview);
-    this->_setNeedsUpdateConstraints();
+    this->removeSubview(subview);
+    this->setNeedsUpdateConstraints();
   }
   
   void enableBackground() { this->_enableBackground = true; }
@@ -59,17 +55,17 @@ public:
 protected:
   virtual std::string _getComponentName() const override { return "StackView"; };
   
-  void _setup(const std::vector<std::shared_ptr<View>> & views = {})
+  void setup(const std::vector<std::shared_ptr<View>> & views = {})
   {
+    ofLogNotice(_getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' | Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "' | Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
+    
     this->enableSubviewRendering();
-    this->enableMask();
+    this->disableMask();
     
     wrapper = Wrapper::create();
+//    wrapper->enableDebug();
     wrapper->enableSubviewRendering();
-    View::addSubviewAt(wrapper, subviews.size());
-    
-//    ofLogNotice(_getLogModule(__FUNCTION__)) << "ADD SUBVIEWS";
-    this->addSubviews(views);
+    View::addSubviewAt(wrapper, subviews.size()); // Cannot use the addSubview, since it uses the modified addSubviewAt
     
     this->addConstraints({
       { wrapper->left == this->left | kiwi::strength::strong },
@@ -78,48 +74,47 @@ protected:
       { wrapper->top == this->scroll_y + Styling::marginTop() | kiwi::strength::strong },
     });
     
-    this->setIntrinsicHeight(Styling::getRowHeight() * 5);
+    this->addSubviews(views);
     
-    ofLogNotice(_getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' | Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "' | Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
+    this->setIntrinsicHeight(Styling::getRowHeight() * 5);
   }
   
-  virtual void _update(double time, double delta) override
+  virtual void onUpdate(float time, float delta) override
   {
-    View::_update(time, delta);
+    View::onUpdate(time, delta);
     
     _scrollIntensity = ofLerp(_scrollIntensity, 0.0, 1.0 - pow(0.005, delta));
   }
   
-  virtual void _updateConstraints() override
+  virtual void updateConstraints() override
   {
-    if (stackViews.size() == 0) return;
+    if (subviews.size() == 0) return;
     
     ofLogNotice(_getLogModule(__FUNCTION__)) << "StackViews Size = " << stackViews.size();
     
-    // Reset Constraints
-    wrapper->removeConstraints(stackConstraints);
+    wrapper->removeAllConstraints();
     stackConstraints.clear();
     
-    auto alignmentConstraints = LayoutHelpers::alignment(wrapper, stackViews, this->axis, this->alignment);
-    auto distributeConstraints = LayoutHelpers::distribute(wrapper, stackViews, this->axis, this->distribution);
+//    auto alignmentConstraints = LayoutHelpers::alignment(wrapper, stackViews, this->axis, this->alignment);
+//    auto distributeConstraints = LayoutHelpers::distribute(wrapper, stackViews, this->axis, this->distribution);
     
     std::vector<kiwi::Constraint> constraints;
-    ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
+//    ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
 //    ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
     
-    ofLogNotice(_getLogModule(__FUNCTION__)) << "Constraints Size = " << constraints.size();
-    
-    wrapper->addConstraints({
-      { subviews.front()->top == this->content_top | kiwi::strength::strong },
+    this->addConstraints({
+      { stackViews.front()->top == this->content_top | kiwi::strength::strong },
+//      { stackViews.front()->left == wrapper->content_left | kiwi::strength::strong },
+//      { stackViews.front()->right == wrapper->content_left | kiwi::strength::strong },
     });
     
-    wrapper->addConstraints(constraints);
+//    this->addConstraints(constraints);
     stackConstraints = constraints;
   }
   
-  virtual void _preDraw() override
+  virtual void onPreDraw() override
   {
-    View::_preDraw();
+    View::onPreDraw();
     
     ofPushStyle();
     {
@@ -128,8 +123,8 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _postDraw() override {
-    View::_postDraw();
+  virtual void onPostDraw() override {
+    View::onPostDraw();
 
     ofPushStyle();
     
@@ -147,7 +142,7 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _drawMask() override
+  virtual void onDrawMask() override
   {
     ofPushStyle();
     {
@@ -156,7 +151,7 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _mouseScrolled(const MouseEventArgs & e) override
+  virtual void onMouseScrolled(const MouseEventArgs & e) override
   {
     float heightDiff = this->getHeight() - wrapper->getHeight();
     bool shouldScroll = heightDiff < 0.0f && scroll_y.value() + e.scrollY > heightDiff;
@@ -168,22 +163,36 @@ protected:
   std::vector<kiwi::Constraint> stackConstraints;
   
   class Wrapper : public ofxCortex::ui::View {
-  public:
+  protected:
     Wrapper() : View("Wrapper") {}
     
-    static std::shared_ptr<Wrapper> create() {
-      return std::make_shared<Wrapper>();
+  public:
+    
+    
+    template<typename ... F>
+    static std::shared_ptr<Wrapper> create(F&& ... f) {
+      struct EnableMakeShared : public Wrapper { EnableMakeShared(F&&... arg) : Wrapper(std::forward<F>(arg)...) {} };
+      
+      auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+      p->viewDidLoad();
+      
+      View::everyView.insert(p);
+      return p;
     }
     
     virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
     {
+      ofLogNotice(_getLogModule(__FUNCTION__)) << "Index = " << index << " Name = '" << subview->getName() << "'";
+      
       subview->setParent(this->getParent());
       subview->setLevel(this->level + 1);
       subview->disableInteractionOutsideParent();
       
       this->subviews.push_back(subview);
-      this->everyView.push_back(subview);
     }
+    
+  protected:
+    virtual std::string _getComponentName() const override { return "StackView::Wrapper"; };
   };
   std::shared_ptr<Wrapper> wrapper;
   

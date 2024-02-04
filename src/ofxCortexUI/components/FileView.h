@@ -9,23 +9,31 @@
 namespace ofxCortex { namespace ui {
 
 class FileView : public ofxCortex::ui::View {
-public:
+protected:
   FileView(ofParameter<ofxCortex::core::types::File> param) : View(param.getName())
   {
     parameter.makeReferenceTo(param);
   }
   
-  static std::shared_ptr<FileView> create(ofParameter<ofxCortex::core::types::File> param) {
-    auto instance = make_shared<FileView>(param);
-    instance->_setup();
-    return instance;
-  };
+public:
+  
+  
+  template<typename ... F>
+  static std::shared_ptr<FileView> create(F&& ... f) {
+    struct EnableMakeShared : public FileView { EnableMakeShared(F&&... arg) : FileView(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
+  }
   
 protected:
   
   virtual string _getComponentName() const override { return "FileView"; };
   
-  void _setup()
+  virtual void viewDidLoad() override
   {
     fileValue = ui::ValueView<ofxCortex::core::types::File>::create(parameter);
     fileValue->setName(getName() + "::Value");
@@ -42,20 +50,16 @@ protected:
     this->disableSubviewRendering();
   }
   
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     fileValue->draw();
     button->draw();
   }
   
-  virtual void _updateConstraints() override
-  {
-    View::_updateConstraints();
-    
-    this->addConstraints({
-      { }
-    });
-  }
+//  virtual void updateConstraints() override
+//  {
+//    View::updateConstraints();
+//  }
   
   // Members
   ofParameter<ofxCortex::core::types::File> parameter;

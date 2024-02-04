@@ -9,37 +9,35 @@ namespace ofxCortex { namespace ui {
 
 template<typename T>
 class ValueView : public ofxCortex::ui::View {
-public:
-  
+protected:
   ValueView(std::string name, T value) : View(name)
   {
     parameter.setName(name);
     parameter.set(value);
-  }
-  static std::shared_ptr<ValueView<T>> create(std::string name, T value) {
-    auto ptr = std::make_shared<ValueView>(name, value);
-    ptr->_setup();
-    return ptr;
   }
   
   ValueView(ofParameter<T> param) : View(param.getName())
   {
     parameter.makeReferenceTo(param);
   }
-  static std::shared_ptr<ValueView<T>> create(ofParameter<T> parameter) {
-    auto ptr = std::make_shared<ValueView<T>>(parameter);
-    ptr->_setup();
-    return ptr;
+  
+public:
+  
+  template<typename ... F>
+  static std::shared_ptr<ValueView<T>> create(F&& ... f) {
+    struct EnableMakeShared : public ValueView<T> { EnableMakeShared(F&&... arg) : ValueView<T>(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
   
 protected:
   virtual std::string _getComponentName() const override { return "ValueView"; };
   
-  void _setup()
-  {
-  }
-  
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     const auto & b = this->getContentBounds();
     

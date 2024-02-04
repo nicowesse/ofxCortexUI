@@ -15,54 +15,75 @@
 namespace ofxCortex { namespace ui {
 
 class View : public std::enable_shared_from_this<View> {
+protected:
+  View(const std::string & name);
+  
 public:
-//  View();
-  View(std::string name);
   virtual ~View();
   
-  static std::shared_ptr<View> create(const std::string & name);
+  template<typename ... F>
+  static std::shared_ptr<View> create(F&& ... f) {
+    struct EnableMakeShared : public View { EnableMakeShared(F&&... arg) : View(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
+  }
   
-  void update();
-  void update(double time, double delta);
-  void enableAutoUpdate();
-  void disableAutoUpdate();
-  
-  void draw();
-  void enableSubviewRendering() { _shouldDrawSubviews = true; }
-  void disableSubviewRendering() { _shouldDrawSubviews = false; }
-  
-  void enableMask() { _enableMask = true; }
-  void disableMask() { _enableMask = false; }
-  
-  void enableDebug() { _enableDebug = true; }
-  void disableDebug() { _enableDebug = false; }
-  
-  
-#pragma mark - OBJECT: Initialisation and Loops
-protected:
-  void _setup();
-  
-  virtual void _update(double time, double delta);
-  
-  virtual void _preDraw();
-  virtual void _draw();
-  virtual void _postDraw();
-  
-  virtual void _drawMask();
-  bool _enableMask { false };
-  
-  virtual void _debug();
-  bool _enableDebug { false };
-  
-  virtual void _drawSubviews();
-  bool _shouldDrawSubviews { true };
-  
-  
-#pragma mark - OBJECT: Identification
-public:
   virtual void setName(std::string name) { _name = name; }
   std::string getName() const { return _name; }
   
+  void update() { this->internalUpdate(ofGetElapsedTimef(), ofGetLastFrameTime()); }
+  void update(float time, float delta) { this->internalUpdate(time, delta); }
+  
+  void draw() { this->internalDraw(); }
+  void enableSubviewRendering() { shouldDrawSubviews = true; }
+  void disableSubviewRendering() { shouldDrawSubviews = false; }
+  
+  void enableMask() { isMaskEnabled = true; }
+  void disableMask() { isMaskEnabled = false; }
+  
+  void enableDebug() { isDebugEnabled = true; }
+  void disableDebug() { isDebugEnabled = false; }
+  
+  
+#pragma mark - OBJECT: Overrideables
+protected:
+  struct MouseEventArgs;
+  struct DeltaMouseEventArgs;
+  
+  virtual void viewDidLoad() {};
+  
+  virtual void onUpdate(float time, float delta) {};
+  
+  virtual void onPreDraw() {}
+  virtual void onDraw();
+  virtual void onPostDraw();
+  
+  virtual void onDrawMask();
+  virtual void onDebug();
+  virtual void onDrawSubviews();
+  
+  virtual void onMousePressed(const MouseEventArgs & e);
+  virtual void onMouseReleased(const MouseEventArgs & e);
+  virtual void onMouseReleasedOutside(const MouseEventArgs & e);
+  virtual void onMouseEnter(const MouseEventArgs & e);
+  virtual void onMouseExit(const MouseEventArgs & e);
+  virtual void onMouseMoved(const MouseEventArgs & e);
+  virtual void onMouseDragged(const MouseEventArgs & e);
+  virtual void onMouseScrolled(const MouseEventArgs & e);
+  
+  virtual void onKeyPressed(const ofKeyEventArgs & e);
+  virtual void onKeyReleased(const ofKeyEventArgs & e);
+  virtual void onCharTyped(const uint32_t & c);
+  
+  virtual void onWindowResized(const ofResizeEventArgs & e) {};
+  
+  
+  
+#pragma mark - OBJECT: Identification
 protected:
   std::string _name;
   
@@ -95,6 +116,7 @@ public:
   
   void removeConstraint(kiwi::Constraint & constraints);
   void removeConstraints(std::vector<kiwi::Constraint> constraints);
+  void removeAllConstraints();
   
   void setIntrinsicSize(float width, float height);
   void setIntrinsicWidth(float width);
@@ -137,10 +159,11 @@ public:
   void setZ(int value) { layerZ = value; }
   int getZ() const { return layerZ; }
   
-  bool isInside(const glm::vec2 & point);
+  bool inside(const glm::vec2 & point);
   bool isOverlapped(const glm::vec2 & point);
-  void enableOverlap() { _includeInOverlap = true; }
-  void disableOverlap() { _includeInOverlap = false; }
+  
+  void enableOverlap() { includeInOverlap = true; }
+  void disableOverlap() { includeInOverlap = false; }
   
   
 #pragma mark - LAYOUT: Variables
@@ -174,43 +197,60 @@ public:
   ofRectangle getBounds() const;
   ofRectangle getContentBounds() const;
   
+  
+  
 #pragma mark - LAYOUT: Helpers
-  void setNeedsLayout(bool affectSubviews = false);
+protected:  
+  virtual void layoutSubviews();
+  void layoutIfNeeded() {
+    if (this->needsLayout) {
+      this->layoutSubviews();
+      this->needsLayout = false;
+    }
+  }
+  void setNeedsLayout() { this->needsLayout = true; };
+  bool needsLayout { true };
   
-protected:
+  
+  
+  virtual void updateConstraints();
+  void setNeedsUpdateConstraints() { this->needsUpdateConstraints = true; }
+  void updateConstraintsIfNeeded() {
+    if (this->needsUpdateConstraints) {
+      this->updateConstraints();
+      this->needsUpdateConstraints = false;
+    }
+  }
+  bool needsUpdateConstraints { true };
+  
   std::vector<kiwi::Constraint> constraints;
-  virtual void _updateConstraints();
-  void _updateConstraintsIfNeeded();
-  void _updateConstraintsImmediately();
-  void _setNeedsUpdateConstraints();
-  bool _needsUpdateConstraints { false };
   
-  
-  virtual void _updateLayout();
-  void _updateLayoutImmediately();
-  void _layoutIfNeeded(bool layoutSubviews = true);
-  bool _needsLayout { false };
   
   
 #pragma mark - LAYOUT: Rendering
+protected:
+  void internalUpdate(double time, double delta);
+  void internalDraw();
+  
+  bool isMaskEnabled { false };
+  bool isDebugEnabled { false };
+  bool shouldDrawSubviews { true };
+  
 //  ofRectangle bounds;
 //  ofRectangle _getBounds() const;
-  ofRectangle _getLocalBounds() const;
+  ofRectangle getLocalBounds() const;
   
 //  ofRectangle contentBounds;
 //  ofRectangle _getContentBounds() const;
-  ofRectangle _getLocalContentBounds() const;
+  ofRectangle getLocalContentBounds() const;
   
   int layerZ { 0 };
-  bool _includeInOverlap { true };
-  void _updateBounds();
-  
-  ofMatrix4x4 _getTransformationMatrix() const;
-  ofMatrix4x4 _getInverseTransformationMatrix() const;
+  bool includeInOverlap { true };
+  void updateBounds();
   
   
   
-#pragma mark - Family Tree
+#pragma mark - OBJECT: Family Tree
 public:
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index);
   virtual void addSubview(const std::shared_ptr<View> & subview);
@@ -230,262 +270,127 @@ protected:
   std::vector<std::shared_ptr<View>> subviews;
   
   inline static std::shared_ptr<View> focused = nullptr;
-  bool _isFocused() const { return View::focused != nullptr && View::focused.get() == this; }
-  static std::vector<std::shared_ptr<View>> everyView;
+  bool isFocused() const { return View::focused != nullptr && View::focused.get() == this; }
+  
+  inline static std::set<std::shared_ptr<View>> everyView;
+  
   int level { 0 };
-  int _getDepth() const;
-  int _getActualZ() const { return _getDepth() + layerZ; }
+  int getDepth() const;
+  int getActualZ() const { return getDepth() + layerZ; }
   
   
   
 #pragma mark - EVENTS
 public:
-  void enableEvents() {
-    _addMouseEventListeners();
-    _addKeyEventListeners();
-  }
-  void disableEvents() {
-    _removeMouseEventListeners();
-    _removeKeyEventListeners();
-  }
-  void enableMouseEvents() { _addMouseEventListeners(); }
-  void disableMouseEvents() { _removeMouseEventListeners(); }
+  void disableEvents() { this->unbindEvents(); }
+  void enableUpdateEvent() { this->bindUpdateListener(); }
+  void disableUpdateEvent() { this->unbindUpdateListener(); }
+  void enableDrawEvent() { this->bindDrawListener(); }
+  void disableDrawEvent() { this->bindUpdateListener(); }
+  void enableMouseEvents() { this->bindMouseListeners(); }
+  void disableMouseEvents() { this->unbindMouseListeners(); }
+  void enableKeyEvents() { this->bindKeyListeners(); }
+  void disableKeyEvents() { this->unbindKeyListeners(); }
+  void enableWindowResizeEvents() { this->bindWindowResizedListener(); }
+  void disableWindowResizeEvents() { this->unbindWindowResizedListener(); }
   
-  void enableInteractionOutsideParent() { this->_enableInteractionOutsideParent = true; }
-  void disableInteractionOutsideParent() { this->_enableInteractionOutsideParent = false; }
+  void enableInteractionOutsideParent() { this->shouldEnableInteractionOutsideParent = true; }
+  void disableInteractionOutsideParent() { this->shouldEnableInteractionOutsideParent = false; }
   
+protected:
+  inline static ofEventListeners eventListeners;
+  // All Events
+  void bindEvents();
+  void unbindEvents();
+  
+  // Update
+  void bindUpdateListener() { ofAddListener(ofEvents().update, this, &View::updateHandler); }
+  void unbindUpdateListener() { ofRemoveListener(ofEvents().update, this, &View::updateHandler); }
+  void updateHandler(ofEventArgs & e) { this->internalUpdate(ofGetElapsedTimef(), ofGetLastFrameTime()); }
+  
+  // Draw
+  void bindDrawListener() { ofAddListener(ofEvents().draw, this, &View::drawHandler); }
+  void unbindDrawListener() { ofRemoveListener(ofEvents().draw, this, &View::drawHandler); }
+  void drawHandler(ofEventArgs & e) { this->internalDraw(); }
+  
+  // Window Resized
+  void bindWindowResizedListener() { ofAddListener(ofEvents().windowResized, this, &View::windowResizedHandler); }
+  void unbindWindowResizedListener() { ofRemoveListener(ofEvents().windowResized, this, &View::windowResizedHandler); }
+  void windowResizedHandler(ofResizeEventArgs & e) { this->onWindowResized(e); }
+  
+  // Mouse Handling
   struct MouseEventArgs : public ofMouseEventArgs {
     MouseEventArgs() : ofMouseEventArgs() {};
     MouseEventArgs(const ofMouseEventArgs & e) : ofMouseEventArgs(e) {};
     MouseEventArgs& operator= (const MouseEventArgs &other)
     {
       ofMouseEventArgs::operator=(other);
+      
+      isInside = other.isInside;
       isOverlapped = other.isOverlapped;
+      delta = other.delta;
+      
       return *this;
     }
     
+    bool isInside { false };
     bool isOverlapped { false };
+    glm::vec2 delta { 0, 0 };
   };
   
-  struct DeltaMouseEvent : public MouseEventArgs {
-    DeltaMouseEvent() : MouseEventArgs() {};
-    DeltaMouseEvent(const ofMouseEventArgs & e) : MouseEventArgs(e) {};
-    DeltaMouseEvent(const DeltaMouseEvent & e) : MouseEventArgs(e), delta(e.delta) {};
-    DeltaMouseEvent& operator= (const DeltaMouseEvent &other)
-    {
-      MouseEventArgs::operator=(other);
-      delta = other.delta;
-      return *this;
-    }
-    
-    glm::vec2 delta;
-  };
+  void bindMouseListeners();
+  void unbindMouseListeners();
+  void mousePressedHandler(ofMouseEventArgs & e);
+  void mouseReleasedHandler(ofMouseEventArgs & e);
+  void mouseMovedHandler(ofMouseEventArgs & e);
+  void mouseDraggedHandler(ofMouseEventArgs & e);
+  void mouseScrolledHandler(ofMouseEventArgs & e);
+  
+  
   
   ofxCortex::ui::Styling::State getMouseState() const {
-    if (_isMouseOver && _isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
-    else if (_isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
-    else if (_isMouseOver) return ofxCortex::ui::Styling::State::HOVER;
+    if (isMouseInside && isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
+    else if (isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
+    else if (isMouseInside) return ofxCortex::ui::Styling::State::HOVER;
     
     return ofxCortex::ui::Styling::State::IDLE;
   }
   
-  float getHoverIntensity() const { return _mouseHoverIntensity; }
-  float getActiveIntensity() const { return _mouseActiveIntensity; }
+  float getHoverIntensity() const { return mouseHoverIntensity; }
+  float getActiveIntensity() const { return mouseActiveIntensity; }
   
+  // Mouse Flags
+  bool isMouseInside { false };
+  bool isMousePressed { false };
+  bool wasMousePressedInside { false };
   
+  float mouseActiveIntensity { 0.0f };
+  float mouseHoverIntensity { 0.0f };
   
-  ofEvent<MouseEventArgs> onMousePressedE;
-  void onMousePressed(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMousePressedE.newListener(callback, 0)); }
-  bool isMousePressed() { return _isMousePressed; }
+  int lastMousePressTime { 0 };
+  int doublePressInterval { 500 };
+  glm::vec2 lastMousePosition { 0, 0 };
   
-  ofEvent<MouseEventArgs> onMouseDoublePressedE;
-  void onMouseDoublePressed(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseDoublePressedE.newListener(callback, 0)); }
+  bool shouldEnableInteractionOutsideParent { true };
   
-  ofEvent<MouseEventArgs> onMouseReleasedE;
-  void onMouseReleased(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedE.newListener(callback, 0)); }
-  
-  ofEvent<MouseEventArgs> onMouseReleasedOutsideE;
-  void onMouseReleasedOutside(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseReleasedOutsideE.newListener(callback, 0)); }
-  
-  ofEvent<DeltaMouseEvent> onMouseMovedE;
-  void onMouseMoved(std::function<void(DeltaMouseEvent)> callback) { _eventListeners.push(onMouseMovedE.newListener(callback, 0)); }
-  
-  ofEvent<DeltaMouseEvent> onMouseDraggedE;
-  void onMouseDragged(std::function<void(DeltaMouseEvent)> callback) { _eventListeners.push(onMouseDraggedE.newListener(callback, 0)); }
-  
-  ofEvent<MouseEventArgs> onMouseEnterE;
-  void onMouseEnter(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseDraggedE.newListener(callback, 0)); }
-  bool isMouseOver(){ return _isMouseOver; };
-  
-  ofEvent<MouseEventArgs> onMouseExitE;
-  void onMouseExit(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseExitE.newListener(callback, 0)); }
-  
-  ofEvent<MouseEventArgs> onMouseScrolledE;
-  void onMouseScrolled(std::function<void(MouseEventArgs)> callback) { _eventListeners.push(onMouseScrolledE.newListener(callback, 0)); }
-  
-  
-  ofEvent<ofKeyEventArgs> onKeyPressedE;
-  void onKeyPressed(std::function<void(ofKeyEventArgs)> callback) { _eventListeners.push(onKeyPressedE.newListener(callback, 0)); }
-  static bool isKeyPressed(int key) { return ofGetKeyPressed(key); };
-  
-  ofEvent<ofKeyEventArgs> onKeyReleasedE;
-  void onKeyReleased(std::function<void(ofKeyEventArgs)> callback) { _eventListeners.push(onKeyReleasedE.newListener(callback, 0)); }
-  
-  ofEvent<uint32_t> onCharTypedE;
-  void onCharTyped(std::function<void(uint32_t)> callback) { _eventListeners.push(onCharTypedE.newListener(callback, 0)); }
+  // Key Handling
+  void bindKeyListeners();
+  void unbindKeyListeners();
+  void keyPressedHandler(ofKeyEventArgs & e);
+  void keyReleasedHandler(ofKeyEventArgs & e);
+  void charTypedHandler(uint32_t & c);
   
 protected:
-  void _addUpdateEventListener();
-  void _removeUpdateEventListener();
   
-  void _addDrawEventListener();
-  void _removeDrawEventListener();
   
-  void _addWindowResizeEventListener();
-  void _removeWindowResizeEventListener();
-  
-  void _addMouseEventListeners();
-  void _removeMouseEventListeners();
-  
-  void _addKeyEventListeners();
-  void _removeKeyEventListeners();
-  
-  //    void _addTouchEventListeners();
-  //    void _removeTouchEventListeners();
-  
-  bool _isMousePressed { false };
-  float _mouseActiveIntensity { 0.0f };
-  
-  bool _isMouseOver { false };
-  float _mouseHoverIntensity { 0.0f };
-  
-  bool _wasMousePressedInside { false };
-  bool _wasMouseReleasedInside { false };
-  int _lastMousePressTime { 0 };
-  int _doublePressInterval { 500 };
-  glm::vec2 _lastMousePosition { 0, 0 };
-  
-  bool _enableInteractionOutsideParent { true };
-  
-  ofEventListeners _eventListeners;
   
 #pragma mark - EVENTS: Handlers
-  void _updateHandler(ofEventArgs &e);
-  void _drawHandler(ofEventArgs &e);
-  void _mousePressedHandler(ofMouseEventArgs &e);
-  void _mouseReleasedHandler(ofMouseEventArgs &e);
-  void _mouseMovedHandler(ofMouseEventArgs &e);
-  void _mouseDraggedHandler(ofMouseEventArgs &e);
-  void _mouseScrolledHandler(ofMouseEventArgs &e);
-  void _keyPressedHandler(ofKeyEventArgs &e);
-  void _keyReleasedHandler(ofKeyEventArgs &e);
-  void _charHandler(uint32_t &c);
-  
-  // Trigger Helpers
-  void _triggerMousePressed(MouseEventArgs & args) {
-    onMousePressedE.notify(args);
-    _mousePressed(args);
-  }
-  
-  void _triggerMouseDoublePressed(MouseEventArgs & args) {
-    onMouseDoublePressedE.notify(args);
-    _mouseDoublePressed(args);
-  }
-  
-  void _triggerMouseReleased(MouseEventArgs & args) {
-    onMouseReleasedE.notify(args);
-    _mouseReleased(args);
-  }
-  
-  void _triggerMouseReleasedOutside(MouseEventArgs & args) {
-    onMouseReleasedOutsideE.notify(args);
-    _mouseReleasedOutside(args);
-  }
-  
-  void _triggerMouseMoved(DeltaMouseEvent & args) {
-    onMouseMovedE.notify(args);
-    _mouseMoved(args);
-  }
-  
-  void _triggerMouseDragged(DeltaMouseEvent & args) {
-    onMouseDraggedE.notify(args);
-    _mouseDragged(args);
-  }
-  
-  void _triggerMouseScrolled(MouseEventArgs & args) {
-    onMouseScrolledE.notify(args);
-    _mouseScrolled(args);
-  }
-  
-  void _triggerMouseEnter(MouseEventArgs & args) {
-    onMouseEnterE.notify(args);
-    _mouseEnter(args);
-  }
-  
-  void _triggerMouseExit(MouseEventArgs & args) {
-    onMouseExitE.notify(args);
-    _mouseExit(args);
-  }
-  
-  void _triggerKeyPressed(ofKeyEventArgs & args) {
-    onKeyPressedE.notify(args);
-    _keyPressed(args);
-  }
-  
-  void _triggerKeyReleased(ofKeyEventArgs & args) {
-    onKeyReleasedE.notify(args);
-    _keyReleased(args);
-  }
-  
-  void _triggerCharTyped(uint32_t & args) {
-    onCharTypedE.notify(args);
-    _charTyped(args);
-  }
-  
-  // Hooks
-  virtual void _mousePressed(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
-  }
-  virtual void _mouseDoublePressed(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
-  }
-  virtual void _mouseReleased(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
-  }
-  virtual void _mouseReleasedOutside(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " Is overlapped = " << e.isOverlapped;
-  }
-  virtual void _mouseMoved(const DeltaMouseEvent & e) {
-    //    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " delta: " << e.delta.x << "," << e.delta.y;
-  }
-  virtual void _mouseDragged(const DeltaMouseEvent & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y << " delta: " << e.delta.x << "," << e.delta.y;
-  }
-  virtual void _mouseScrolled(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.scrollX << "," << e.scrollY;
-  }
-  virtual void _mouseEnter(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
-  }
-  virtual void _mouseExit(const MouseEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.x << "," << e.y;
-  }
-  
-  virtual void _keyPressed(const ofKeyEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.key;
-  }
-  virtual void _keyReleased(const ofKeyEventArgs & e) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << e.key;
-  }
-  virtual void _charTyped(const uint32_t &c) {
-    ofLogVerbose(_getLogModule(__FUNCTION__)) << c;
-  }
-  
-  virtual void _windowResized(ofResizeEventArgs &e) {
-//    ofLogNotice(_getLogModule(__FUNCTION__)) << "Scale = " << Styling::getScale() << " Row height: " << Styling::defaultRowHeight().value() * Styling::getScale();
-    this->setIntrinsicHeight(Styling::getRowHeight());
-    LayoutEngine::setNeedsSolve();
-  }
+
+//  virtual void _windowResized(ofResizeEventArgs &e) {
+////    ofLogNotice(_getLogModule(__FUNCTION__)) << "Scale = " << Styling::getScale() << " Row height: " << Styling::defaultRowHeight().value() * Styling::getScale();
+//    this->setIntrinsicHeight(Styling::getRowHeight());
+//    LayoutEngine::setNeedsSolve();
+//  }
 };
 
 }}

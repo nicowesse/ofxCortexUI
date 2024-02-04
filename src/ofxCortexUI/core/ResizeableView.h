@@ -6,20 +6,26 @@
 namespace ofxCortex { namespace ui {
 
 class ResizeableView : public View {
-public:
+protected:
   ResizeableView(std::string name) : View(name)
   {
     ofLogVerbose(_getLogModule(__FUNCTION__));
-    
-//    this->setIntrinsicSize(28, 20);
   }
   
-  static std::shared_ptr<ResizeableView> create(const std::string & name, ofRectangle rect = ofRectangle(0, 0, 288, 40))
-  {
-    auto instance = std::make_shared<ResizeableView>(name);
-    instance->_setup();
-    return instance;
+public:
+  
+  
+  template<typename ... T>
+  static std::shared_ptr<ResizeableView> create(T&& ... t) {
+    struct EnableMakeShared : public ResizeableView { EnableMakeShared(T&&... arg) : ResizeableView(std::forward<T>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<T>(t)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
+  
   
   void enableX()  { _enableX = true; }
   void disableX() { _enableX = false; }
@@ -44,18 +50,18 @@ public:
   struct ResizeEvent : public ofEventArgs {
     ofRectangle bounds;
   };
-  ofEvent<ResizeEvent> onResizedE;
-  void onResized(std::function<void(ResizeEvent)> callback) { _eventListeners.push(onResizedE.newListener(callback, 0)); }
+  ofEvent<ResizeEvent> onResizedEvent;
+  void onResizedE(std::function<void(ResizeEvent)> callback) { View::eventListeners.push(onResizedEvent.newListener(callback, 0)); }
   
 protected:
   virtual std::string _getComponentName() const override { return "ResizeableView"; };
   
-  void _setup()
+  virtual void viewDidLoad() override
   {
-    this->_updateConstraintsImmediately();
+    
   }
   
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     const auto & BB = this->getBounds();
     ofPushStyle();
@@ -83,9 +89,9 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _updateConstraints() override
+  virtual void updateConstraints() override
   {
-    View::_updateConstraints();
+    View::updateConstraints();
     
     this->addConstraints({
       { width >= _minWidth | kiwi::strength::strong },
@@ -106,7 +112,7 @@ protected:
     e.bounds.y = this->top.value();
     e.bounds.width = this->width.value() - value;
     e.bounds.height = this->height.value();
-    onResizedE.notify(e);
+    onResizedEvent.notify(e);
   }
   bool _limitLeft(float deltaX) { return this->constrainingView && this->left.value() + deltaX < constrainingView->content_left.value(); }
   
@@ -123,7 +129,7 @@ protected:
     e.bounds.y = this->top.value() + value;
     e.bounds.width = this->width.value();
     e.bounds.height = this->height.value() - value;
-    onResizedE.notify(e);
+    onResizedEvent.notify(e);
   }
   bool _limitTop(float deltaY) { return this->constrainingView && this->top.value() + deltaY < constrainingView->content_top.value(); }
   
@@ -139,7 +145,7 @@ protected:
     e.bounds.y = this->top.value();
     e.bounds.width = this->width.value() + value;
     e.bounds.height = this->height.value();
-    onResizedE.notify(e);
+    onResizedEvent.notify(e);
   }
   
   bool _limitRight(float deltaX) { return this->constrainingView && this->left.value() + this->width.value() + deltaX > constrainingView->content_right.value(); }
@@ -156,7 +162,7 @@ protected:
     e.bounds.y = this->top.value();
     e.bounds.width = this->width.value();
     e.bounds.height = this->height.value() + value;
-    onResizedE.notify(e);
+    onResizedEvent.notify(e);
   }
   bool _limitBottom(float deltaY) { return this->constrainingView && this->top.value() + this->height.value() + deltaY > constrainingView->content_bottom.value(); }
   
@@ -168,7 +174,7 @@ protected:
   float _minHeight { 20 };
   std::shared_ptr<View> constrainingView;
   
-  virtual void _mousePressed(const MouseEventArgs & e) override
+  virtual void onMousePressed(const MouseEventArgs & e) override
   {
     if (abs(e.x - this->getLeft()) < _grabAreaDimensions.x && _enableX) dragAnchorHorz = OF_ALIGN_HORZ_LEFT;
     if (abs(e.x - this->getRight()) < _grabAreaDimensions.x && _enableX) dragAnchorHorz = OF_ALIGN_HORZ_RIGHT;
@@ -178,7 +184,7 @@ protected:
   
   glm::vec2 _grabAreaDimensions { 8, 8 };
   
-  virtual void _mouseDragged(const DeltaMouseEvent & e) override
+  virtual void onMouseDragged(const MouseEventArgs & e) override
   {
     if (dragAnchorHorz == OF_ALIGN_HORZ_IGNORE && dragAnchorVert == OF_ALIGN_VERT_IGNORE) {
       this->translate(e.delta * glm::vec2(_enableX, _enableY));
@@ -188,7 +194,7 @@ protected:
       resizeE.bounds.y = this->top.value() + e.delta.y;
       resizeE.bounds.width = this->width.value();
       resizeE.bounds.height = this->height.value();
-      onResizedE.notify(resizeE);
+      onResizedEvent.notify(resizeE);
     }
     
     if (dragAnchorHorz == OF_ALIGN_HORZ_LEFT) _translateLeft(e.delta.x);
@@ -198,7 +204,7 @@ protected:
     else if (dragAnchorVert == OF_ALIGN_VERT_BOTTOM) _translateBottom(e.delta.y);
   }
   
-  virtual void _mouseReleased(const MouseEventArgs & e) override
+  virtual void onMouseReleased(const MouseEventArgs & e) override
   {
     dragAnchorHorz = OF_ALIGN_HORZ_IGNORE;
     dragAnchorVert = OF_ALIGN_VERT_IGNORE;

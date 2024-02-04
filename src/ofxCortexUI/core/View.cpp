@@ -2,10 +2,8 @@
 
 namespace ofxCortex { namespace ui {
 
-std::vector<std::shared_ptr<View>> View::everyView;
-
 #pragma mark - Public
-View::View(std::string name)
+View::View(const std::string & name)
 {
   setName(name);
 //  enableMask();
@@ -60,130 +58,88 @@ View::View(std::string name)
   
   this->setIntrinsicSize(288, Styling::getRowHeight());
   
-  this->enableAutoUpdate();
-  this->enableEvents();
-  this->_addWindowResizeEventListener();
-  
-  this->_updateLayoutImmediately();
+  this->bindUpdateListener();
+  this->bindMouseListeners();
+  this->bindKeyListeners();
 }
-
-//View::View(std::string name) : View()
-//{
-//  setName(name);
-//  ofLogNotice(_getLogModule(__FUNCTION__));
-//}
 
 View::~View()
 {
-  this->disableAutoUpdate();
-  this->disableEvents();
-  this->_removeWindowResizeEventListener();
+  this->unbindEvents();
   
   subviews.clear();
 }
 
-std::shared_ptr<View> View::create(const std::string & name)
+void View::internalUpdate(double time, double delta)
 {
-  auto instance = std::make_shared<View>(name);
-  instance->_setup();
-  return instance;
-}
-
-void View::_setup()
-{
-  this->_updateConstraintsImmediately();
-}
-
-void View::update()
-{
-  this->_update(ofGetElapsedTimef(), ofGetLastFrameTime());
-}
-
-void View::update(double time, double delta)
-{
-  this->_update(time, delta);
-}
-
-void View::_update(double time, double delta)
-{
-  this->_updateConstraintsIfNeeded();
-  this->_layoutIfNeeded();
+  this->updateConstraintsIfNeeded();
+  this->layoutIfNeeded();
   
-  _mouseHoverIntensity = ofLerp(_mouseHoverIntensity, _isMouseOver, 1.0 - pow(0.005, delta));
-  _mouseActiveIntensity = ofLerp(_mouseActiveIntensity, _wasMousePressedInside, 1.0 - pow(0.005, delta));
+  mouseHoverIntensity = ofLerp(mouseHoverIntensity, isMouseInside, 1.0 - pow(0.005, delta));
+  mouseActiveIntensity = ofLerp(mouseActiveIntensity, wasMousePressedInside, 1.0 - pow(0.005, delta));
+  
+  this->onUpdate(time, delta);
 }
 
-void View::enableAutoUpdate()
-{
-  _addUpdateEventListener();
-}
-
-void View::disableAutoUpdate()
-{
-  _removeUpdateEventListener();
-}
-
-void View::draw()
+void View::internalDraw()
 {
   ofPushMatrix();
   {
     ofPushStyle();
     {
-      _preDraw();
+      this->onPreDraw();
       
-      if (_enableMask)
+      if (this->isMaskEnabled)
       {
         Stencil::beginDrawingMask();
-        _drawMask();
+        this->onDrawMask();
         Stencil::endDrawingMask();
         Stencil::beginUsingMask();
       }
       
-      _draw();
+      this->onDraw();
       
-      if (_shouldDrawSubviews) _drawSubviews();
-      if (_enableMask) Stencil::endUsingMask();
+      if (this->shouldDrawSubviews) onDrawSubviews();
+      if (this->isMaskEnabled) Stencil::endUsingMask();
       
-      _postDraw();
+      this->onPostDraw();
     }
     ofPopStyle();
   }
   ofPopMatrix();
 }
 
-void View::_preDraw()
+void View::onDraw()
 {
-  
+  ofPushStyle();
+  ofSetColor(255);
+  Styling::drawBackground(this->getBounds());
+  ofPopStyle();
 }
 
-void View::_draw()
+void View::onPostDraw()
 {
-  
-}
-
-void View::_postDraw()
-{
-  if (_isFocused())
+  if (this->isFocused())
   {
     ofPushStyle();
-    Styling::drawFocusBorder(getBounds());
+    Styling::drawFocusBorder(this->getBounds());
     ofPopStyle();
   }
   
-  if (_enableDebug) { _debug(); }
+  if (this->isDebugEnabled) { this->onDebug(); }
 }
 
-void View::_drawMask()
+void View::onDrawMask()
 {
-  ofDrawRectangle(getBounds());
+  ofDrawRectangle(this->getBounds());
 }
 
-void View::_drawSubviews()
+void View::onDrawSubviews()
 {
   for (auto & view : subviews) view->draw();
 }
 
-void View::_debug()
+void View::onDebug()
 {
   ofPushStyle();
   ofNoFill();
@@ -193,15 +149,6 @@ void View::_debug()
   ofSetColor(ofColor::green, 128);
   ofDrawRectangle(this->getContentBounds());
   ofPopStyle();
-}
-
-void View::setNeedsLayout(bool affectSubviews) {
-  this->_needsLayout = true;
-  
-  if (affectSubviews)
-  {
-    for (auto & view :subviews) view->setNeedsLayout(true);
-  }
 }
 
 void View::setIntrinsicSize(float width, float height)
@@ -310,7 +257,7 @@ void View::translate(const glm::vec2 & delta)
   this->translate(delta.x, delta.y);
 }
 
-bool View::isInside(const glm::vec2 & point)
+bool View::inside(const glm::vec2 & point)
 {
   return getBounds().inside(point);
 }
@@ -321,9 +268,9 @@ bool View::isOverlapped(const glm::vec2 & point)
   
   for (auto & view : everyView)
   {
-    if (view.get() == this || !view->isInside(point) || view->_includeInOverlap == false) continue;
+    if (view.get() == this || !view->inside(point) || view->includeInOverlap == false) continue;
     
-    return view->_getActualZ() >= this->_getActualZ(); // || view->getZ() > this->getZ();
+    return view->getActualZ() >= this->getActualZ(); // || view->getZ() > this->getZ();
   }
   
   return false;
@@ -335,7 +282,6 @@ void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
   subview->setParent(shared_from_this());
   subview->setLevel(this->level + 1);
   subviews.insert(subviews.begin() + index, subview);
-  everyView.push_back(subview);
 }
 
 void View::addSubview(const std::shared_ptr<View> & subview)
@@ -359,6 +305,8 @@ void View::removeSubview(std::shared_ptr<View> subview)
 
 void View::addConstraint(kiwi::Constraint & constraint)
 {
+  ofLogVerbose(_getLogModule(__FUNCTION__)) << kiwi::debug::dumps(constraint) << std::endl;
+  
   LayoutEngine::addConstraint(constraint);
   this->constraints.push_back(constraint);
   
@@ -374,7 +322,7 @@ void View::addConstraints(std::vector<kiwi::Constraint> constraints)
 void View::removeConstraint(kiwi::Constraint & constraint)
 {
   LayoutEngine::removeConstraint(constraint);
-  std::remove(std::begin(constraints), std::end(constraints), constraint);
+  std::remove(std::begin(this->constraints), std::end(this->constraints), constraint);
   
   this->setNeedsLayout();
 }
@@ -382,6 +330,14 @@ void View::removeConstraint(kiwi::Constraint & constraint)
 void View::removeConstraints(std::vector<kiwi::Constraint> constraints)
 {
   for (auto& constraint : constraints) this->removeConstraint(constraint);
+}
+
+void View::removeAllConstraints()
+{
+  for (auto& constraint : this->constraints)
+  {
+    this->removeConstraint(constraint);
+  }
 }
 
 #pragma mark - Protected
@@ -419,7 +375,7 @@ std::vector<std::shared_ptr<View>> View::flatten(const std::shared_ptr<View> & n
   return result;
 }
 
-int View::_getDepth() const {
+int View::getDepth() const {
   if (!hasParent()) return 0;
   
   int depth = 0;
@@ -439,49 +395,14 @@ int View::_getDepth() const {
 
 
 
-void View::_updateConstraints()
+void View::updateConstraints()
 {
-  ofLogVerbose(_getLogModule(__FUNCTION__));
+  ofLogNotice(_getLogModule(__FUNCTION__));
 }
 
-void View::_updateConstraintsIfNeeded()
+void View::layoutSubviews()
 {
-  if (this->_needsUpdateConstraints)
-  {
-    this->_updateConstraints();
-    this->_needsUpdateConstraints = false;
-  }
-}
-
-void View::_updateConstraintsImmediately()
-{
-  this->_setNeedsUpdateConstraints();
-  this->_updateConstraintsIfNeeded();
-}
-
-void View::_setNeedsUpdateConstraints()
-{
-  this->_needsUpdateConstraints = true;
-}
-
-
-void View::_updateLayoutImmediately()
-{
-  this->setNeedsLayout();
-  this->_layoutIfNeeded();
-}
-
-void View::_layoutIfNeeded(bool layoutSubviews)
-{
-  if (this->_needsLayout) {
-    this->_updateLayout();
-    this->_needsLayout = false;
-  };
-}
-
-void View::_updateLayout()
-{
-  ofLogVerbose(_getLogModule(__FUNCTION__));
+  ofLogNotice(_getLogModule(__FUNCTION__));
 }
 
 ofRectangle View::getBounds() const
@@ -494,234 +415,350 @@ ofRectangle View::getContentBounds() const
   return ofRectangle(content_left.value(), content_top.value(), content_width.value(), content_height.value());
 }
 
-void View::_updateBounds()
+void View::updateBounds()
 {
   ofLogVerbose(_getLogModule(__FUNCTION__));
 }
 
-ofRectangle View::_getLocalBounds() const {
+ofRectangle View::getLocalBounds() const {
   return ofRectangle(0, 0, width.value(), height.value());
 }
 
-ofRectangle View::_getLocalContentBounds() const {
+ofRectangle View::getLocalContentBounds() const {
   return ofRectangle(0, 0, content_width.value(), content_height.value());
-}
-
-ofMatrix4x4 View::_getTransformationMatrix() const
-{
-  ofMatrix4x4 m;
-  m = ofMatrix4x4::newTranslationMatrix(getPosition()) * m; //.setTranslation(getPosition());
-                                                            //  m = ofMatrix4x4::newScaleMatrix(glm::vec3(_scale.x, _scale.y, 0)) * m;
-                                                            //  m = ofMatrix4x4::newRotationMatrix(_rotation, 0, 0, 1) * m;
-  
-  return m;
-}
-
-ofMatrix4x4 View::_getInverseTransformationMatrix() const
-{
-  ofMatrix4x4 m;
-  //  m = ofMatrix4x4::newRotationMatrix(_rotation * -1.0, 0, 0, 1) * m;
-  //  m = ofMatrix4x4::newScaleMatrix(glm::vec3(1.0f / _scale.x, 1.0f / _scale.y, 1.0f)) * m;
-  m = ofMatrix4x4::newTranslationMatrix(getPosition() * -1.0) * m;
-  //  if (hasParent()) m = ofMatrix4x4::newTranslationMatrix(getParent()->getPosition() * -1.0) * m;
-  
-  return m;
 }
 
 std::string View::_getLogModule(const std::string & func)
 {
   std::stringstream logModule;
-  logModule << _getComponentName() << "('" << _name << "')::" << func << "()";
+  logModule << _getComponentName() << "('" << _name << "')[" << ofGetFrameNum() << "]::" << func << "()";
   return logModule.str();
 }
 
 
 
-void View::_addDrawEventListener()
+#pragma mark - Event Handling
+void View::bindEvents()
 {
-  ofAddListener(ofEvents().draw, this, &View::_drawHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_removeDrawEventListener()
-{
-  ofRemoveListener(ofEvents().draw, this, &View::_drawHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_addUpdateEventListener()
-{
-  ofAddListener(ofEvents().update, this, &View::_updateHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_removeUpdateEventListener()
-{
-  ofRemoveListener(ofEvents().update, this, &View::_updateHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_addWindowResizeEventListener()
-{
-  ofAddListener(ofEvents().windowResized, this, &View::_windowResized, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_removeWindowResizeEventListener()
-{
-  ofRemoveListener(ofEvents().windowResized, this, &View::_windowResized, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_addMouseEventListeners()
-{
-  ofAddListener(ofEvents().mousePressed, this, &View::_mousePressedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().mouseReleased, this, &View::_mouseReleasedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().mouseMoved, this, &View::_mouseMovedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().mouseDragged, this, &View::_mouseDraggedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().mouseScrolled, this, &View::_mouseScrolledHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_removeMouseEventListeners()
-{
-  ofRemoveListener(ofEvents().mousePressed, this, &View::_mousePressedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().mouseReleased, this, &View::_mouseReleasedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().mouseMoved, this, &View::_mouseMovedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().mouseDragged, this, &View::_mouseDraggedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().mouseScrolled, this, &View::_mouseScrolledHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_addKeyEventListeners()
-{
-  ofAddListener(ofEvents().keyPressed, this, &View::_keyPressedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().keyReleased, this, &View::_keyReleasedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofAddListener(ofEvents().charEvent, this, &View::_charHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_removeKeyEventListeners()
-{
-  ofRemoveListener(ofEvents().keyPressed, this, &View::_keyPressedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().keyReleased, this, &View::_keyReleasedHandler, OF_EVENT_ORDER_AFTER_APP);
-  ofRemoveListener(ofEvents().charEvent, this, &View::_charHandler, OF_EVENT_ORDER_AFTER_APP);
-}
-
-void View::_updateHandler(ofEventArgs &e)
-{
-  _update(ofGetElapsedTimef(), ofGetLastFrameTime());
-}
-
-void View::_drawHandler(ofEventArgs &e)
-{
-  _draw();
-}
-
-void View::_mousePressedHandler(ofMouseEventArgs &e)
-{
-  bool isPressedInside = isInside(e);
-  bool isPressedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+  ofLogNotice("View('" + _name + "')::bindEvents()");
   
-  bool shouldTrigger = isPressedInside && (isPressedInsideParent || _enableInteractionOutsideParent);
+  this->bindUpdateListener();
+  this->bindDrawListener();
+  this->bindMouseListeners();
+  this->bindKeyListeners();
+}
+
+void View::unbindEvents()
+{
+  ofLogNotice("View('" + _name + "')::unbindEvents()");
   
-  ofLogVerbose(_getLogModule(__FUNCTION__)) << std::boolalpha << "Pressed inside = " << isPressedInside << " Inside parent = " << isPressedInsideParent << " => Should trigger = " << shouldTrigger;
+  this->unbindUpdateListener();
+  this->unbindDrawListener();
+  this->unbindMouseListeners();
+  this->unbindKeyListeners();
+}
+
+#pragma mark - Mouse Handling
+void View::bindMouseListeners()
+{
+  ofAddListener(ofEvents().mousePressed, this, &View::mousePressedHandler);
+  ofAddListener(ofEvents().mouseReleased, this, &View::mouseReleasedHandler);
+  ofAddListener(ofEvents().mouseMoved, this, &View::mouseMovedHandler);
+  ofAddListener(ofEvents().mouseDragged, this, &View::mouseDraggedHandler);
+  ofAddListener(ofEvents().mouseScrolled, this, &View::mouseScrolledHandler);
+}
+
+void View::unbindMouseListeners()
+{
+  ofRemoveListener(ofEvents().mousePressed, this, &View::mousePressedHandler);
+  ofRemoveListener(ofEvents().mouseReleased, this, &View::mouseReleasedHandler);
+}
+
+
+void View::mousePressedHandler(ofMouseEventArgs & e)
+{
+  bool isInsideView = this->inside(e);
   
   MouseEventArgs customE(e);
-  customE.isOverlapped = isOverlapped(e);
+  customE.isOverlapped = false;
   
-  if (shouldTrigger) {
-    _triggerMousePressed(customE);
-    if (_includeInOverlap) View::focused = shared_from_this();
+  if (isInsideView)
+  {
+    onMousePressed(customE);
+    
+    View::focused = shared_from_this();
   }
   
-  _isMousePressed = true;
-  _wasMousePressedInside = isPressedInside;
-  _lastMousePosition = e;
+  this->wasMousePressedInside = isInsideView;
+  this->isMousePressed = isInsideView;
 }
 
-void View::_mouseReleasedHandler(ofMouseEventArgs &e)
+void View::onMousePressed(const MouseEventArgs &e)
 {
-  bool isReleasedInside = isInside(e);
-  bool isReleasedInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isReleasedInside && (isReleasedInsideParent || _enableInteractionOutsideParent);
+  ofLogNotice("View('" + _name + "')") << "onMousePressed(ofMouseEventArgs & e) " << e.x << "," << e.y;
+}
+
+void View::mouseReleasedHandler(ofMouseEventArgs & e)
+{
+  bool isInsideView = this->inside(e);
   
   MouseEventArgs customE(e);
-  customE.isOverlapped = isOverlapped(e);
+  customE.isOverlapped = false;
   
-  if (shouldTrigger) _triggerMouseReleased(customE);
-  if (_wasMousePressedInside && !isReleasedInside) _triggerMouseReleasedOutside(customE);
-  
-  _isMousePressed = false;
-  _wasMousePressedInside = false;
-  _wasMouseReleasedInside = isReleasedInside;
-}
-
-void View::_mouseMovedHandler(ofMouseEventArgs &e)
-{
-  bool isMovedInside = isInside(e);
-  bool isMovedInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isMovedInside && (isMovedInsideParent || _enableInteractionOutsideParent);
-  
-  auto deltaEvent = DeltaMouseEvent(e);
-  deltaEvent.isOverlapped = isOverlapped(e);
-  deltaEvent.delta = e - _lastMousePosition;
-  
-  if (shouldTrigger) _triggerMouseMoved(deltaEvent);
-  
-  if (!_isMouseOver && isMovedInside) {
-    _triggerMouseEnter(deltaEvent);
+  if (isInsideView) { onMouseReleased(customE); }
+  else if (this->wasMousePressedInside && !isInsideView) {
+    onMouseReleasedOutside(customE);
+    
+    if (isFocused()) View::focused = nullptr;
   }
   
-  if (_isMouseOver && !isMovedInside) {
-    _triggerMouseExit(deltaEvent);
-  }
-  
-  _isMouseOver = isMovedInside;
-  _lastMousePosition = e;
+  this->isMousePressed = false;
 }
 
-void View::_mouseDraggedHandler(ofMouseEventArgs &e)
+void View::onMouseReleased(const MouseEventArgs &e)
 {
-  auto deltaEvent = DeltaMouseEvent(e);
-  deltaEvent.isOverlapped = isOverlapped(e);
-  deltaEvent.delta = e - _lastMousePosition;
-  
-  bool isDraggedInside = isInside(e);
-  bool isDraggedInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isDraggedInside && (isDraggedInsideParent || _enableInteractionOutsideParent);
-  
-  
-  if (shouldTrigger) _triggerMouseDragged(deltaEvent);
-  
-  if (!_isMouseOver && isDraggedInside) {
-    _triggerMouseEnter(deltaEvent);
-  }
-  
-  if (_isMouseOver && !isDraggedInside) {
-    _triggerMouseExit(deltaEvent);
-  }
-  
-  _isMouseOver = isDraggedInside;
-  _lastMousePosition = e;
+  ofLogNotice("View('" + _name + "')") << "onMouseReleased(ofMouseEventArgs & e) " << e.x << "," << e.y;
 }
 
-void View::_mouseScrolledHandler(ofMouseEventArgs &e)
+void View::onMouseReleasedOutside(const MouseEventArgs &e)
 {
-  bool isScrolledInside = isInside(e);
-  bool isScrolledInsideParent = hasParent() ? getParent()->isInside(e) : true;
-  bool shouldTrigger = isScrolledInside && (isScrolledInsideParent || _enableInteractionOutsideParent);
+  ofLogNotice("View('" + _name + "')") << "onMouseReleasedOutside(ofMouseEventArgs & e) " << e.x << "," << e.y;
+}
+
+void View::mouseMovedHandler(ofMouseEventArgs & e)
+{
+  //  ofLogNotice("View('" + name + "')") << "mouseReleasedHandler(ofMouseEventArgs & e)";
   
-  MouseEventArgs event(e);
-  event.isOverlapped = isOverlapped(e);
-  if (shouldTrigger) _triggerMouseScrolled(event);
+  bool isInsideView = this->inside(e);
+  
+  auto customE = MouseEventArgs(e);
+  customE.isOverlapped = false;
+  customE.delta = e - this->lastMousePosition;
+  
+  if (isInsideView) { onMouseMoved(customE); }
+  
+  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); }
+  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); }
+  
+  this->isMouseInside = isInsideView;
+  this->lastMousePosition = e;
 }
 
-
-void View::_keyPressedHandler(ofKeyEventArgs &e)
+void View::onMouseMoved(const MouseEventArgs & e)
 {
-  if (_isFocused()) _triggerKeyPressed(e);
+  //  ofLogNotice("View('" + name + "')") << "onMouseMoved(ofMouseEventArgs & e) " << e.x << "," << e.y;
 }
 
-void View::_keyReleasedHandler(ofKeyEventArgs &e)
+void View::onMouseEnter(const MouseEventArgs &e)
 {
-  if (_isFocused()) _triggerKeyReleased(e);
+  ofLogNotice("View('" + _name + "')") << "onMouseEnter(ofMouseEventArgs & e) " << e.x << "," << e.y;
 }
 
-void View::_charHandler(uint32_t &c)
+void View::onMouseExit(const MouseEventArgs &e)
 {
-  if (_isFocused()) _triggerCharTyped(c);
+  ofLogNotice("View('" + _name + "')") << "onMouseExit(ofMouseEventArgs & e) " << e.x << "," << e.y;
 }
+
+void View::mouseDraggedHandler(ofMouseEventArgs & e)
+{
+  bool isInsideView = this->inside(e);
+  
+  auto customE = MouseEventArgs(e);
+  customE.isOverlapped = false;
+  customE.delta = e - this->lastMousePosition;
+  
+  if (isInsideView) { onMouseDragged(customE); }
+  
+  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); }
+  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); }
+  
+  this->isMouseInside = isInsideView;
+  this->lastMousePosition = e;
+}
+
+void View::onMouseDragged(const MouseEventArgs &e)
+{
+  //  ofLogNotice("View('" + name + "')") << "onMouseDragged(ofMouseEventArgs & e) " << e.x << "," << e.y;
+}
+
+void View::mouseScrolledHandler(ofMouseEventArgs & e)
+{
+  //  ofLogNotice("View('" + name + "')") << "mouseReleasedHandler(ofMouseEventArgs & e)";
+  
+  bool isInsideView = this->inside(e);
+  
+  MouseEventArgs customE(e);
+  customE.isOverlapped = false;
+  
+  if (isInsideView) { onMouseScrolled(customE); }
+}
+
+void View::onMouseScrolled(const MouseEventArgs &e)
+{
+  ofLogNotice("View('" + _name + "')") << "onMouseScroll(ofMouseEventArgs & e): Delta = " << e.scrollX << "," << e.scrollY;
+}
+
+#pragma mark - Mouse Handling
+void View::bindKeyListeners()
+{
+  ofAddListener(ofEvents().keyPressed, this, &View::keyPressedHandler);
+  ofAddListener(ofEvents().keyReleased, this, &View::keyReleasedHandler);
+  ofAddListener(ofEvents().charEvent, this, &View::charTypedHandler);
+}
+
+void View::unbindKeyListeners()
+{
+  ofRemoveListener(ofEvents().keyPressed, this, &View::keyPressedHandler);
+  ofRemoveListener(ofEvents().keyReleased, this, &View::keyReleasedHandler);
+  ofRemoveListener(ofEvents().charEvent, this, &View::charTypedHandler);
+}
+
+
+void View::keyPressedHandler(ofKeyEventArgs & e)
+{
+  if (isFocused()) { onKeyPressed(e); }
+}
+
+void View::onKeyPressed(const ofKeyEventArgs & e)
+{
+  ofLogNotice("View('" + _name + "')") << "onKeyPressed(ofKeyEventArgs & e): Key = " << (char)e.key;
+}
+
+void View::keyReleasedHandler(ofKeyEventArgs & e)
+{
+  if (isFocused()) { onKeyReleased(e); }
+}
+
+void View::onKeyReleased(const ofKeyEventArgs & e)
+{
+//  ofLogNotice("View('" + name + "')") << "onKeyReleased(ofKeyEventArgs & e): Key = " << (char)e.key;
+}
+
+void View::charTypedHandler(uint32_t & c)
+{
+  if (isFocused()) { onCharTyped(c); }
+}
+
+void View::onCharTyped(const uint32_t & c)
+{
+//  ofLogNotice("View('" + name + "')") << "onKeyReleased(ofKeyEventArgs & e): Key = " << (char)e.key;
+}
+
+//
+//
+//void View::_mousePressedHandler(ofMouseEventArgs &e)
+//{
+//  bool isPressedInside = isInside(e);
+//  bool isPressedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+//  
+//  bool shouldTrigger = isPressedInside && (isPressedInsideParent || _enableInteractionOutsideParent);
+//  
+//  ofLogVerbose(_getLogModule(__FUNCTION__)) << std::boolalpha << "Pressed inside = " << isPressedInside << " Inside parent = " << isPressedInsideParent << " => Should trigger = " << shouldTrigger;
+//  
+//  MouseEventArgs customE(e);
+//  customE.isOverlapped = isOverlapped(e);
+//  
+//  if (shouldTrigger) {
+//    _triggerMousePressed(customE);
+//    if (_includeInOverlap) View::focused = shared_from_this();
+//  }
+//  
+//  _isMousePressed = true;
+//  _wasMousePressedInside = isPressedInside;
+//  _lastMousePosition = e;
+//}
+//
+//void View::_mouseReleasedHandler(ofMouseEventArgs &e)
+//{
+//  bool isReleasedInside = isInside(e);
+//  bool isReleasedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+//  bool shouldTrigger = isReleasedInside && (isReleasedInsideParent || _enableInteractionOutsideParent);
+//  
+//  MouseEventArgs customE(e);
+//  customE.isOverlapped = isOverlapped(e);
+//  
+//  if (shouldTrigger) _triggerMouseReleased(customE);
+//  if (_wasMousePressedInside && !isReleasedInside) _triggerMouseReleasedOutside(customE);
+//  
+//  _isMousePressed = false;
+//  _wasMousePressedInside = false;
+//  _wasMouseReleasedInside = isReleasedInside;
+//}
+//
+//void View::_mouseMovedHandler(ofMouseEventArgs &e)
+//{
+//  bool isMovedInside = isInside(e);
+//  bool isMovedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+//  bool shouldTrigger = isMovedInside && (isMovedInsideParent || _enableInteractionOutsideParent);
+//  
+//  auto deltaEvent = DeltaMouseEvent(e);
+//  deltaEvent.isOverlapped = isOverlapped(e);
+//  deltaEvent.delta = e - _lastMousePosition;
+//  
+//  if (shouldTrigger) _triggerMouseMoved(deltaEvent);
+//  
+//  if (!_isMouseOver && isMovedInside) {
+//    _triggerMouseEnter(deltaEvent);
+//  }
+//  
+//  if (_isMouseOver && !isMovedInside) {
+//    _triggerMouseExit(deltaEvent);
+//  }
+//  
+//  _isMouseOver = isMovedInside;
+//  _lastMousePosition = e;
+//}
+//
+//void View::_mouseDraggedHandler(ofMouseEventArgs &e)
+//{
+//  auto deltaEvent = DeltaMouseEvent(e);
+//  deltaEvent.isOverlapped = isOverlapped(e);
+//  deltaEvent.delta = e - _lastMousePosition;
+//  
+//  bool isDraggedInside = isInside(e);
+//  bool isDraggedInsideParent = hasParent() ? getParent()->isInside(e) : true;
+//  bool shouldTrigger = isDraggedInside && (isDraggedInsideParent || _enableInteractionOutsideParent);
+//  
+//  
+//  if (shouldTrigger) _triggerMouseDragged(deltaEvent);
+//  
+//  if (!_isMouseOver && isDraggedInside) {
+//    _triggerMouseEnter(deltaEvent);
+//  }
+//  
+//  if (_isMouseOver && !isDraggedInside) {
+//    _triggerMouseExit(deltaEvent);
+//  }
+//  
+//  _isMouseOver = isDraggedInside;
+//  _lastMousePosition = e;
+//}
+//
+//void View::_mouseScrolledHandler(ofMouseEventArgs &e)
+//{
+//  bool isScrolledInside = isInside(e);
+//  bool isScrolledInsideParent = hasParent() ? getParent()->isInside(e) : true;
+//  bool shouldTrigger = isScrolledInside && (isScrolledInsideParent || _enableInteractionOutsideParent);
+//  
+//  MouseEventArgs event(e);
+//  event.isOverlapped = isOverlapped(e);
+//  if (shouldTrigger) _triggerMouseScrolled(event);
+//}
+//
+//
+//void View::_keyPressedHandler(ofKeyEventArgs &e)
+//{
+//  if (_isFocused()) _triggerKeyPressed(e);
+//}
+//
+//void View::_keyReleasedHandler(ofKeyEventArgs &e)
+//{
+//  if (_isFocused()) _triggerKeyReleased(e);
+//}
+//
+//void View::_charHandler(uint32_t &c)
+//{
+//  if (_isFocused()) _triggerCharTyped(c);
+//}
 
 }}

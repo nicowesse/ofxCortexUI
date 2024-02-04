@@ -7,18 +7,11 @@
 namespace ofxCortex { namespace ui {
 
 class LabelView : public ofxCortex::ui::View {
-public:
-  
-  LabelView(std::string name)
+protected:
+  LabelView(const std::string & name)
   : View(name)
   {
-    setName(name);
     parameter.setName(name);
-  }
-  static std::shared_ptr<LabelView> create(std::string name) {
-    auto instance = std::make_shared<LabelView>(name);
-    instance->_setup();
-    return instance;
   }
   
   LabelView(ofAbstractParameter & param)
@@ -27,20 +20,25 @@ public:
     parameter.makeReferenceTo(param.cast<std::string>());
   }
   
-  static std::shared_ptr<LabelView> create(ofAbstractParameter & parameter) {
-    auto instance = std::make_shared<LabelView>(parameter);
-    instance->_setup();
-    return instance;
+public:
+  
+  
+  
+  template<typename ... T>
+  static std::shared_ptr<LabelView> create(T&& ... t) {
+    struct EnableMakeShared : public LabelView { EnableMakeShared(T&&... arg) : LabelView(std::forward<T>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<T>(t)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
   
 protected:
   virtual std::string _getComponentName() const override { return "LabelView"; };
   
-  void _setup()
-  {
-  }
-  
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     ofPushStyle();
     {

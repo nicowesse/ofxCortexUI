@@ -3,7 +3,7 @@
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-void SliderView<T>::_draw()
+void SliderView<T>::onDraw()
 {
   Styling::drawBackground(this->getBounds());
   this->_drawSlider();
@@ -79,9 +79,9 @@ void SliderView<T>::_drawDot()
 }
 
 template<typename T>
-void SliderView<T>::_mousePressed(const MouseEventArgs & e)
+void SliderView<T>::onMousePressed(const MouseEventArgs & e)
 {
-  View::_mousePressed(e);
+  View::onMousePressed(e);
   
   if (e.isOverlapped) return;
   
@@ -91,9 +91,9 @@ void SliderView<T>::_mousePressed(const MouseEventArgs & e)
 }
 
 template<typename T>
-void SliderView<T>::_mouseDragged(const DeltaMouseEvent & e)
+void SliderView<T>::onMouseDragged(const MouseEventArgs & e)
 {
-  View::_mousePressed(e);
+  View::onMouseDragged(e);
   
   if (e.isOverlapped) return;
   
@@ -103,9 +103,9 @@ void SliderView<T>::_mouseDragged(const DeltaMouseEvent & e)
 }
 
 template<typename T>
-void SliderView<T>::_mouseScrolled(const MouseEventArgs & e)
+void SliderView<T>::onMouseScrolled(const MouseEventArgs & e)
 {
-  if (!_isFocused()) return;
+  if (!isFocused()) return;
   
   if (e.modifiers == OF_KEY_SHIFT)
   {
@@ -124,11 +124,11 @@ void SliderView<T>::_mouseScrolled(const MouseEventArgs & e)
 }
 
 template<typename T>
-void SliderView<T>::_keyPressed(const ofKeyEventArgs & e)
+void SliderView<T>::onKeyPressed(const ofKeyEventArgs & e)
 {
-  View::_keyPressed(e);
+  View::onKeyPressed(e);
   
-  if (!_isFocused()) return;
+  if (!isFocused()) return;
   
   switch(e.key)
   {
@@ -244,7 +244,7 @@ ofShader & SliderView<T>::_getShader()
 }
 
 template<>
-void SliderView<int>::_draw()
+void SliderView<int>::onDraw()
 {
   Styling::drawBackground(this->getBounds());
   
@@ -284,9 +284,9 @@ void SliderView<int>::_draw()
 }
 
 template<>
-void SliderView<int>::_mousePressed(const MouseEventArgs & e)
+void SliderView<int>::onMousePressed(const MouseEventArgs & e)
 {
-  View::_mousePressed(e);
+  View::onMousePressed(e);
   
   float parameterRange = parameter.getMax() - parameter.getMin();
   float halfStepWidth = this->getContentBounds().width / parameterRange * 0.5;
@@ -297,9 +297,9 @@ void SliderView<int>::_mousePressed(const MouseEventArgs & e)
 }
 
 template<>
-void SliderView<int>::_mouseDragged(const DeltaMouseEvent & e)
+void SliderView<int>::onMouseDragged(const MouseEventArgs & e)
 {
-  View::_mousePressed(e);
+  View::onMouseDragged(e);
   
   float parameterRange = parameter.getMax() - parameter.getMin();
   float halfStepWidth = this->getContentBounds().width / parameterRange * 0.5;

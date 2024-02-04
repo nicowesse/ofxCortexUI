@@ -5,23 +5,28 @@
 namespace ofxCortex { namespace ui {
 
 class CheckboxView : public ofxCortex::ui::View {
-public:
-  
+protected:
   CheckboxView(ofParameter<bool> & param) : View(param.getName())
   {
     parameter.makeReferenceTo(param);
   };
   
-  static shared_ptr<CheckboxView> create(ofParameter<bool> & param) {
-    auto ptr = make_shared<CheckboxView>(param);
-    ptr->_setup();
-    return ptr;
+public:
+  template<typename ... F>
+  static std::shared_ptr<CheckboxView> create(F&& ... f) {
+    struct EnableMakeShared : public CheckboxView { EnableMakeShared(F&&... arg) : CheckboxView(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
   
 protected:
   virtual string _getComponentName() const override { return "Checkbox"; };
   
-  void _setup()
+  void viewDidLoad()
   {
     outerRing.circle(0, 0, 12 * 0.5);
     outerRing.circle(0, 0, 10 * 0.5);
@@ -30,7 +35,7 @@ protected:
     innerAnimation = parameter.get();
   };
   
-  virtual void _draw() override
+  virtual void onDraw() override
   {
     Styling::drawBackground(this->getBounds(), View::getMouseState());
     Styling::drawLabel(parameter.getName(), this->getBounds());
@@ -61,9 +66,9 @@ protected:
     ofPopStyle();
   }
   
-  virtual void _mousePressed(const MouseEventArgs & e) override
+  virtual void onMousePressed(const MouseEventArgs & e) override
   {
-    View::_mousePressed(e);
+    View::onMousePressed(e);
     
     parameter.set(!parameter.get());
     

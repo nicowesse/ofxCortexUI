@@ -10,15 +10,15 @@ namespace ofxCortex { namespace ui {
 //  return instance;
 //}
 
-void RangeSliderView::Bar::_update(double time, double delta)
+void RangeSliderView::Bar::onUpdate(float time, float delta)
 {
-  ResizeableView::_update(time, delta);
+  ResizeableView::onUpdate(time, delta);
   
-  float targetIntensity = isMouseOver() ? (isMousePressed() ? 2.0f : 1.5f) : 1.0f;
+  float targetIntensity = isMouseInside ? (isMousePressed ? 2.0f : 1.5f) : 1.0f;
   _intensity = ofLerp(_intensity, targetIntensity, 1.0 - pow(0.02, delta));
 }
 
-void RangeSliderView::Bar::_draw()
+void RangeSliderView::Bar::onDraw()
 {
   auto BB = this->getBounds();
   BB.setFromCenter(BB.getCenter(), BB.width, MIN(Styling::getDotSize() * 2 * 4, BB.height));
@@ -55,14 +55,7 @@ void RangeSliderView::Bar::_draw()
   ofPopStyle();
 }
 
-std::shared_ptr<RangeSliderView> RangeSliderView::create(ofParameter<ofxCortex::core::types::Range> & param)
-{
-  auto instance = std::make_shared<RangeSliderView>(param);
-  instance->_setup();
-  return instance;
-}
-
-void RangeSliderView::_setup()
+void RangeSliderView::viewDidLoad()
 {
   this->disableSubviewRendering();
   
@@ -73,7 +66,7 @@ void RangeSliderView::_setup()
   bar->setIntrinsicSize(1, Styling::getRowHeight());
   bar->setWidth(this->getWidth());
   bar->setGrabAreaDimensions(glm::vec2(16 * Styling::getScale(), 16 * Styling::getScale()));
-  bar->onResized([this](const ResizeableView::ResizeEvent & e) {
+  bar->onResizedE([this](const ResizeableView::ResizeEvent & e) {
     glm::vec2 minSize = bar->getMinSize();
     const auto & CBB = this->getContentBounds();
     float normalizedFrom = ofMap(e.bounds.getLeft(), CBB.getLeft(), CBB.getRight() - minSize.x, 0, 1, true);
@@ -105,7 +98,7 @@ void RangeSliderView::_setup()
     _parameterSetInternally = false;
   });
   
-  this->_updateConstraintsImmediately();
+  this->setNeedsUpdateConstraints();
   LayoutEngine::forceSolve();
   
   float normalLeft = ofMap(parameter->from, parameter->min, parameter->max, 0, 1, true);
@@ -114,7 +107,7 @@ void RangeSliderView::_setup()
   _setRightFromNormalized(normalRight);
 }
 
-void RangeSliderView::_draw()
+void RangeSliderView::onDraw()
 {
   Styling::drawBackground(this->getBounds());
   
@@ -129,16 +122,16 @@ void RangeSliderView::_draw()
   ofPopStyle();
 }
 
-void RangeSliderView::_mouseScrolled(const MouseEventArgs & e)
+void RangeSliderView::onMouseScrolled(const MouseEventArgs & e)
 {
   parameter += -e.scrollX;
 }
 
-void RangeSliderView::_keyPressed(const ofKeyEventArgs & e)
+void RangeSliderView::onKeyPressed(const ofKeyEventArgs & e)
 {
-  View::_keyPressed(e);
+  View::onKeyPressed(e);
   
-  if (!_isFocused()) return;
+  if (!isFocused()) return;
   
   float delta = (e.key == OF_KEY_LEFT) ? -1.0f : (e.key == OF_KEY_RIGHT) ? 1.0f : 0.0f;
   
@@ -149,16 +142,16 @@ void RangeSliderView::_keyPressed(const ofKeyEventArgs & e)
   parameter += delta;
 }
 
-void RangeSliderView::_windowResized(ofResizeEventArgs & e)
+void RangeSliderView::onWindowResized(const ofResizeEventArgs & e)
 {
-  View::_windowResized(e);
+  View::onWindowResized(e);
   
   bar->setGrabAreaDimensions(glm::vec2(16 * Styling::getScale(), 16 * Styling::getScale()));
 }
 
-void RangeSliderView::_updateConstraints()
+void RangeSliderView::updateConstraints()
 {
-  View::_updateConstraints();
+  View::updateConstraints();
   
   this->addConstraints({
     { bar->left >= this->content_left | kiwi::strength::strong },
