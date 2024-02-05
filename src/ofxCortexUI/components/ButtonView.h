@@ -19,11 +19,11 @@ protected:
   };
   
 public:
-  template<typename ... T>
-  static std::shared_ptr<ButtonView> create(T&& ... t) {
-    struct EnableMakeShared : public ButtonView { EnableMakeShared(T&&... arg) : ButtonView(std::forward<T>(arg)...) {} };
+  template<typename ... F>
+  static std::shared_ptr<ButtonView> create(F&& ... f) {
+    struct EnableMakeShared : public ButtonView { EnableMakeShared(F&&... arg) : ButtonView(std::forward<F>(arg)...) {} };
     
-    auto p = std::make_shared<EnableMakeShared>(std::forward<T>(t)...);
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
     p->viewDidLoad();
     
     View::everyView.insert(p);
@@ -35,8 +35,8 @@ protected:
   
   virtual void onDraw() override
   {
-    Styling::drawBackground(this->getBounds(), getMouseState());
-    Styling::drawLabel(parameter.getName(), this->getContentBounds(), OF_ALIGN_HORZ_CENTER);
+    Styling::drawBackground(this->getFrame(), getMouseState());
+    Styling::drawLabel(parameter.getName(), this->getContentFrame(), OF_ALIGN_HORZ_CENTER);
   }
   
   virtual void onMousePressed(const MouseEventArgs & e) override

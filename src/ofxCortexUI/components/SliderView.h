@@ -9,18 +9,17 @@
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class SliderView : public ofxCortex::ui::View {
+class SliderView : public ofxCortex::ui::ParameterView<T> {
   static_assert(std::is_arithmetic<T>::value, "SliderView: T must be numeric!");
   
 protected:
-  SliderView(ofParameter<T> param) : View(param.getName())
+  SliderView(const ofAbstractParameter & param) : ParameterView<T>(param)
   {
-    parameter.makeReferenceTo(param);
+//    parameter.makeReferenceTo(param);
+//    parameterRef = param.newReference();
   };
   
 public:
-  
-  
   template<typename ... F>
   static std::shared_ptr<SliderView<T>> create(F&& ... f) {
     struct EnableMakeShared : public SliderView<T> { EnableMakeShared(F&&... arg) : SliderView<T>(std::forward<F>(arg)...) {} };
@@ -35,26 +34,25 @@ public:
   
   
 protected:
-  virtual string _getComponentName() const override { return "SliderView"; };
+  virtual std::string _getComponentName() const override { return "SliderView"; };
   
   
   virtual void onDraw() override;
-  void _drawSlider();
-  void _drawZero();
-  void _drawDot();
+  void drawSlider();
+  void drawZero();
+  void drawDot();
   
-  virtual void onMousePressed(const MouseEventArgs & e) override;
-  virtual void onMouseDragged(const MouseEventArgs & e) override;
-  virtual void onMouseScrolled(const MouseEventArgs & e) override;
+  virtual void onMousePressed(const View::MouseEventArgs & e) override;
+  virtual void onMouseDragged(const View::MouseEventArgs & e) override;
+  virtual void onMouseScrolled(const View::MouseEventArgs & e) override;
   virtual void onKeyPressed(const ofKeyEventArgs & e) override;
   
-  ofParameter<T> parameter;
-  T getNormalizedParameter() { return ofMap(parameter.get(), parameter.getMin(), parameter.getMax(), 0, 1, true); }
+//  std::shared_ptr<ofAbstractParameter> parameterRef;
+//  ofParameter<T> getParameter() { return parameterRef->cast<T>(); }
+  T getNormalizedParameter() { return ofMap(ParameterView<T>::getParameterValue(), ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), 0, 1, true); }
   
-  static ofShader & _getShader();
-  float _inset { 8 };
+  static ofShader & getShader();
   float interpolation { 0.0f };
-  ofFloatColor _sliderColor;
 };
 
 }}

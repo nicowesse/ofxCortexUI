@@ -39,9 +39,9 @@ protected:
   
   virtual void onDraw() override
   {
-    const auto & b = this->getContentBounds();
+    const auto & b = this->getContentFrame();
     
-    Styling::drawBackground(this->getBounds());
+    Styling::drawBackground(this->getFrame());
     
     ofSetColor(Styling::getForegroundColor());
     ofxCortex::ui::Styling::drawLabel(parameter.getName(), b);

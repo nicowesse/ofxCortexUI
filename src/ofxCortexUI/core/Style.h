@@ -99,35 +99,40 @@ public:
   
   static float getDotSize() { return getScaled(3); }
   
-  static void drawBackground(const ofRectangle & bounds, State mouseState = IDLE) {
-    return drawBackground(bounds, getBackgroundColor(mouseState), getBorderColor(mouseState));
-  }
-  
   static void drawBackground(const ofRectangle & bounds, ofColor fillColor, ofColor borderColor) {
     ofPushStyle();
     {
       ofSetColor(fillColor);
       ofFill();
       ofDrawRectRounded(bounds, 6 * Styling::getScale());
-      
-      //      ofSetColor(borderColor);
-      //      ofNoFill();
-      //    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
-      //      ofDrawRectRounded(bounds, 6 * Styling::getScale());
     }
     ofPopStyle();
   }
   
-  static void drawFocusBorder(const ofRectangle & bounds)
+  static void drawBackground(const ofRectangle & bounds, State mouseState = IDLE) {
+    return drawBackground(bounds, getBackgroundColor(mouseState), getBorderColor(mouseState));
+  }
+  
+  static void drawBorder(const ofRectangle & bounds, ofColor borderColor)
   {
-    ofRectangle scaledBounds; scaledBounds.setFromCenter(bounds.getCenter(), bounds.width - 2, bounds.height - 2);
+    ofRectangle scaledBounds; scaledBounds.setFromCenter(bounds.getCenter(), bounds.width - 1, bounds.height - 1);
     ofPushStyle();
     {
-      ofSetColor(get().borderColorFocused);
+      ofSetColor(borderColor);
       ofNoFill();
-      ofDrawRectRounded(scaledBounds, Styling::getScaled(6));
+      ofDrawRectRounded(scaledBounds, Styling::getScaled(5));
     }
     ofPopStyle();
+  }
+  
+  static void drawBorder(const ofRectangle & bounds, State mouseState = IDLE)
+  {
+    drawBorder(bounds, getBorderColor(mouseState));
+  }
+  
+  static void drawFocusBorder(const ofRectangle & bounds)
+  {
+    drawBorder(bounds, getBorderColor(State::FOCUS));
   }
   
   static void drawContainerBackground(const ofRectangle & bounds, ofColor fillColor = Styling::getContainerColor(), ofColor borderColor = Styling::getBorderColor(), int level = 0) {
@@ -281,12 +286,6 @@ private:
     LayoutEngine::suggestValue(spacing_y, initialSpacing);
     
     _loadFonts(scale);
-    //
-    //    LayoutEngine::forceSolve();
-    //    ofResizeEventArgs e;
-    //    e.width = ofGetWidth();
-    //    e.height = ofGetHeight();
-    //    _onWindowResized(e);
   };
   
   ~Styling() {
@@ -324,8 +323,6 @@ private:
     _loadFonts(scale);
     
     LayoutEngine::forceSolve();
-    
-    //    std::cout << "Padding Right: " << padding_right.value() << std::endl;
   }
   
   float scale;
@@ -348,13 +345,16 @@ private:
   kiwi::Variable spacing_y { "spacing_y" };
   
   // Colors
-  ofColor backgroundColor { 14 };
-  ofColor backgroundColorHovering { 18 };
-  ofColor backgroundColorActive { 24 };
-  ofColor containerColor { 24 };
+  ofColor backgroundColor { 18 };
+  ofColor backgroundColorHovering { 24 };
+  ofColor backgroundColorActive { 32 };
+  
+  ofColor containerColor { 20 };
   ofColor foregroundColor { 255 };
+  
   ofColor accentColor { ofColor::fromHex(0xFFD953) };
-  ofColor borderColor { 64 };
+  
+  ofColor borderColor { 32 };
   ofColor borderColorHover { 255 };
   ofColor borderColorFocused { 128 };
   
@@ -368,6 +368,7 @@ private:
   {
     std::string labelPath = "assets/fonts/SF-Pro-Text-Regular.otf";
     if (!ofFile::doesFileExist(labelPath)) labelPath = OF_TTF_MONO;
+    
     ofTrueTypeFontSettings labelSettings(labelPath, 8 * scale);
     labelSettings.antialiased = true;
     labelSettings.contours = true;

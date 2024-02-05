@@ -42,10 +42,10 @@ protected:
   {
     ofPushStyle();
     {
-      Styling::drawBackground(this->getBounds());
+      Styling::drawBackground(this->getFrame());
       
       ofSetColor(Styling::getForegroundColor());
-      Styling::drawLabel(parameter.getName(), this->getContentBounds());
+      Styling::drawLabel(parameter.getName(), this->getContentFrame());
     }
     ofPopStyle();
   }

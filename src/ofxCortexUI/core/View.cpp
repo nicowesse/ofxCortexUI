@@ -8,7 +8,7 @@ View::View(const std::string & name)
   setName(name);
 //  enableMask();
   
-  this->addConstraints({
+  baseConstraints = {
     kiwi::Constraint { right >= left | kiwi::strength::required },
     kiwi::Constraint { bottom >= top | kiwi::strength::required },
     
@@ -18,36 +18,28 @@ View::View(const std::string & name)
     kiwi::Constraint { bottom == top + height | kiwi::strength::required },
     kiwi::Constraint { centerX == left + 0.5 * width | kiwi::strength::required },
     kiwi::Constraint { centerY == top + 0.5 * height | kiwi::strength::required },
-  });
     
-  this->addConstraints({
-    kiwi::Constraint { width == intrinsic_width | kiwi::strength::weak },
-    kiwi::Constraint { height == intrinsic_height | kiwi::strength::weak },
-//    kiwi::Constraint { width >= intrinsic_width | kiwi::strength::medium },
-//    kiwi::Constraint { height >= intrinsic_height | kiwi::strength::medium },
-//    kiwi::Constraint { width <= intrinsic_width | kiwi::strength::weak },
-//    kiwi::Constraint { height <= intrinsic_height | kiwi::strength::weak }
-  });
+    kiwi::Constraint { width == intrinsic_width | kiwi::strength::medium },
+    kiwi::Constraint { height == intrinsic_height | kiwi::strength::medium },
+    
+    kiwi::Constraint { content_left >= left | kiwi::strength::required },
+    kiwi::Constraint { content_top >= top | kiwi::strength::required },
+    kiwi::Constraint { content_right <= right | kiwi::strength::required },
+    kiwi::Constraint { content_bottom <= bottom | kiwi::strength::required },
+    
+    kiwi::Constraint { content_left == left + Styling::paddingLeft() | kiwi::strength::required },
+    kiwi::Constraint { content_right == right - Styling::paddingRight() | kiwi::strength::required },
+    kiwi::Constraint { content_top == top + Styling::paddingTop() | kiwi::strength::required },
+    kiwi::Constraint { content_bottom == bottom - Styling::paddingBottom() | kiwi::strength::required },
+    
+    
+    kiwi::Constraint { content_width == content_right - content_left | kiwi::strength::required },
+    kiwi::Constraint { content_height == content_bottom - content_top | kiwi::strength::required },
+    kiwi::Constraint { content_centerX == content_left + 0.5 * content_width | kiwi::strength::required },
+    kiwi::Constraint { content_centerY == content_top + 0.5 * content_height | kiwi::strength::required },
+  };
   
-  // Content Constraints
-  this->addConstraints(
-   {
-     kiwi::Constraint { content_left >= left },
-     kiwi::Constraint { content_top >= top },
-     kiwi::Constraint { content_right <= right },
-     kiwi::Constraint { content_bottom <= bottom },
-     
-     kiwi::Constraint { content_left == left + Styling::paddingLeft() | kiwi::strength::required },
-     kiwi::Constraint { content_right == right - Styling::paddingRight() | kiwi::strength::required },
-     kiwi::Constraint { content_top == top + Styling::paddingTop() | kiwi::strength::required },
-     kiwi::Constraint { content_bottom == bottom - Styling::paddingBottom() | kiwi::strength::required },
-     
-     
-     kiwi::Constraint { content_width == content_right - content_left | kiwi::strength::required },
-     kiwi::Constraint { content_height == content_bottom - content_top | kiwi::strength::required },
-     kiwi::Constraint { content_centerX == content_left + 0.5 * content_width | kiwi::strength::required },
-     kiwi::Constraint { content_centerY == content_top + 0.5 * content_height | kiwi::strength::required },
-   });
+  LayoutEngine::addConstraints(baseConstraints);
   
   LayoutEngine::addEditVariable(left, kiwi::strength::weak);
   LayoutEngine::addEditVariable(top, kiwi::strength::weak);
@@ -56,7 +48,7 @@ View::View(const std::string & name)
   LayoutEngine::addEditVariable(intrinsic_width, kiwi::strength::medium);
   LayoutEngine::addEditVariable(intrinsic_height, kiwi::strength::medium);
   
-  this->setIntrinsicSize(288, Styling::getRowHeight());
+  this->setIntrinsicSize(288 * Styling::getScale(), Styling::getRowHeight());
   
   this->bindUpdateListener();
   this->bindMouseListeners();
@@ -67,6 +59,8 @@ View::~View()
 {
   this->unbindEvents();
   
+  LayoutEngine::removeConstraints(baseConstraints);
+  this->removeAllConstraints();
   subviews.clear();
 }
 
@@ -76,7 +70,7 @@ void View::internalUpdate(double time, double delta)
   this->layoutIfNeeded();
   
   mouseHoverIntensity = ofLerp(mouseHoverIntensity, isMouseInside, 1.0 - pow(0.005, delta));
-  mouseActiveIntensity = ofLerp(mouseActiveIntensity, wasMousePressedInside, 1.0 - pow(0.005, delta));
+  mouseActiveIntensity = ofLerp(mouseActiveIntensity, isMousePressed, 1.0 - pow(0.005, delta));
   
   this->onUpdate(time, delta);
 }
@@ -87,7 +81,7 @@ void View::internalDraw()
   {
     ofPushStyle();
     {
-      this->onPreDraw();
+      if (this->shouldDraw) this->onPreDraw();
       
       if (this->isMaskEnabled)
       {
@@ -97,12 +91,12 @@ void View::internalDraw()
         Stencil::beginUsingMask();
       }
       
-      this->onDraw();
+      if (this->shouldDraw) this->onDraw();
       
-      if (this->shouldDrawSubviews) onDrawSubviews();
+      if (this->shouldDrawSubviews) this->onDrawSubviews();
       if (this->isMaskEnabled) Stencil::endUsingMask();
       
-      this->onPostDraw();
+      if (this->shouldDraw) this->onPostDraw();
     }
     ofPopStyle();
   }
@@ -114,6 +108,7 @@ void View::onDraw()
   ofPushStyle();
   ofSetColor(255);
   Styling::drawBackground(this->frame, this->getMouseState());
+  Styling::drawBorder(this->frame);
   ofPopStyle();
 }
 
@@ -154,7 +149,7 @@ void View::onDebug()
 //  ofDrawRectangle(this->contentFrame);
   
   ofSetColor(255, 192);
-  ofDrawBitmapString(getName() + " - " + ofToString(frame), this->getContentBounds().x + 2, this->getContentBounds().y + 11 + 2);
+  ofDrawBitmapString(getName() + " - " + ofToString(frame), this->getContentFrame().x + 2, this->getContentFrame().y + 11 + 2);
   ofPopStyle();
 }
 
@@ -203,14 +198,12 @@ void View::setBottom(float value)
 
 void View::setPosition(float x, float y)
 {
-  ofLogVerbose(_getLogModule(__FUNCTION__));
-  
   LayoutEngine::suggestValue(this->left, x);
   LayoutEngine::suggestValue(this->top, y);
   this->setNeedsLayout();
 }
 
-void View::setPosition(glm::vec2 position)
+void View::setPosition(const glm::vec2 & position)
 {
   this->setPosition(position.x, position.y);
 }
@@ -227,7 +220,7 @@ void View::setHeight(float value)
 }
 
 
-void View::setRect(const ofRectangle & rect)
+void View::setFrame(const ofRectangle & rect)
 {
   LayoutEngine::suggestValue(this->left, rect.x);
   LayoutEngine::suggestValue(this->top, rect.y);
@@ -266,7 +259,7 @@ void View::translate(const glm::vec2 & delta)
 
 bool View::inside(const glm::vec2 & point)
 {
-  return getBounds().inside(point);
+  return getFrame().inside(point);
 }
 
 bool View::isOverlapped(const glm::vec2 & point)
@@ -322,8 +315,7 @@ void View::addConstraint(kiwi::Constraint & constraint)
 
 void View::addConstraints(std::vector<kiwi::Constraint> constraints)
 {
-  for (auto& constraint : constraints) this->addConstraint(constraint);
-  //  this->constraints.insert(this->constraints.end(), constraints.begin(), constraints.end());
+  for (auto & constraint : constraints) this->addConstraint(constraint);
 }
 
 void View::removeConstraint(kiwi::Constraint & constraint)
@@ -411,16 +403,16 @@ void View::layoutSubviews()
 {
   ofLogNotice(_getLogModule(__FUNCTION__));
   
-  frame = getBounds();
-  contentFrame = getContentBounds();
+  frame = getFrame();
+  contentFrame = getContentFrame();
 }
 
-ofRectangle View::getBounds() const
+ofRectangle View::getFrame() const
 {
   return ofRectangle(left.value(), top.value(), width.value(), height.value());
 }
 
-ofRectangle View::getContentBounds() const
+ofRectangle View::getContentFrame() const
 {
   return ofRectangle(content_left.value(), content_top.value(), content_width.value(), content_height.value());
 }
@@ -430,11 +422,11 @@ void View::updateBounds()
   ofLogVerbose(_getLogModule(__FUNCTION__));
 }
 
-ofRectangle View::getLocalBounds() const {
+ofRectangle View::getLocalFrame() const {
   return ofRectangle(0, 0, width.value(), height.value());
 }
 
-ofRectangle View::getLocalContentBounds() const {
+ofRectangle View::getLocalContentFrame() const {
   return ofRectangle(0, 0, content_width.value(), content_height.value());
 }
 

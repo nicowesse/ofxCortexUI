@@ -26,7 +26,7 @@ public:
 protected:
   virtual string _getComponentName() const override { return "Checkbox"; };
   
-  void viewDidLoad()
+  virtual void viewDidLoad() override
   {
     outerRing.circle(0, 0, 12 * 0.5);
     outerRing.circle(0, 0, 10 * 0.5);
@@ -37,15 +37,15 @@ protected:
   
   virtual void onDraw() override
   {
-    Styling::drawBackground(this->getBounds(), View::getMouseState());
-    Styling::drawLabel(parameter.getName(), this->getBounds());
+    Styling::drawBackground(this->getFrame(), View::getMouseState());
+    Styling::drawLabel(parameter.getName(), this->getFrame());
     
     _drawCheckbox();
   }
   
   virtual void _drawCheckbox()
   {
-    const auto & rect = this->getContentBounds();
+    const auto & rect = this->getContentFrame();
     
     float diameter = 10.0f;
     float radius = diameter * 0.5;

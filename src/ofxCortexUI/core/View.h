@@ -8,9 +8,11 @@
 #include "ofRectangle.h"
 #include "ofGraphics.h"
 #include "ofAppRunner.h"
+#include "ofParameter.h"
 #include "LayoutEngine.h"
 #include "Style.h"
 #include "Stencil.h"
+#include "ofxCortex/types/Parameter.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -39,8 +41,10 @@ public:
   void update(float time, float delta) { this->internalUpdate(time, delta); }
   
   void draw() { this->internalDraw(); }
-  void enableSubviewRendering() { shouldDrawSubviews = true; }
-  void disableSubviewRendering() { shouldDrawSubviews = false; }
+  void enableRendering() { this->shouldDraw = true; }
+  void disableRendering() { this->shouldDraw = false; }
+  void enableSubviewRendering() { this->shouldDrawSubviews = true; }
+  void disableSubviewRendering() { this->shouldDrawSubviews = false; }
   
   void enableMask() { isMaskEnabled = true; }
   void disableMask() { isMaskEnabled = false; }
@@ -136,7 +140,7 @@ public:
   float getContentBottom() const { return this->content_bottom.value(); }
   
   void setPosition(float x, float y);
-  void setPosition(glm::vec2 position);
+  void setPosition(const glm::vec2 & position);
   glm::vec2 getPosition() const { return glm::vec2(this->left.value(), this->top.value()); }
   void setWidth(float value);
   float getWidth() const { return this->width.value(); }
@@ -147,8 +151,9 @@ public:
   void setSize(float w, float h);
   void setSize(glm::vec2 size);
   
-  void setRect(const ofRectangle & rect);
-  ofRectangle getRect() const { return getBounds(); }
+  void setFrame(const ofRectangle & rect);
+  ofRectangle getFrame() const;
+  ofRectangle getContentFrame() const;
   
   void setCenter(float x, float y);
   void setCenter(glm::vec2 center);
@@ -194,16 +199,12 @@ public:
   kiwi::Variable intrinsic_width { "intrinsic_width" };
   kiwi::Variable intrinsic_height { "intrinsic_height" };
   
-  ofRectangle getBounds() const;
-  ofRectangle getContentBounds() const;
-  
-  
 #pragma mark - LAYOUT: Helpers
 protected:  
   void updateFrames()
   {
-    this->frame = getBounds();
-    this->contentFrame = getContentBounds();
+    this->frame = getFrame();
+    this->contentFrame = getContentFrame();
   }
   virtual void layoutSubviews();
   void layoutIfNeeded() {
@@ -216,10 +217,6 @@ protected:
   void setNeedsLayout() { this->needsLayout = true; };
   bool needsLayout { true };
   
-  ofRectangle frame;
-  ofRectangle contentFrame;
-  
-  
   
   virtual void updateConstraints();
   void setNeedsUpdateConstraints() { this->needsUpdateConstraints = true; }
@@ -231,6 +228,7 @@ protected:
   }
   bool needsUpdateConstraints { true };
   
+  std::vector<kiwi::Constraint> baseConstraints;
   std::vector<kiwi::Constraint> constraints;
   
   
@@ -242,21 +240,18 @@ protected:
   
   bool isMaskEnabled { false };
   bool isDebugEnabled { false };
+  bool shouldDraw { true };
   bool shouldDrawSubviews { true };
   
-//  ofRectangle bounds;
-//  ofRectangle _getBounds() const;
-  ofRectangle getLocalBounds() const;
+  ofRectangle frame;
+  ofRectangle contentFrame;
   
-//  ofRectangle contentBounds;
-//  ofRectangle _getContentBounds() const;
-  ofRectangle getLocalContentBounds() const;
+  ofRectangle getLocalFrame() const;
+  ofRectangle getLocalContentFrame() const;
   
   int layerZ { 0 };
   bool includeInOverlap { true };
   void updateBounds();
-  
-  
   
 #pragma mark - OBJECT: Family Tree
 public:
@@ -369,6 +364,16 @@ protected:
     return ofxCortex::ui::Styling::State::IDLE;
   }
   
+  std::string getMouseStateString(const ofxCortex::ui::Styling::State & state)
+  {
+    switch(state) {
+      case ofxCortex::ui::Styling::State::ACTIVE: return "ACTIVE";
+      case ofxCortex::ui::Styling::State::FOCUS: return "FOCUS";
+      case ofxCortex::ui::Styling::State::HOVER: return "HOVER";
+      default: case ofxCortex::ui::Styling::State::IDLE: return "IDLE";
+    }
+  }
+  
   float getHoverIntensity() const { return mouseHoverIntensity; }
   float getActiveIntensity() const { return mouseActiveIntensity; }
   
@@ -392,18 +397,42 @@ protected:
   void keyPressedHandler(ofKeyEventArgs & e);
   void keyReleasedHandler(ofKeyEventArgs & e);
   void charTypedHandler(uint32_t & c);
+};
+
+template<typename T>
+class ParameterView : public View {
+protected:
+  ParameterView(const ofAbstractParameter & parameter) : View(parameter.getName())
+  {
+    this->parameterRef = parameter.newReference();
+  }
   
 protected:
+  std::shared_ptr<ofAbstractParameter> parameterRef;
   
+  ofParameter<T> & getParameter() {
+    auto unit = std::dynamic_pointer_cast<ofxCortex::UnitParameter<T>>(parameterRef);
+    
+    if (unit) return unit->getParameter();
+    else return parameterRef->cast<T>();
+  }
   
+  // Aliases
+  std::string getParameterName() { return parameterRef->getName(); }
+  T getParameterMin() { return getParameter().getMin(); }
+  T getParameterMax() { return getParameter().getMax(); }
   
-#pragma mark - EVENTS: Handlers
-
-//  virtual void _windowResized(ofResizeEventArgs &e) {
-////    ofLogNotice(_getLogModule(__FUNCTION__)) << "Scale = " << Styling::getScale() << " Row height: " << Styling::defaultRowHeight().value() * Styling::getScale();
-//    this->setIntrinsicHeight(Styling::getRowHeight());
-//    LayoutEngine::setNeedsSolve();
-//  }
+  void setParameter(const T & value) { getParameter().set(value); }
+  T getParameterValue() { return getParameter().get(); }
+  
+  std::string getUnit() {
+    auto p = std::dynamic_pointer_cast<ofxCortex::UnitParameter<T>>(parameterRef);
+    
+    return (p) ? p->getUnit() : "";
+  }
+  
+private:
+  
 };
 
 }}

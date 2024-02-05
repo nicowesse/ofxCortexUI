@@ -63,7 +63,7 @@ protected:
   
   virtual void onDraw() override
   {
-    const auto & BB = this->getBounds();
+    const auto & BB = this->getFrame();
     ofPushStyle();
     
     ofFill();

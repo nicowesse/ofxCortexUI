@@ -20,7 +20,7 @@ void RangeSliderView::Bar::onUpdate(float time, float delta)
 
 void RangeSliderView::Bar::onDraw()
 {
-  auto BB = this->getBounds();
+  auto BB = this->getFrame();
   BB.setFromCenter(BB.getCenter(), BB.width, MIN(Styling::getDotSize() * 2 * 4, BB.height));
   const float & scale = Styling::getScale();
   float borderRadius = BB.height * 0.5;
@@ -68,7 +68,7 @@ void RangeSliderView::viewDidLoad()
   bar->setGrabAreaDimensions(glm::vec2(16 * Styling::getScale(), 16 * Styling::getScale()));
   bar->onResizedE([this](const ResizeableView::ResizeEvent & e) {
     glm::vec2 minSize = bar->getMinSize();
-    const auto & CBB = this->getContentBounds();
+    const auto & CBB = this->getContentFrame();
     float normalizedFrom = ofMap(e.bounds.getLeft(), CBB.getLeft(), CBB.getRight() - minSize.x, 0, 1, true);
     float normalizedTo = ofMap(e.bounds.getRight(), CBB.getLeft() + minSize.x, CBB.getRight(), 0, 1, true);
     
@@ -109,16 +109,16 @@ void RangeSliderView::viewDidLoad()
 
 void RangeSliderView::onDraw()
 {
-  Styling::drawBackground(this->getBounds());
+  Styling::drawBackground(this->getFrame());
   
   bar->draw();
   
   ofPushStyle();
   ofSetColor(Styling::getForegroundColor(), 255 - 128 * getActiveIntensity());
-  Styling::drawLabel(getName(), this->getContentBounds());
+  Styling::drawLabel(getName(), this->getContentFrame());
   
   ofSetColor(Styling::getAccentColor(), 255 - 128 * getActiveIntensity());
-  Styling::drawValue(parameter->toString(), this->getContentBounds());
+  Styling::drawValue(parameter->toString(), this->getContentFrame());
   ofPopStyle();
 }
 

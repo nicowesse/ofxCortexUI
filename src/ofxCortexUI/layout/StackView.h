@@ -118,7 +118,7 @@ protected:
     
     ofPushStyle();
     {
-      if (this->_enableBackground) Styling::drawContainerBackground(this->getBounds(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
+      if (this->_enableBackground) Styling::drawContainerBackground(this->getFrame(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
     }
     ofPopStyle();
   }
@@ -146,7 +146,7 @@ protected:
   {
     ofPushStyle();
     {
-      Styling::drawBackground(this->getContentBounds(), ofColor::white, ofColor(0, 0));
+      Styling::drawBackground(this->getContentFrame(), ofColor::white, ofColor(0, 0));
     }
     ofPopStyle();
   }

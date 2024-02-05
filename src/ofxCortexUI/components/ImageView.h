@@ -11,7 +11,6 @@
 namespace ofxCortex { namespace ui {
 
 class ImageViewer : public ofxCortex::ui::View {
-public:
   ImageViewer() : View("Image Viewer")
   {
       ofAddListener(ofEvents().fileDragEvent, this, &ImageViewer::_dragHandler, OF_EVENT_ORDER_AFTER_APP);
@@ -22,11 +21,16 @@ public:
   {
     parameter.makeReferenceTo(param);
   }
-  
-  static shared_ptr<ImageViewer> create(ofParameter<ofxCortex::core::types::Image> param) {
-    auto ptr = make_shared<ImageViewer>(param);
-    ptr->_setup();
-    return ptr;
+public:
+  template<typename ... F>
+  static std::shared_ptr<ImageViewer> create(F&& ... f) {
+    struct EnableMakeShared : public ImageViewer { EnableMakeShared(F&&... arg) : ImageViewer(std::forward<F>(arg)...) {} };
+    
+    auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    p->viewDidLoad();
+    
+    View::everyView.insert(p);
+    return p;
   }
   
   ~ImageViewer()
@@ -40,7 +44,7 @@ public:
       return;
     }
     
-    auto RR = this->getContentBounds();
+    auto RR = this->getContentFrame();
     auto imageRect = ofRectangle(0, 0, parameter->image.getWidth(), parameter->image.getHeight());
     RR.setFromCenter(RR.getCenter(), RR.width - (Styling::getHorizontalPadding()), RR.height - (Styling::getVerticalPadding()));
     
@@ -52,14 +56,9 @@ public:
 protected:
   virtual string _getComponentName() const override { return "Image Viewer"; };
   
-  void _setup()
-  {
-    
-  }
-  
   void _drawOverlay(float alpha)
   {
-    auto RR = this->getContentBounds();
+    auto RR = this->getContentFrame();
     RR.setFromCenter(RR.getCenter(), RR.width - (Styling::getHorizontalPadding()), RR.height - (Styling::getVerticalPadding()));
     RR.scaleFromCenter(1.0 - (0.04 * alpha));
     
@@ -71,7 +70,7 @@ protected:
     
     
     ofSetColor(255, 255.0 * alpha);
-    Styling::drawLabel("Drop or Click to Upload Image..", this->getContentBounds(), OF_ALIGN_HORZ_CENTER, OF_ALIGN_VERT_CENTER);
+    Styling::drawLabel("Drop or Click to Upload Image..", this->getContentFrame(), OF_ALIGN_HORZ_CENTER, OF_ALIGN_VERT_CENTER);
 //    ofxCortex::core::graphics::Typography::draw(*(this->style->getLabelFont()), "Drop or Click to Upload Image..", RR.getCenter(), 8, OF_ALIGN_HORZ_CENTER, OF_ALIGN_VERT_CENTER);
     ofPopStyle();
   }
@@ -79,7 +78,7 @@ protected:
   virtual void onDraw() override
   {
 //    background->drawBackground();
-    Styling::drawBackground(this->getBounds(), View::getMouseState());
+    Styling::drawBackground(this->getFrame(), View::getMouseState());
     this->drawImage();
     this->_drawOverlay(_overlayOpacity);
   }
