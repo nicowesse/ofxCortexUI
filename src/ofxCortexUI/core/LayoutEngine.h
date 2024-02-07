@@ -36,14 +36,16 @@ public:
   {
     get().setNeedsSolve();
     ofEventArgs e;
-    get()._updateHandler(e);
+    get().updateHandler(e);
   }
   
   
 private:
   LayoutEngine() {
-    ofAddListener(ofEvents().update, this, &LayoutEngine::_updateHandler, OF_EVENT_ORDER_BEFORE_APP);
-    ofAddListener(ofEvents().windowResized, this, &LayoutEngine::_onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
+    ofLogVerbose(__PRETTY_FUNCTION__);
+    
+    ofAddListener(ofEvents().update, this, &LayoutEngine::updateHandler, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().windowResized, this, &LayoutEngine::onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
     
     solver.addEditVariable(screen_w, kiwi::strength::strong);
     solver.suggestValue(screen_w, ofGetWidth());
@@ -52,8 +54,8 @@ private:
   };
   
   ~LayoutEngine() {
-    ofRemoveListener(ofEvents().update, this, &LayoutEngine::_updateHandler);
-    ofRemoveListener(ofEvents().windowResized, this, &LayoutEngine::_onWindowResized);
+    ofRemoveListener(ofEvents().update, this, &LayoutEngine::updateHandler);
+    ofRemoveListener(ofEvents().windowResized, this, &LayoutEngine::onWindowResized);
   }
   
   LayoutEngine(const LayoutEngine&) = delete;
@@ -65,17 +67,19 @@ private:
     return instance;
   }
   
-  void _updateHandler(ofEventArgs &e)
+  void updateHandler(ofEventArgs &e)
   {
-    if (_needSolve)
+    if (this->_needSolve)
     {
       solver.updateVariables();
-      _needSolve = false;
+      this->_needSolve = false;
     }
   }
   
-  void _onWindowResized(ofResizeEventArgs &e)
+  void onWindowResized(ofResizeEventArgs &e)
   {
+    ofLogVerbose("LayoutEngine::" + std::string(__FUNCTION__) + "()");
+    
     solver.suggestValue(screen_w, e.width);
     solver.suggestValue(screen_h, e.height);
     _needSolve = true;

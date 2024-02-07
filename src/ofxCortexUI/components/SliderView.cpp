@@ -95,7 +95,7 @@ void SliderView<T>::onMouseDragged(const View::MouseEventArgs & e)
 {
   View::onMouseDragged(e);
   
-  if (e.isOverlapped) return;
+//  if (e.isOverlapped || !View::isFocused()) return;
   
   float normalizedX = ofMap(e.x - 2, this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), 0, 1, true);
   float parameterValue = ofMap(normalizedX, 0, 1, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax());
@@ -306,6 +306,8 @@ void SliderView<int>::onMouseDragged(const MouseEventArgs & e)
 {
   View::onMouseDragged(e);
   
+  if (e.isOverlapped || !View::isFocused()) return;
+  
   float parameterRange = ParameterView<int>::getParameterMax() - ParameterView<int>::getParameterMin();
   float stepWidth = this->getContentFrame().width / parameterRange;
   
@@ -313,6 +315,26 @@ void SliderView<int>::onMouseDragged(const MouseEventArgs & e)
   ParameterView<int>::setParameter(parameterValue);
 }
 
+template<>
+void SliderView<int>::onKeyPressed(const ofKeyEventArgs & e)
+{
+  View::onKeyPressed(e);
+  
+  if (!View::isFocused()) return;
+  
+  float multiplier = 1.0;
+  if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT + OF_KEY_SHIFT)) multiplier = 1000;
+  else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) multiplier = 100;
+  else if (e.modifiers == OF_KEY_COMMAND) multiplier = 10;
+  
+  switch(e.key)
+  {
+    case OF_KEY_LEFT: ParameterView<int>::getParameter() += -1; break;
+    case OF_KEY_DOWN: ParameterView<int>::getParameter() += -10 * multiplier; break;
+    case OF_KEY_RIGHT: ParameterView<int>::getParameter() += 1.0; break;
+    case OF_KEY_UP: ParameterView<int>::getParameter() += 10 * multiplier; break;
+  }
+}
 
 template class SliderView<float>;
 template class SliderView<int>;

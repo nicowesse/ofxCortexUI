@@ -21,7 +21,7 @@ public:
   };
   
   static const kiwi::Variable & defaultRowHeight() { return get().default_row_height; }
-  static float getRowHeight(int rows = 1) { return 40 * rows * get().scale; }//get().default_row_height.value() * rows * get().scale; }
+  static float getRowHeight(int rows = 1) { return getScaled(40.0 * rows); }
   
   static void  setMargins(float value) {
     setMarginTop(value);
@@ -92,7 +92,7 @@ public:
       case ACTIVE: return getAccentColor(); break;
       case FOCUS: return get().borderColorFocused; break;
         //      case HOVER: get().borderColorHover; break;
-      case IDLE:
+      case IDLE: return get().borderColor; break;
       default: return get().borderColor; break;
     }
   }
@@ -253,11 +253,14 @@ public:
 private:
   
   Styling() {
-    ofAddListener(ofEvents().windowResized, this, &Styling::_onWindowResized);
+    ofLogVerbose(__PRETTY_FUNCTION__);
+  
+    ofAddListener(ofEvents().windowResized, this, &Styling::onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
     
-    scale = ((ofAppGLFWWindow*)ofGetWindowPtr())->getPixelScreenCoordScale();
+    float DPI = ((ofAppGLFWWindow*) ofGetWindowPtr())->getPixelScreenCoordScale();
+    this->scale = DPI;
     
-    double initialMargin = 6 * scale;
+    double initialMargin = 6 * DPI;
     LayoutEngine::addEditVariable(margin_top, kiwi::strength::strong);
     LayoutEngine::addEditVariable(margin_left, kiwi::strength::strong);
     LayoutEngine::addEditVariable(margin_bottom, kiwi::strength::strong);
@@ -268,7 +271,7 @@ private:
     LayoutEngine::suggestValue(margin_bottom, initialMargin);
     LayoutEngine::suggestValue(margin_right, initialMargin);
     
-    double initialPadding = 6 * scale;
+    double initialPadding = 6 * DPI;
     LayoutEngine::addEditVariable(padding_top, kiwi::strength::strong);
     LayoutEngine::addEditVariable(padding_left, kiwi::strength::strong);
     LayoutEngine::addEditVariable(padding_bottom, kiwi::strength::strong);
@@ -279,17 +282,20 @@ private:
     LayoutEngine::suggestValue(padding_bottom, initialPadding);
     LayoutEngine::suggestValue(padding_right, initialPadding);
     
-    double initialSpacing = 6 * scale;
+    double initialSpacing = 6 * DPI;
     LayoutEngine::addEditVariable(spacing_x, kiwi::strength::strong);
     LayoutEngine::addEditVariable(spacing_y, kiwi::strength::strong);
     LayoutEngine::suggestValue(spacing_x, initialSpacing);
     LayoutEngine::suggestValue(spacing_y, initialSpacing);
     
-    _loadFonts(scale);
+    LayoutEngine::addEditVariable(default_row_height, kiwi::strength::strong);
+    LayoutEngine::suggestValue(default_row_height, 40.0 * DPI);
+    
+    this->loadFonts(DPI);
   };
   
   ~Styling() {
-    ofRemoveListener(ofEvents().windowResized, this, &Styling::_onWindowResized);
+    ofRemoveListener(ofEvents().windowResized, this, &Styling::onWindowResized);
   }
   Styling(const Styling&) = delete;
   Styling& operator=(const Styling&) = delete;
@@ -300,9 +306,11 @@ private:
     return instance;
   }
   
-  void _onWindowResized(ofResizeEventArgs &e)
+  void onWindowResized(ofResizeEventArgs &e)
   {
-    scale = ((ofAppGLFWWindow*) ofGetWindowPtr())->getPixelScreenCoordScale();
+    this->scale = ((ofAppGLFWWindow*) ofGetWindowPtr())->getPixelScreenCoordScale();
+    
+    ofLogVerbose("Styling::" + std::string(__FUNCTION__) + "()") << "DPI = " << this->scale;
     
     double initialMargin = 6 * scale;
     LayoutEngine::suggestValue(margin_top, initialMargin);
@@ -320,21 +328,28 @@ private:
     LayoutEngine::suggestValue(spacing_x, initialSpacing);
     LayoutEngine::suggestValue(spacing_y, initialSpacing);
     
-    _loadFonts(scale);
+    LayoutEngine::suggestValue(default_row_height, 40.0 * scale);
+    
+    this->loadFonts(scale);
     
     LayoutEngine::forceSolve();
   }
   
   float scale;
+//  kiwi::Variable scale { "scale" };
   
   // Dimensions
   kiwi::Variable default_row_height { "default_row_height" };
   
   // Spacing
   kiwi::Variable margin_top { "margin_top" };
+  kiwi::Variable scaled_margin_top { "scaled_margin_top" };
   kiwi::Variable margin_left { "margin_left" };
+  kiwi::Variable scaled_margin_left { "scaled_margin_left" };
   kiwi::Variable margin_bottom { "margin_bottom" };
+  kiwi::Variable scaled_margin_bottom { "scaled_margin_bottom" };
   kiwi::Variable margin_right { "margin_right" };
+  kiwi::Variable scaled_margin_right { "scaled_margin_right" };
   
   kiwi::Variable padding_top { "padding_top" };
   kiwi::Variable padding_left { "padding_left" };
@@ -345,8 +360,8 @@ private:
   kiwi::Variable spacing_y { "spacing_y" };
   
   // Colors
-  ofColor backgroundColor { 18 };
-  ofColor backgroundColorHovering { 24 };
+  ofColor backgroundColor { 16 };
+  ofColor backgroundColorHovering { 20 };
   ofColor backgroundColorActive { 32 };
   
   ofColor containerColor { 20 };
@@ -354,7 +369,7 @@ private:
   
   ofColor accentColor { ofColor::fromHex(0xFFD953) };
   
-  ofColor borderColor { 32 };
+  ofColor borderColor { 24 };
   ofColor borderColorHover { 255 };
   ofColor borderColorFocused { 128 };
   
@@ -364,7 +379,7 @@ private:
     Font valueFont;
   } fonts;
   
-  void _loadFonts(float scale)
+  void loadFonts(float scale)
   {
     std::string labelPath = "assets/fonts/SF-Pro-Text-Regular.otf";
     if (!ofFile::doesFileExist(labelPath)) labelPath = OF_TTF_MONO;

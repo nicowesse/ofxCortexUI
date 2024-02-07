@@ -427,7 +427,7 @@ std::vector<kiwi::Constraint> LayoutHelpers::alignHorizontal(std::shared_ptr<Vie
 std::vector<kiwi::Constraint> LayoutHelpers::alignVertical(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment)
 {
   std::vector<kiwi::Constraint> constraints;
-  for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
     if (alignment == Alignment::FILL_SPACE) {
       constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
       constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });

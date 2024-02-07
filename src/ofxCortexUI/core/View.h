@@ -28,6 +28,9 @@ public:
     struct EnableMakeShared : public View { EnableMakeShared(F&&... arg) : View(std::forward<F>(arg)...) {} };
     
     auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    
+    ofLogVerbose(p->toString(__FUNCTION__));
+    
     p->viewDidLoad();
     
     View::everyView.insert(p);
@@ -58,7 +61,11 @@ protected:
   struct MouseEventArgs;
   struct DeltaMouseEventArgs;
   
-  virtual void viewDidLoad() {};
+  virtual void viewDidLoad() {
+    ofLogVerbose(toString(__FUNCTION__));
+//    this->updateConstraintsIfNeeded();
+//    this->layoutIfNeeded();
+  };
   
   virtual void onUpdate(float time, float delta) {};
   
@@ -83,7 +90,7 @@ protected:
   virtual void onKeyReleased(const ofKeyEventArgs & e);
   virtual void onCharTyped(const uint32_t & c);
   
-  virtual void onWindowResized(const ofResizeEventArgs & e) {};
+  virtual void onWindowResized(const ofResizeEventArgs & e);
   
   
   
@@ -92,7 +99,18 @@ protected:
   std::string _name;
   
   virtual std::string _getComponentName() const { return "View"; }
-  virtual std::string _getLogModule(const std::string & func);
+  virtual std::string _getLogModule(const std::string & func = "") const;
+  std::string toString(const std::string & functionName = "") const { return _getLogModule(functionName); }
+  friend std::ostream& operator<<(std::ostream& os, const View& view)
+  {
+    os << view.toString();
+    return os;
+  }
+  friend std::ostream& operator<<(std::ostream& os, const std::shared_ptr<View>& view)
+  {
+    os << view->toString();
+    return os;
+  }
   
   std::string _getLevel() const {
     if (!hasParent()) return "";
@@ -115,27 +133,24 @@ protected:
   
 #pragma mark - LAYOUT: Positioning and Sizing
 public:
-  void addConstraint(kiwi::Constraint & constraints);
-  void addConstraints(std::vector<kiwi::Constraint> constraints);
-  
-  void removeConstraint(kiwi::Constraint & constraints);
-  void removeConstraints(std::vector<kiwi::Constraint> constraints);
-  void removeAllConstraints();
   
   void setIntrinsicSize(float width, float height);
+  glm::vec2 getIntrinsicSize() const { return glm::vec2(getIntrinsicWidth(), getIntrinsicHeight()); }
   void setIntrinsicWidth(float width);
+  float getIntrinsicWidth() const { return this->intrinsic_width.value(); }
   void setIntrinsicHeight(float height);
+  float getIntrinsicHeight() const { return this->intrinsic_height.value(); }
   
-  void setLeft(float value);
+  void  setLeft(float value);
   float getLeft() const { return this->left.value(); }
   float getContentLeft() const { return this->content_left.value(); }
-  void setTop(float value);
+  void  setTop(float value);
   float getTop() const { return this->top.value(); }
   float getContentTop() const { return this->content_top.value(); }
-  void setRight(float value);
+  void  setRight(float value);
   float getRight() const { return this->right.value(); }
   float getContentRight() const { return this->content_right.value(); }
-  void setBottom(float value);
+  void  setBottom(float value);
   float getBottom() const { return this->bottom.value(); }
   float getContentBottom() const { return this->content_bottom.value(); }
   
@@ -173,6 +188,13 @@ public:
   
 #pragma mark - LAYOUT: Variables
 public:
+  void addConstraint(kiwi::Constraint & constraints);
+  void addConstraints(std::vector<kiwi::Constraint> constraints);
+  
+  void removeConstraint(kiwi::Constraint & constraints);
+  void removeConstraints(std::vector<kiwi::Constraint> constraints);
+  void clearConstraints();
+  
   kiwi::Variable left { "left" };
   kiwi::Variable top { "top" };
   
@@ -203,18 +225,42 @@ public:
 protected:  
   void updateFrames()
   {
+    ofLogVerbose(toString(__FUNCTION__));
+    
     this->frame = getFrame();
     this->contentFrame = getContentFrame();
   }
+  
   virtual void layoutSubviews();
   void layoutIfNeeded() {
     if (this->needsLayout) {
       this->updateFrames();
       this->layoutSubviews();
+      
+      // Subviews
+      for (auto & subview : subviews)
+      {
+        subview->setNeedsLayout();
+//        subview->layoutIfNeeded();
+      }
+      
       this->needsLayout = false;
     }
   }
-  void setNeedsLayout() { this->needsLayout = true; };
+  void setNeedsLayout() {
+    ofLogVerbose(toString(__FUNCTION__));
+    this->needsLayout = true;
+  };
+  void forceLayout() {
+    this->updateFrames();
+    this->layoutSubviews();
+    
+    // Subviews
+    for (auto & subview : subviews)
+    {
+      subview->layoutSubviews();
+    }
+  }
   bool needsLayout { true };
   
   
@@ -238,7 +284,7 @@ protected:
   void internalUpdate(double time, double delta);
   void internalDraw();
   
-  bool isMaskEnabled { false };
+  bool isMaskEnabled { true };
   bool isDebugEnabled { false };
   bool shouldDraw { true };
   bool shouldDrawSubviews { true };
@@ -251,7 +297,6 @@ protected:
   
   int layerZ { 0 };
   bool includeInOverlap { true };
-  void updateBounds();
   
 #pragma mark - OBJECT: Family Tree
 public:
@@ -271,6 +316,8 @@ public:
 protected:
   std::shared_ptr<View> superview;
   std::vector<std::shared_ptr<View>> subviews;
+  
+  std::shared_ptr<View> getSelf() { return shared_from_this(); }
   
   inline static std::shared_ptr<View> focused = nullptr;
   bool isFocused() const { return View::focused != nullptr && View::focused.get() == this; }
@@ -324,7 +371,7 @@ protected:
   // Window Resized
   void bindWindowResizedListener() { ofAddListener(ofEvents().windowResized, this, &View::windowResizedHandler); }
   void unbindWindowResizedListener() { ofRemoveListener(ofEvents().windowResized, this, &View::windowResizedHandler); }
-  void windowResizedHandler(ofResizeEventArgs & e) { this->onWindowResized(e); }
+  void windowResizedHandler(ofResizeEventArgs & e);
   
   // Mouse Handling
   struct MouseEventArgs : public ofMouseEventArgs {
@@ -417,10 +464,13 @@ protected:
     else return parameterRef->cast<T>();
   }
   
+  std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef->newReference(); }
+  
   // Aliases
   std::string getParameterName() { return parameterRef->getName(); }
   T getParameterMin() { return getParameter().getMin(); }
   T getParameterMax() { return getParameter().getMax(); }
+  std::string getParameterType() { return typeid(T).name(); }
   
   void setParameter(const T & value) { getParameter().set(value); }
   T getParameterValue() { return getParameter().get(); }
@@ -430,8 +480,6 @@ protected:
     
     return (p) ? p->getUnit() : "";
   }
-  
-private:
   
 };
 

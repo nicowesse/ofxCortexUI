@@ -25,6 +25,8 @@ public:
     struct EnableMakeShared : public SliderView<T> { EnableMakeShared(F&&... arg) : SliderView<T>(std::forward<F>(arg)...) {} };
     
     auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
+    ofLogVerbose(p->toString(__FUNCTION__));
+    
     p->viewDidLoad();
     
     View::everyView.insert(p);
