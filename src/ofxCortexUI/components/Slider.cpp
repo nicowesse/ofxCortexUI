@@ -28,7 +28,7 @@ void Slider<T>::drawSlider()
   {
     _getShader().begin();
     _getShader().setUniform1f("u_center", centerBulge);
-    ofDrawPlane(rect.getCenter(), rect.width - handle->getWidth(), 1);
+    ofDrawPlane(rect.getCenter(), rect.width, 1);
     _getShader().end();
     
     // Rounded Rect BG
@@ -41,7 +41,27 @@ void Slider<T>::drawSlider()
     
     ofFill();
     if (parameter.getMin() < 0.0) this->drawZero();
-    handle->drawHandle(ofFloatColor(style->accentColor), ofFloatColor(style->backgroundColor), 6.0);
+//    handle->drawHandle(ofFloatColor(style->accentColor), ofFloatColor(style->backgroundColor), 6.0);
+  }
+  ofPopStyle();
+}
+
+template<typename T>
+void Slider<T>::drawValueDot()
+{
+  const auto & rect = getRenderRect();
+  
+  float x = ofMap(parameter, parameter.getMin(), parameter.getMax(), rect.getLeft() + inset, rect.getRight() - inset, true);
+  float y = rect.getCenter().y;
+  float diameter = 6.0;
+  
+  ofPushStyle();
+  {
+    ofSetColor(style->backgroundColor);
+    ofDrawCircle(x, y, (diameter + 4) * 0.5);
+    
+    ofSetColor(style->accentColor);
+    ofDrawCircle(x, y, diameter * 0.5);
   }
   ofPopStyle();
 }
@@ -84,19 +104,19 @@ void Slider<T>::_init()
   value->disableEvents();
   this->addChild(value);
   
-  handle = make_shared<Handle>(getRenderRect());
-  handle->setName("Slider::Handle");
-  handle->setWidth(16);
-  this->addChild(handle);
-  
-  _eventListeners.push(handle->onDragE.newListener([this](Draggable::DraggableEventArgs e) {
-    parameter.set(ofMap(handle->getNormalizedPosition().x, 0, 1, parameter.getMin(), parameter.getMax()));
-    _handleOpacity = ofClamp(_handleOpacity + abs(e.delta.x), 0.7, 1.0);
-  }));
-  
-  _eventListeners.push(parameter.newListener([this](const T & value) {
-    handle->setFromNormalizedX(ofMap(value, parameter.getMin(), parameter.getMax(), 0, 1, true));
-  }));
+//  handle = make_shared<Handle>(getRenderRect());
+//  handle->setName("Slider::Handle");
+//  handle->setWidth(16);
+//  this->addChild(handle);
+//  
+//  _eventListeners.push(handle->onDragE.newListener([this](Draggable::DraggableEventArgs e) {
+//    parameter.set(ofMap(handle->getNormalizedPosition().x, 0, 1, parameter.getMin(), parameter.getMax()));
+//    _handleOpacity = ofClamp(_handleOpacity + abs(e.delta.x), 0.7, 1.0);
+//  }));
+//  
+//  _eventListeners.push(parameter.newListener([this](const T & value) {
+//    handle->setFromNormalizedX(ofMap(value, parameter.getMin(), parameter.getMax(), 0, 1, true));
+//  }));
 }
 
 template<typename T>
@@ -112,6 +132,7 @@ void Slider<T>::_draw()
 {
   background->drawBackground();
   this->drawSlider();
+  this->drawValueDot();
   
   label->drawLabel(ofFloatColor(style->labelFontColor, _textOpacity));
   value->drawValue(ofFloatColor(style->valueFontColor, _textOpacity));
@@ -124,7 +145,7 @@ void Slider<T>::_debug()
 {
   View::_debug();
   
-  handle->debug();
+//  handle->debug();
 }
 
 template<typename T>
@@ -139,10 +160,10 @@ void Slider<T>::_adjustLayout()
   ofRectangle dragBounds = getRenderRect();
   dragBounds.setFromCenter(dragBounds.getCenter(), dragBounds.width - 12, dragBounds.height);
   
-  handle->setDragBounds(dragBounds);
-  handle->setHeight(dragBounds.height);
-  handle->setY(dragBounds.y);
-  handle->setFromNormalizedX(getNormalizedParameter());
+//  handle->setDragBounds(dragBounds);
+//  handle->setHeight(dragBounds.height);
+//  handle->setY(dragBounds.y);
+//  handle->setFromNormalizedX(getNormalizedParameter());
   
   DisplayObject::_adjustLayout();
 }
@@ -152,15 +173,27 @@ void Slider<T>::_mousePressed(const ofMouseEventArgs & e)
 {
   View::_mousePressed(e);
   
-  glm::vec2 localCoord = globalToLocal(e);
+  const auto & rect = getRenderRect();
   
-  if (hasFocus() && !handle->isInsideRectangle(e, true))
-  {
-    ofRectangle sliderRect = handle->getDragBounds();
-    sliderRect.setFromCenter(sliderRect.getCenter(), sliderRect.width - handle->getWidth(), sliderRect.height);
-    float normalizedFromX = ofMap(localCoord.x, sliderRect.getLeft(), sliderRect.getRight(), 0, 1, true);
-    parameter.set(ofMap(normalizedFromX, 0, 1, parameter.getMin(), parameter.getMax()));
-  }
+  glm::vec2 localCoord = globalToLocal(e);
+  float normalizedX = ofMap(localCoord.x, rect.getLeft() + inset, rect.getRight() - inset, 0, 1, true);
+  
+  parameter.set(ofMap(normalizedX, 0, 1, parameter.getMin(), parameter.getMax()));
+  
+  _handleOpacity = 1.0f;
+}
+
+template<typename T>
+void Slider<T>::_mouseDragged(const ofMouseEventArgs & e)
+{
+  View::_mousePressed(e);
+  
+  const auto & rect = getRenderRect();
+  
+  glm::vec2 localCoord = globalToLocal(e);
+  float normalizedX = ofMap(localCoord.x, rect.getLeft() + inset, rect.getRight() - inset, 0, 1, true);
+  
+  parameter.set(ofMap(normalizedX, 0, 1, parameter.getMin(), parameter.getMax()));
   
   _handleOpacity = 1.0f;
 }
@@ -303,6 +336,23 @@ ofShader & Slider<T>::_getShader()
   }
   
   return shader;
+}
+
+template<>
+void Slider<int>::_mouseDragged(const ofMouseEventArgs & e)
+{
+  View::_mousePressed(e);
+  
+  const auto & rect = getRenderRect();
+  
+  glm::vec2 localCoord = globalToLocal(e);
+  float normalizedX = ofMap(localCoord.x, rect.getLeft() + inset, rect.getRight() - inset, 0, 1, true);
+  
+  int nextValue = ofMap(normalizedX, 0, 1, parameter.getMin(), parameter.getMax());
+  
+  if (nextValue != parameter) parameter.set(nextValue);
+  
+  _handleOpacity = 1.0f;
 }
 
 template class Slider<float>;

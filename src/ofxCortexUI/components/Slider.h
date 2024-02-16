@@ -52,6 +52,7 @@ public:
   }
   
   void drawSlider();
+  void drawValueDot();
   void drawZero();
   
   virtual bool hasParameter() const override { return true; }
@@ -68,6 +69,7 @@ protected:
   virtual void _adjustLayout() override;
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override;
+  virtual void _mouseDragged(const ofMouseEventArgs & e) override;
   virtual void _mouseScrolled(const ofMouseEventArgs & e) override;
   virtual void _keyPressed(const ofKeyEventArgs & e) override;
   
@@ -77,8 +79,9 @@ protected:
   shared_ptr<ui::Background> background;
   shared_ptr<ui::Label> label;
   shared_ptr<ui::Value<T>> value;
-  shared_ptr<Handle> handle;
+//  shared_ptr<Handle> handle;
   
+  float inset { 12 };
   float _textOpacity { 0.65f };
   float _handleOpacity{1.0f};
   
