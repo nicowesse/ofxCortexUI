@@ -11,6 +11,7 @@
 #include "ofxCortexUI/layout/FitView.h"
 
 #include "ofxCortexUI/components/Label.h"
+#include "ofxCortexUI/components/GroupLabel.h"
 #include "ofxCortexUI/components/Value.h"
 #include "ofxCortexUI/components/Slider.h"
 #ifdef TARGET_OSX

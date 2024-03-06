@@ -1,5 +1,6 @@
 #include "ParameterUtils.h"
 #include "ofxCortexUI/components/Label.h"
+#include "ofxCortexUI/components/GroupLabel.h"
 #include "ofxCortexUI/components/Value.h"
 #include "ofxCortexUI/components/Button.h"
 #include "ofxCortexUI/components/Slider.h"
@@ -15,7 +16,7 @@ std::vector<std::shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFo
 {
   vector<shared_ptr<ofxCortex::ui::View>> views;
   
-  if (parameters.getName().size() > 0 && includeGroupName) views.push_back(ui::Label::create(parameters.getName()));
+  if (parameters.getName().size() > 0 && includeGroupName) views.push_back(ui::GroupLabel::create(parameters));
 
   vector<shared_ptr<ofAbstractParameter> >::iterator param = parameters.begin();
 
