@@ -63,8 +63,8 @@ protected:
   
   virtual void viewDidLoad() {
     ofLogVerbose(toString(__FUNCTION__));
-//    this->updateConstraintsIfNeeded();
-//    this->layoutIfNeeded();
+//    this->setNeedsUpdateConstraints();
+//    this->setNeedsLayout();
   };
   
   virtual void onUpdate(float time, float delta) {};
@@ -99,16 +99,16 @@ protected:
   std::string _name;
   
   virtual std::string _getComponentName() const { return "View"; }
-  virtual std::string _getLogModule(const std::string & func = "") const;
-  std::string toString(const std::string & functionName = "") const { return _getLogModule(functionName); }
+  virtual std::string _getLogModule(const std::string & func = "", bool includeStructure = true) const;
+  std::string toString(const std::string & functionName = "", bool includeStructure = true) const { return _getLogModule(functionName, includeStructure); }
   friend std::ostream& operator<<(std::ostream& os, const View& view)
   {
-    os << view.toString();
+    os << view.toString("", false);
     return os;
   }
   friend std::ostream& operator<<(std::ostream& os, const std::shared_ptr<View>& view)
   {
-    os << view->toString();
+    os << view->toString("", false);
     return os;
   }
   
@@ -189,10 +189,10 @@ public:
 #pragma mark - LAYOUT: Variables
 public:
   void addConstraint(kiwi::Constraint & constraints);
-  void addConstraints(std::vector<kiwi::Constraint> constraints);
+  void addConstraints(const std::vector<kiwi::Constraint> & constraints);
   
   void removeConstraint(kiwi::Constraint & constraints);
-  void removeConstraints(std::vector<kiwi::Constraint> constraints);
+  void removeConstraints(const std::vector<kiwi::Constraint> constraints);
   void clearConstraints();
   
   kiwi::Variable left { "left" };
@@ -275,7 +275,7 @@ protected:
   bool needsUpdateConstraints { true };
   
   std::vector<kiwi::Constraint> baseConstraints;
-  std::vector<kiwi::Constraint> constraints;
+  std::vector<kiwi::Constraint> layoutConstraints;
   
   
   

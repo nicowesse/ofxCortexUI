@@ -33,7 +33,7 @@ void SliderView<T>::drawSlider()
     SliderView<T>::getShader().begin();
     SliderView<T>::getShader().setUniform1f("u_center", centerBulge);
     SliderView<T>::getShader().setUniform4f("u_color", sliderColor);
-    ofDrawPlane(rect.getCenter(), rect.width, 0.5);
+    ofDrawPlane(rect.x, centerY, rect.width, 1);
     SliderView<T>::getShader().end();
     
     ofFill();
@@ -48,16 +48,16 @@ void SliderView<T>::drawZero()
   const auto & rect = this->getContentFrame();
   float zeroPoint = ofMap(0, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), rect.getLeft() + Styling::getPaddingLeft(), rect.getRight() - Styling::getPaddingRight());
   
-  float r = 4;
+  float r = Styling::getScaled(3);
   float alpha = 0.6;
   
   ofPushStyle();
   {
     ofSetColor(Styling::getBackgroundColor());
-    ofDrawCircle(zeroPoint, rect.getCenter().y, (r + 2) * 0.5);
+    ofDrawCircle(zeroPoint, rect.y + rect.height * 0.5, (r + 2) * 0.5);
     
     ofSetColor(Styling::getForegroundColor(), 255 * alpha);
-    ofDrawCircle(zeroPoint, rect.getCenter().y, r * 0.5);
+    ofDrawCircle(zeroPoint, rect.y + rect.height * 0.5, r * 0.5);
   }
   ofPopStyle();
 }
@@ -71,10 +71,10 @@ void SliderView<T>::drawDot()
   
   ofPushStyle();
   ofSetColor(Styling::getForegroundColor());
-  ofDrawCircle(x, BB.getCenter().y, Styling::getDotSize());
+  ofDrawCircle(x, BB.y + BB.height * 0.5, Styling::getDotSize());
   
   ofSetColor(Styling::getAccentColor());
-  ofDrawCircle(x, BB.getCenter().y, Styling::getDotSize() * 0.5 * View::getHoverIntensity() + 1 * View::getActiveIntensity() * Styling::getScale());
+  ofDrawCircle(x, BB.y + BB.height * 0.5, Styling::getDotSize() * 0.5 * View::getHoverIntensity() + 1 * View::getActiveIntensity() * Styling::getScale());
   ofPopStyle();
 }
 

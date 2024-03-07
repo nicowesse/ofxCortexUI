@@ -21,8 +21,8 @@ View::View(const std::string & name)
     kiwi::Constraint { centerX == left + 0.5 * width | kiwi::strength::required },
     kiwi::Constraint { centerY == top + 0.5 * height | kiwi::strength::required },
     
-    kiwi::Constraint { width == intrinsic_width | kiwi::strength::medium },
-    kiwi::Constraint { height == intrinsic_height | kiwi::strength::medium },
+    kiwi::Constraint { width == intrinsic_width | kiwi::strength::strong },
+    kiwi::Constraint { height == intrinsic_height | kiwi::strength::strong },
     
     kiwi::Constraint { content_left >= left | kiwi::strength::required },
     kiwi::Constraint { content_top >= top | kiwi::strength::required },
@@ -290,6 +290,8 @@ bool View::isOverlapped(const glm::vec2 & point)
 
 void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
 {
+  ofLogVerbose(_getLogModule());
+  
   subview->setParent(shared_from_this());
   subview->setLevel(this->level + 1);
   subviews.insert(subviews.begin() + index, subview);
@@ -299,12 +301,16 @@ void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
 
 void View::addSubview(const std::shared_ptr<View> & subview)
 {
+  ofLogVerbose(_getLogModule());
+  
   this->addSubviewAt(subview, subviews.size());
 }
 
 
 void View::addSubviews(std::vector<std::shared_ptr<View>> views)
 {
+  ofLogVerbose(_getLogModule());
+  
   if (views.size() == 0) return;
   
   for (auto & view : views) this->addSubview(view);
@@ -318,23 +324,28 @@ void View::removeSubview(std::shared_ptr<View> subview)
 
 void View::addConstraint(kiwi::Constraint & constraint)
 {
-  ofLogVerbose(toString(__FUNCTION__)); // << kiwi::debug::dumps(constraint);
+  ofLogVerbose(toString(__FUNCTION__));
   
   LayoutEngine::addConstraint(constraint);
-  this->constraints.push_back(constraint);
+  this->layoutConstraints.push_back(constraint);
   
   this->setNeedsLayout();
 }
 
-void View::addConstraints(std::vector<kiwi::Constraint> constraints)
+void View::addConstraints(const std::vector<kiwi::Constraint> & constraints)
 {
-  for (auto & constraint : constraints) this->addConstraint(constraint);
+  ofLogVerbose(toString(__FUNCTION__));
+  
+  LayoutEngine::addConstraints(constraints);
+  this->layoutConstraints.insert(this->layoutConstraints.end(), constraints.begin(), constraints.end());
+  
+  this->setNeedsLayout();
 }
 
 void View::removeConstraint(kiwi::Constraint & constraint)
 {
   LayoutEngine::removeConstraint(constraint);
-  std::remove(std::begin(this->constraints), std::end(this->constraints), constraint);
+  std::remove(std::begin(this->layoutConstraints), std::end(this->layoutConstraints), constraint);
   
   this->setNeedsLayout();
 }
@@ -346,12 +357,10 @@ void View::removeConstraints(std::vector<kiwi::Constraint> constraints)
 
 void View::clearConstraints()
 {
-  ofLogVerbose(toString(__FUNCTION__)) << "Constraints = " << constraints.size();
+  ofLogVerbose(toString(__FUNCTION__));
   
-  for (auto& constraint : this->constraints)
-  {
-    this->removeConstraint(constraint);
-  }
+  this->removeConstraints(this->layoutConstraints);
+  layoutConstraints.clear();
 }
 
 #pragma mark - Protected
@@ -433,10 +442,12 @@ ofRectangle View::getLocalContentFrame() const {
   return ofRectangle(0, 0, content_width.value(), content_height.value());
 }
 
-std::string View::_getLogModule(const std::string & func) const
+std::string View::_getLogModule(const std::string & func, bool includeStructure) const
 {
   std::stringstream logModule;
-  logModule << _getLevel() << _getComponentName() << "('" << getName() << "')[" << ofGetFrameNum() << "]::" << func << "()";
+  if (includeStructure) logModule << _getLevel();
+  logModule << _getComponentName() << "('" << getName() << "')[" << ofGetFrameNum() << "]";
+  if (func != "") logModule << "::" << func << "()";
   return logModule.str();
 }
 

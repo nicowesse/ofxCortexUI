@@ -13,11 +13,7 @@ class SliderView : public ofxCortex::ui::ParameterView<T> {
   static_assert(std::is_arithmetic<T>::value, "SliderView: T must be numeric!");
   
 protected:
-  SliderView(const ofAbstractParameter & param) : ParameterView<T>(param)
-  {
-//    parameter.makeReferenceTo(param);
-//    parameterRef = param.newReference();
-  };
+  SliderView(const ofAbstractParameter & param) : ParameterView<T>(param) {};
   
 public:
   template<typename ... F>
@@ -38,7 +34,7 @@ public:
 protected:
   virtual std::string _getComponentName() const override { return "SliderView"; };
   
-  
+  virtual void viewDidLoad() override { View::setIntrinsicHeight(48); }
   virtual void onDraw() override;
   void drawSlider();
   void drawZero();
