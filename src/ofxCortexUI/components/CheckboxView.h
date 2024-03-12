@@ -1,14 +1,15 @@
 #pragma once
 
 #include "ofxTweenzor.h"
+#include "ofxCortex/utils/NumberUtils.h"
 
 namespace ofxCortex { namespace ui {
 
-class CheckboxView : public ofxCortex::ui::View {
+class CheckboxView : public ofxCortex::ui::ParameterView<bool> {
 protected:
-  CheckboxView(ofParameter<bool> & param) : View(param.getName())
+  CheckboxView(ofAbstractParameter & param) : ParameterView(param)
   {
-    parameter.makeReferenceTo(param);
+//    parameter.makeReferenceTo(param);
   };
   
 public:
@@ -24,7 +25,12 @@ public:
   }
   
 protected:
-  virtual string _getComponentName() const override { return "Checkbox"; };
+  virtual ~CheckboxView() 
+  {
+//    Tweenzor::removeCompleteListener(&innerAnimation);
+  }
+  
+  virtual string getComponentName() const override { return "Checkbox"; };
   
   virtual void viewDidLoad() override
   {
@@ -32,25 +38,26 @@ protected:
     outerRing.circle(0, 0, 10 * 0.5);
     outerRing.setFillColor(Styling::getAccentColor());
     
-    innerAnimation = parameter.get();
+    innerAnimation = getParameter();
+    innerAnimation.setSmoothing(0.001);
   };
   
   virtual void onDraw() override
   {
     Styling::drawBackground(this->getFrame(), View::getMouseState());
-    Styling::drawLabel(parameter.getName(), this->getFrame());
+    Styling::drawLabel(getParameterName(), this->getContentFrame());
     
-    _drawCheckbox();
+    this->drawCheckbox();
   }
   
-  virtual void _drawCheckbox()
+  virtual void drawCheckbox()
   {
     const auto & rect = this->getContentFrame();
     
     float diameter = 10.0f;
     float radius = diameter * 0.5;
     
-    float innerRadius = radius * 0.5 * innerAnimation;
+    float innerRadius = radius * 0.4 * innerAnimation;
     
     float x = rect.getRight() - radius - 12.0;
     float y = rect.getCenter().y;
@@ -58,7 +65,8 @@ protected:
     ofPushStyle();
     {
       ofSetColor(Styling::getAccentColor());
-      outerRing.draw(x, y);
+      ofNoFill();
+      ofDrawCircle(x, y, radius);
       
       ofFill();
       ofDrawCircle(x, y, innerRadius);
@@ -70,17 +78,18 @@ protected:
   {
     View::onMousePressed(e);
     
-    parameter.set(!parameter.get());
+    setParameter(!getParameterValue());
+    innerAnimation = (float) getParameterValue();
     
-    Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
+//    Tweenzor::add(&innerAnimation, innerAnimation, getParameterValue(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
   }
   
   // Members
-  ofParameter<bool> parameter;
-  ofEventListener onParameterTrigger;
+//  ofParameter<bool> parameter;
+//  ofEventListener onParameterTrigger;
   
   ofPath outerRing;
-  float innerAnimation { 0.0f };
+  ofxCortex::core::utils::Lerped<float> innerAnimation { 0.0f };
 };
 
 }}

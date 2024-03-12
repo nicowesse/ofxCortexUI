@@ -31,7 +31,7 @@ public:
   
 protected:
   
-  virtual string _getComponentName() const override { return "FileView"; };
+  virtual string getComponentName() const override { return "FileView"; };
   
   virtual void viewDidLoad() override
   {

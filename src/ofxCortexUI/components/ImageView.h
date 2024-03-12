@@ -54,7 +54,7 @@ public:
   }
   
 protected:
-  virtual string _getComponentName() const override { return "Image Viewer"; };
+  virtual string getComponentName() const override { return "Image Viewer"; };
   
   void _drawOverlay(float alpha)
   {
@@ -143,7 +143,7 @@ public:
   }
   
 protected:
-  virtual std::string _getComponentName() const override { return "Image"; };
+  virtual std::string getComponentName() const override { return "Image"; };
   
   virtual void viewDidLoad() override
   {

@@ -144,10 +144,9 @@ public:
       ofFill();
       ofDrawRectRounded(bounds, Styling::getScaled(6));
       
-      //      ofSetColor(borderColor);
-      //      ofNoFill();
-      //    //  ofDrawRectRounded(b.x, b.y, layerZ * 10 + 1, b.width, b.height, 4);
-      //      ofDrawRectRounded(bounds, (6 + Styling::getPaddingTop()) * Styling::getScale());
+      ofSetColor(borderColor);
+      ofNoFill();
+      ofDrawRectRounded(bounds, Styling::getScaled(6));
     }
     ofPopStyle();
   }
@@ -172,7 +171,7 @@ public:
   {
     if (horzAlignment == OF_ALIGN_HORZ_LEFT)
     {
-      float X = BB.getLeft() + Styling::getPaddingLeft();
+      int X = BB.getLeft() + Styling::getPaddingLeft();
       
       if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
@@ -181,7 +180,7 @@ public:
     
     if (horzAlignment == OF_ALIGN_HORZ_CENTER)
     {
-      float X = BB.getCenter().x;
+      int X = floor(BB.getCenter().x);
       
       if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
@@ -190,7 +189,7 @@ public:
     
     if (horzAlignment == OF_ALIGN_HORZ_RIGHT)
     {
-      float X = BB.getRight() - getPaddingRight();
+      int X = BB.getRight() - getPaddingRight();
       
       if (verticalAlignment == OF_ALIGN_VERT_TOP) drawLabel(text, glm::vec2(X, BB.getTop() + Styling::getPaddingTop()), horzAlignment, verticalAlignment);
       if (verticalAlignment == OF_ALIGN_VERT_CENTER) drawLabel(text, glm::vec2(X, BB.getCenter().y), horzAlignment, verticalAlignment);
@@ -211,7 +210,7 @@ public:
     
     glm::vec2 renderPosition = position + offset;
     
-    getValueFont().drawString(text, renderPosition.x, renderPosition.y);
+    getValueFont().drawStringAsShapes(text, (int) renderPosition.x - 1, (int) renderPosition.y);
   }
   
   static void drawValue(const std::string & text, const ofRectangle & BB, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_RIGHT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
@@ -371,7 +370,7 @@ private:
   
   ofColor borderColor { 24 };
   ofColor borderColorHover { 255 };
-  ofColor borderColorFocused { 128 };
+  ofColor borderColorFocused { 48 };
   
   // Fonts
   struct Fonts {

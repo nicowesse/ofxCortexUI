@@ -26,7 +26,6 @@ public:
     auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
     
     ofLogVerbose(p->toString(__FUNCTION__));
-    
     p->viewDidLoad();
     
     
@@ -35,7 +34,7 @@ public:
   }
   
 protected:
-  virtual std::string _getComponentName() const override { return "ButtonView"; };
+  virtual std::string getComponentName() const override { return "ButtonView"; };
   
   virtual void onDraw() override
   {

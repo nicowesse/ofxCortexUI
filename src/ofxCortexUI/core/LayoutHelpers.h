@@ -34,47 +34,41 @@ public:
   
   static std::string getAlignmentString(const Alignment & alignment);
   
-  static std::vector<kiwi::Constraint> fillWindow(std::shared_ptr<View> view);
-  static std::vector<kiwi::Constraint> fillInner(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views);
-  static std::vector<kiwi::Constraint> fillInner(std::shared_ptr<View> outer, std::shared_ptr<View> inner) { return fillInner(outer, std::vector<std::shared_ptr<View>>{ inner }); }
-  static std::vector<kiwi::Constraint> fillOuter(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views);
-  static std::vector<kiwi::Constraint> fillOuter(std::shared_ptr<View> outer, std::shared_ptr<View> inner) { return fillOuter(outer, std::vector<std::shared_ptr<View>>{ inner }); }
+  static std::vector<kiwi::Constraint> fillWindow(const std::shared_ptr<View> & view);
+  static std::vector<kiwi::Constraint> fillInner(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
+  static std::vector<kiwi::Constraint> fillInner(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner) { return fillInner(outer, std::vector<std::shared_ptr<View>>{ inner }); }
+  static std::vector<kiwi::Constraint> fillOuter(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
+  static std::vector<kiwi::Constraint> fillOuter(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner) { return fillOuter(outer, std::vector<std::shared_ptr<View>>{ inner }); }
   
   
-  static std::vector<kiwi::Constraint> distribute(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis, Distribution distribution);
+  static std::vector<kiwi::Constraint> distribute(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis, Distribution distribution);
   
-  static std::vector<kiwi::Constraint> stack(std::vector<std::shared_ptr<View>> views, Axis axis);
+  static std::vector<kiwi::Constraint> stack(const std::vector<std::shared_ptr<View>> & views, Axis axis);
   
-  static std::vector<kiwi::Constraint> equalSpacing(std::vector<std::shared_ptr<View>> views, Axis axis);
+  static std::vector<kiwi::Constraint> equalSpacing(const std::vector<std::shared_ptr<View>> & views, Axis axis);
   
+  static std::vector<kiwi::Constraint> spacing(const std::vector<std::shared_ptr<View>> & views, Axis axis);
   
-  static std::vector<kiwi::Constraint> fillEqually(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis);
+  static std::vector<kiwi::Constraint> fillEqually(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
   
-  static std::vector<kiwi::Constraint> equalHeight(std::vector<std::shared_ptr<View>> views);
+  static std::vector<kiwi::Constraint> equalHeight(const std::vector<std::shared_ptr<View>> & views);
+  static std::vector<kiwi::Constraint> equalWidth(const std::vector<std::shared_ptr<View>> & views);
   
-  static std::vector<kiwi::Constraint> equalWidth(std::vector<std::shared_ptr<View>> views);
+  static std::vector<kiwi::Constraint> fitWidth(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
+  static std::vector<kiwi::Constraint> fitWidth(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner);
   
-  static std::vector<kiwi::Constraint> fitWidth(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views);
+  static std::vector<kiwi::Constraint> fitHeight(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
+  static std::vector<kiwi::Constraint> fitHeight(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner);
   
-  static std::vector<kiwi::Constraint> fitWidth(std::shared_ptr<View> outer, std::shared_ptr<View> inner);
-  
-  static std::vector<kiwi::Constraint> fitHeight(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views);
-  
-  static std::vector<kiwi::Constraint> fitHeight(std::shared_ptr<View> outer, std::shared_ptr<View> inner);
-  
-  static std::vector<kiwi::Constraint> attachEnds(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis);
-  
-  static std::vector<kiwi::Constraint> attachLeading(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis);
-  
-  static std::vector<kiwi::Constraint> attachTrailing(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis);
+  static std::vector<kiwi::Constraint> attachEnds(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
+  static std::vector<kiwi::Constraint> attachLeading(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
+  static std::vector<kiwi::Constraint> attachTrailing(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
   
   
 #pragma mark - Alignment
-  static std::vector<kiwi::Constraint> alignment(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis, Alignment alignment);
-  
-  static std::vector<kiwi::Constraint> alignHorizontal(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment);
-  
-  static std::vector<kiwi::Constraint> alignVertical(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment);
+  static std::vector<kiwi::Constraint> alignment(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis, Alignment alignment);
+  static std::vector<kiwi::Constraint> alignHorizontal(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment);
+  static std::vector<kiwi::Constraint> alignVertical(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment);
   
 protected:
   class Spacer {

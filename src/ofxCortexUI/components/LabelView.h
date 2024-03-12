@@ -21,9 +21,6 @@ protected:
   }
   
 public:
-  
-  
-  
   template<typename ... T>
   static std::shared_ptr<LabelView> create(T&& ... t) {
     struct EnableMakeShared : public LabelView { EnableMakeShared(T&&... arg) : LabelView(std::forward<T>(arg)...) {} };
@@ -36,7 +33,12 @@ public:
   }
   
 protected:
-  virtual std::string _getComponentName() const override { return "LabelView"; };
+  virtual std::string getComponentName() const override { return "LabelView"; };
+  
+  virtual void viewDidLoad() override 
+  {
+    this->disableInteraction();
+  }
   
   virtual void onDraw() override
   {

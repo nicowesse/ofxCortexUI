@@ -5,7 +5,7 @@ namespace ofxCortex { namespace ui {
 #pragma mark - Public
 View::View(const std::string & name)
 {
-//  ofLogVerbose(toString(__FUNCTION__)) << "Name = " << name;
+  ofLogVerbose("👋 " + getLogModule(__FUNCTION__)) << "Name = '" << name << "'";
   
   setName(name);
   enableMask();
@@ -20,9 +20,6 @@ View::View(const std::string & name)
     kiwi::Constraint { bottom == top + height | kiwi::strength::required },
     kiwi::Constraint { centerX == left + 0.5 * width | kiwi::strength::required },
     kiwi::Constraint { centerY == top + 0.5 * height | kiwi::strength::required },
-    
-    kiwi::Constraint { width == intrinsic_width | kiwi::strength::strong },
-    kiwi::Constraint { height == intrinsic_height | kiwi::strength::strong },
     
     kiwi::Constraint { content_left >= left | kiwi::strength::required },
     kiwi::Constraint { content_top >= top | kiwi::strength::required },
@@ -39,11 +36,11 @@ View::View(const std::string & name)
     kiwi::Constraint { content_height == content_bottom - content_top | kiwi::strength::required },
     kiwi::Constraint { content_centerX == content_left + 0.5 * content_width | kiwi::strength::required },
     kiwi::Constraint { content_centerY == content_top + 0.5 * content_height | kiwi::strength::required },
-    
-//    kiwi::Constraint { intrinsic_height == Styling::defaultRowHeight() | kiwi::strength::required }, // Could be problematic
   };
   
   LayoutEngine::addConstraints(baseConstraints);
+  
+  enableIntrinsicSize();
   
   LayoutEngine::addEditVariable(left, kiwi::strength::weak);
   LayoutEngine::addEditVariable(top, kiwi::strength::weak);
@@ -52,7 +49,12 @@ View::View(const std::string & name)
   LayoutEngine::addEditVariable(intrinsic_width, kiwi::strength::medium);
   LayoutEngine::addEditVariable(intrinsic_height, kiwi::strength::medium);
   
+  onSolveListener = LayoutEngine::onSolveE().newListener(this, &View::updateFrames);
+  
   this->setIntrinsicSize(288 * Styling::getScale(), Styling::getRowHeight());
+  
+  this->setNeedsLayout();
+  this->setNeedsUpdateConstraints();
   
   this->bindUpdateListener();
   this->bindMouseListeners();
@@ -65,6 +67,10 @@ View::~View()
   this->unbindEvents();
   
   LayoutEngine::removeConstraints(baseConstraints);
+  baseConstraints.clear();
+  LayoutEngine::removeConstraints(intrinsicSizeConstraints);
+  intrinsicSizeConstraints.clear();
+  
   this->clearConstraints();
   subviews.clear();
   
@@ -75,6 +81,8 @@ void View::internalUpdate(double time, double delta)
 {
   this->updateConstraintsIfNeeded();
   this->layoutIfNeeded();
+  
+//  this->updateFrames();
   
   mouseHoverIntensity = ofLerp(mouseHoverIntensity, isMouseInside, 1.0 - pow(0.005, delta));
   mouseActiveIntensity = ofLerp(mouseActiveIntensity, isMousePressed, 1.0 - pow(0.005, delta));
@@ -114,16 +122,16 @@ void View::onDraw()
 {
   ofPushStyle();
   ofSetColor(255);
-  Styling::drawBackground(this->frame, this->getMouseState());
-  Styling::drawBorder(this->frame);
+  Styling::drawBackground(this->getFrame(), this->getMouseState());
+  Styling::drawBorder(this->getFrame());
   ofPopStyle();
 }
 
 void View::onPostDraw()
 {
   ofPushStyle();
-  if (this->isFocused()) { Styling::drawFocusBorder(this->frame); }
-  else { Styling::drawBorder(this->frame); }
+  if (this->isFocused()) { Styling::drawFocusBorder(this->getFrame()); }
+  else { Styling::drawBorder(this->getFrame()); }
   ofPopStyle();
   
   if (this->isDebugEnabled) { this->onDebug(); }
@@ -134,7 +142,7 @@ void View::onDrawMask()
   ofPushStyle();
   ofFill();
   ofSetColor(255, 128);
-  ofDrawRectangle(this->frame);
+  ofDrawRectangle(this->getFrame());
   ofPopStyle();
 }
 
@@ -150,10 +158,10 @@ void View::onDebug()
   ofPushStyle();
   ofNoFill();
   ofSetColor(ofColor::red);
-  ofDrawRectangle(this->frame);
+  ofDrawRectangle(this->getFrame());
   
   ofSetColor(ofColor::green);
-  ofDrawRectangle(this->contentFrame);
+  ofDrawRectangle(this->getContentFrame());
   
 //  ofFill();
 //  ofSetColor(Styling::getBackgroundColor(getMouseState()));
@@ -181,6 +189,26 @@ void View::setIntrinsicHeight(float height)
 {
   LayoutEngine::suggestValue(intrinsic_height, height);
   this->setNeedsLayout();
+}
+
+void View::enableIntrinsicSize()
+{
+  ofLogVerbose(getLogModule(__FUNCTION__));
+  
+  intrinsicSizeConstraints.clear();
+  intrinsicSizeConstraints = {
+    kiwi::Constraint { width == intrinsic_width | kiwi::strength::strong },
+    kiwi::Constraint { height == intrinsic_height | kiwi::strength::strong }
+  };
+  View::addConstraints(intrinsicSizeConstraints);
+}
+
+void View::disableIntrinsicSize()
+{
+  ofLogVerbose(getLogModule(__FUNCTION__));
+  
+  View::removeConstraints(intrinsicSizeConstraints);
+  intrinsicSizeConstraints.clear();
 }
 
 void View::setLeft(float value)
@@ -360,7 +388,6 @@ void View::clearConstraints()
   ofLogVerbose(toString(__FUNCTION__));
   
   this->removeConstraints(this->layoutConstraints);
-  layoutConstraints.clear();
 }
 
 #pragma mark - Protected
@@ -416,12 +443,12 @@ int View::getDepth() const {
 
 void View::updateConstraints()
 {
-  ofLogVerbose(_getLogModule(__FUNCTION__));
+  ofLogVerbose(getLogModule(__FUNCTION__)) << "Does nothing.";
 }
 
 void View::layoutSubviews()
 {
-  ofLogVerbose(_getLogModule(__FUNCTION__));
+  ofLogVerbose(getLogModule(__FUNCTION__)) << "Does nothing.";
 }
 
 ofRectangle View::getFrame() const
@@ -442,11 +469,11 @@ ofRectangle View::getLocalContentFrame() const {
   return ofRectangle(0, 0, content_width.value(), content_height.value());
 }
 
-std::string View::_getLogModule(const std::string & func, bool includeStructure) const
+std::string View::getLogModule(const std::string & func, bool includeStructure) const
 {
   std::stringstream logModule;
   if (includeStructure) logModule << _getLevel();
-  logModule << _getComponentName() << "('" << getName() << "')[" << ofGetFrameNum() << "]";
+  logModule << getComponentName() << "('" << getName() << "')[" << ofGetFrameNum() << "]";
   if (func != "") logModule << "::" << func << "()";
   return logModule.str();
 }
@@ -686,7 +713,7 @@ void View::windowResizedHandler(ofResizeEventArgs & e)
 
 void View::onWindowResized(const ofResizeEventArgs & e)
 {
-  ofLogNotice(_getLogModule(__FUNCTION__));
+  ofLogVerbose(getLogModule(__FUNCTION__));
   
   this->setIntrinsicSize(Styling::getScaled(288), Styling::getRowHeight(1));
 }

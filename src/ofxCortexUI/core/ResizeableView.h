@@ -9,7 +9,7 @@ class ResizeableView : public View {
 protected:
   ResizeableView(std::string name) : View(name)
   {
-    ofLogVerbose(_getLogModule(__FUNCTION__));
+    ofLogVerbose(getLogModule(__FUNCTION__));
   }
   
 public:
@@ -54,7 +54,7 @@ public:
   void onResizedE(std::function<void(ResizeEvent)> callback) { View::eventListeners.push(onResizedEvent.newListener(callback, 0)); }
   
 protected:
-  virtual std::string _getComponentName() const override { return "ResizeableView"; };
+  virtual std::string getComponentName() const override { return "ResizeableView"; };
   
   virtual void viewDidLoad() override
   {

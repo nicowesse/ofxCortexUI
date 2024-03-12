@@ -4,11 +4,11 @@ namespace ofxCortex { namespace ui {
 
 void StackView::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
 {
-  ofLogVerbose(toString(__FUNCTION__)) << "Add subview '" << subview->getName() << "'";
+  ofLogVerbose(toString(__FUNCTION__)) << "OVERRIDDEN: Add subview '" << subview->getName() << "'";
   View::addSubviewAt(subview, index);
   this->setNeedsUpdateConstraints();
   
-  this->setIntrinsicHeight(Styling::getRowHeight(subviews.size()) + Styling::getPaddingTop() + Styling::getPaddingBottom());
+//  this->setIntrinsicHeight(Styling::getRowHeight(subviews.size()) + Styling::getPaddingTop() + Styling::getPaddingBottom());
 }
 
 void StackView::removeSubview(std::shared_ptr<View> subview)
@@ -30,18 +30,20 @@ void StackView::onUpdate(float time, float delta)
 
 void StackView::updateConstraints()
 {
-  ofLogVerbose(_getLogModule(__FUNCTION__)) << "START OF updateConstraints(): Subviews = " << ofToString(subviews) << " Size = " << subviews.size();
-  ofLogVerbose(_getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "' Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "'";
+  ofLogVerbose(getLogModule(__FUNCTION__)) << "START OF updateConstraints(): Subviews = " << ofToString(subviews) << " Size = " << subviews.size();
+  ofLogVerbose(getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "' Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "'";
   
   if (subviews.size() == 0) return;
   
-  this->clearConstraints();
+  View::clearConstraints();
   
   auto alignmentConstraints = LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment);
-//  this->addConstraints(alignmentConstraints);
   auto distributeConstraints = LayoutHelpers::distribute(getSelf(), subviews, this->axis, this->distribution);
-  auto stackConstraints = LayoutHelpers::stack(subviews, this->axis);
-  auto attachConstraints = LayoutHelpers::attachLeading(getSelf(), subviews, LayoutHelpers::Axis::VERTICAL);
+//  auto stackConstraints = LayoutHelpers::stack(subviews, this->axis);
+//  auto attachConstraints = LayoutHelpers::attachLeading(getSelf(), subviews, LayoutHelpers::Axis::VERTICAL);
+  auto trailingEdgeConstraints = std::vector<kiwi::Constraint>{
+    { this->content_bottom >= subviews.back()->bottom | kiwi::strength::strong }
+  };
   
   auto scrollConstraints = std::vector<kiwi::Constraint>{
     { subviews.front()->top <= this->content_top | kiwi::strength::strong }
@@ -49,20 +51,22 @@ void StackView::updateConstraints()
   
   ofLogVerbose(toString(__FUNCTION__)) 
   << "\n— " << alignmentConstraints.size() << " x Alignment Constraints"
-  << "\n— " << distributeConstraints.size() << " x Distribute Constraints"
-  << "\n— " << stackConstraints.size() << " x Stack Constraints"
-  << "\n— " << attachConstraints.size() << " x Attach Constraints";
+  << "\n— " << distributeConstraints.size() << " x Distribute Constraints";
+//  << "\n— " << stackConstraints.size() << " x Stack Constraints"
+//  << "\n— " << attachConstraints.size() << " x Attach Constraints";
   
   std::vector<kiwi::Constraint> constraints;
   ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
   ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
-  ofxCortex::core::utils::Array::appendVector(constraints, stackConstraints);
-  ofxCortex::core::utils::Array::appendVector(constraints, attachConstraints);
+//  ofxCortex::core::utils::Array::appendVector(constraints, stackConstraints);
+//  ofxCortex::core::utils::Array::appendVector(constraints, attachConstraints);
+  ofxCortex::core::utils::Array::appendVector(constraints, trailingEdgeConstraints);
 //    ofxCortex::core::utils::Array::appendVector(constraints, scrollConstraints);
   
   ofLogVerbose(toString(__FUNCTION__)) << "Constraints = " << constraints.size();
   
   this->addConstraints(constraints);
+//  for (auto & subview : subviews) subview->setNeedsLayout();
   
   ofLogVerbose(toString(__FUNCTION__)) << "END OF updateConstraints(): Current Layout Constraints = " << this->layoutConstraints.size();
 }
@@ -70,12 +74,14 @@ void StackView::updateConstraints()
 void StackView::onPreDraw()
 {
   View::onPreDraw();
-  
-  ofPushStyle();
+  if (this->_enableBackground)
   {
-      if (this->_enableBackground) Styling::drawContainerBackground(this->getFrame(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
+    ofPushStyle();
+    {
+      Styling::drawContainerBackground(this->getFrame(), Styling::getContainerColor(), Styling::getBorderColor(), this->level);
+    }
+    ofPopStyle();
   }
-  ofPopStyle();
 }
 
 void StackView::onPostDraw()
@@ -102,7 +108,7 @@ void StackView::onDrawMask()
 {
   ofPushStyle();
   {
-    Styling::drawBackground(this->getContentFrame(), ofColor::white, ofColor(0, 0));
+//    Styling::drawBackground(this->getContentFrame(), ofColor::white, ofColor(0, 0));
   }
   ofPopStyle();
 }

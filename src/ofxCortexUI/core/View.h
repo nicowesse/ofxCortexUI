@@ -16,6 +16,8 @@
 
 namespace ofxCortex { namespace ui {
 
+//class ViewLogger;
+
 class View : public std::enable_shared_from_this<View> {
 protected:
   View(const std::string & name);
@@ -98,17 +100,19 @@ protected:
 protected:
   std::string _name;
   
-  virtual std::string _getComponentName() const { return "View"; }
-  virtual std::string _getLogModule(const std::string & func = "", bool includeStructure = true) const;
-  std::string toString(const std::string & functionName = "", bool includeStructure = true) const { return _getLogModule(functionName, includeStructure); }
+//  ViewLogger logger;
+  
+  virtual std::string getComponentName() const { return "View"; }
+  virtual std::string getLogModule(const std::string & func = "", bool includeStructure = true) const;
+  std::string toString(const std::string & functionName = "", bool includeStructure = true) const { return getLogModule(functionName, includeStructure); }
   friend std::ostream& operator<<(std::ostream& os, const View& view)
   {
-    os << view.toString("", false);
+    os << view.getComponentName();
     return os;
   }
   friend std::ostream& operator<<(std::ostream& os, const std::shared_ptr<View>& view)
   {
-    os << view->toString("", false);
+    os << view->getComponentName();
     return os;
   }
   
@@ -140,6 +144,9 @@ public:
   float getIntrinsicWidth() const { return this->intrinsic_width.value(); }
   void setIntrinsicHeight(float height);
   float getIntrinsicHeight() const { return this->intrinsic_height.value(); }
+  
+  void enableIntrinsicSize();
+  void disableIntrinsicSize();
   
   void  setLeft(float value);
   float getLeft() const { return this->left.value(); }
@@ -222,27 +229,11 @@ public:
   kiwi::Variable intrinsic_height { "intrinsic_height" };
   
 #pragma mark - LAYOUT: Helpers
-protected:  
-  void updateFrames()
-  {
-    ofLogVerbose(toString(__FUNCTION__));
-    
-    this->frame = getFrame();
-    this->contentFrame = getContentFrame();
-  }
-  
+protected:
   virtual void layoutSubviews();
   void layoutIfNeeded() {
     if (this->needsLayout) {
-      this->updateFrames();
-      this->layoutSubviews();
-      
-      // Subviews
-      for (auto & subview : subviews)
-      {
-        subview->setNeedsLayout();
-//        subview->layoutIfNeeded();
-      }
+      this->forceLayout();
       
       this->needsLayout = false;
     }
@@ -265,7 +256,10 @@ protected:
   
   
   virtual void updateConstraints();
-  void setNeedsUpdateConstraints() { this->needsUpdateConstraints = true; }
+  void setNeedsUpdateConstraints() {
+    ofLogVerbose(toString(__FUNCTION__));
+    this->needsUpdateConstraints = true;
+  }
   void updateConstraintsIfNeeded() {
     if (this->needsUpdateConstraints) {
       this->updateConstraints();
@@ -276,6 +270,7 @@ protected:
   
   std::vector<kiwi::Constraint> baseConstraints;
   std::vector<kiwi::Constraint> layoutConstraints;
+  std::vector<kiwi::Constraint> intrinsicSizeConstraints;
   
   
   
@@ -291,6 +286,16 @@ protected:
   
   ofRectangle frame;
   ofRectangle contentFrame;
+  
+  ofEventListener onSolveListener;
+  void updateFrames()
+  {
+    if (this->frame.x != left.value() || this->frame.y != top.value() || this->frame.width != width.value() || this->frame.height != height.value()) {
+      ofLogVerbose(toString(__FUNCTION__)) << "Update outer frame!";
+      this->frame = getFrame();
+    }
+    if (this->contentFrame.x != content_left.value() || this->contentFrame.y != content_top.value() || this->contentFrame.width != content_width.value() || this->contentFrame.height != content_height.value()) this->contentFrame = getContentFrame();
+  }
   
   ofRectangle getLocalFrame() const;
   ofRectangle getLocalContentFrame() const;
@@ -471,6 +476,7 @@ protected:
   T getParameterMin() { return getParameter().getMin(); }
   T getParameterMax() { return getParameter().getMax(); }
   std::string getParameterType() { return typeid(T).name(); }
+  std::string getParameterToString() { return getParameter().toString(); }
   
   void setParameter(const T & value) { getParameter().set(value); }
   T getParameterValue() { return getParameter().get(); }
@@ -480,7 +486,6 @@ protected:
     
     return (p) ? p->getUnit() : "";
   }
-  
 };
 
 }}

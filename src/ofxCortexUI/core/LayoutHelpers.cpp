@@ -32,7 +32,7 @@ std::string LayoutHelpers::getAlignmentString(const Alignment & alignment)
   }
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::fillWindow(std::shared_ptr<View> view)
+std::vector<kiwi::Constraint> LayoutHelpers::fillWindow(const std::shared_ptr<View> & view)
 {
   return std::vector<kiwi::Constraint>{
     kiwi::Constraint { view->left == 0 | kiwi::strength::strong },
@@ -42,10 +42,10 @@ std::vector<kiwi::Constraint> LayoutHelpers::fillWindow(std::shared_ptr<View> vi
   };
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::fillInner(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::fillInner(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     std::vector<kiwi::Constraint> fittings = {
       { current->left == outer->content_left | kiwi::strength::strong },
       { current->right == outer->content_right | kiwi::strength::strong },
@@ -58,10 +58,10 @@ std::vector<kiwi::Constraint> LayoutHelpers::fillInner(std::shared_ptr<View> out
   return constraints;
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::fillOuter(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::fillOuter(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     std::vector<kiwi::Constraint> fittings = {
       { current->left == outer->left | kiwi::strength::strong },
       { current->right == outer->right | kiwi::strength::strong },
@@ -74,7 +74,7 @@ std::vector<kiwi::Constraint> LayoutHelpers::fillOuter(std::shared_ptr<View> out
   return constraints;
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::distribute(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis, Distribution distribution)
+std::vector<kiwi::Constraint> LayoutHelpers::distribute(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis, Distribution distribution)
 {
   std::vector<kiwi::Constraint> constraints;
   if (axis == Axis::VERTICAL)
@@ -92,9 +92,9 @@ std::vector<kiwi::Constraint> LayoutHelpers::distribute(std::shared_ptr<View> ou
     }
     else if (distribution == Distribution::FILL_PROPORTIONAL)
     {
-      float totalHeight = std::accumulate(std::begin(views), std::end(views), 0.0f, [](float carry, std::shared_ptr<View> current) { return carry + current->getHeight(); });
+      float totalHeight = std::accumulate(std::begin(views), std::end(views), 0.0f, [](float carry, const std::shared_ptr<View> & current) { return carry + current->getHeight(); });
       
-      std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+      std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
         float proportion = current->getHeight() / totalHeight;
 //        constraints.push_back({ current->height == outer->height * proportion | kiwi::strength::strong });
       });
@@ -139,8 +139,8 @@ std::vector<kiwi::Constraint> LayoutHelpers::distribute(std::shared_ptr<View> ou
     }
     else if (distribution == Distribution::FILL_PROPORTIONAL)
     {
-      float totalWidth = std::accumulate(std::begin(views), std::end(views), 0.0f, [](float carry, std::shared_ptr<View> current) { return carry + current->getWidth(); });
-      std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+      float totalWidth = std::accumulate(std::begin(views), std::end(views), 0.0f, [](float carry, const std::shared_ptr<View> & current) { return carry + current->getWidth(); });
+      std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
         float proportion = current->getWidth() / totalWidth;
         constraints.push_back({ current->width == outer->width * proportion | kiwi::strength::strong });
       });
@@ -178,26 +178,13 @@ std::vector<kiwi::Constraint> LayoutHelpers::distribute(std::shared_ptr<View> ou
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::stack(std::vector<std::shared_ptr<View>> views, Axis axis)
+std::vector<kiwi::Constraint> LayoutHelpers::stack(const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
-  std::vector<kiwi::Constraint> constraints;
-  if (axis == Axis::HORIZONTAL)
-  {
-    LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
-      constraints.push_back({ next->left == current->right + Styling::spacingX() | kiwi::strength::strong });
-    });
-  }
-  else if (axis == Axis::VERTICAL)
-  {
-    LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
-      constraints.push_back({ next->top == current->bottom + Styling::spacingY() | kiwi::strength::strong });
-    });
-  }
-  return constraints;
+  return spacing(views, axis);
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::equalSpacing(std::vector<std::shared_ptr<View>> views, Axis axis)
+std::vector<kiwi::Constraint> LayoutHelpers::equalSpacing(const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
   std::vector<kiwi::Constraint> constraints;
   std::vector<std::shared_ptr<Spacer>> spacers;
@@ -245,8 +232,26 @@ std::vector<kiwi::Constraint> LayoutHelpers::equalSpacing(std::vector<std::share
   return constraints;
 }
 
+std::vector<kiwi::Constraint> LayoutHelpers::spacing(const std::vector<std::shared_ptr<View>> & views, Axis axis)
+{
+  std::vector<kiwi::Constraint> constraints;
+  if (axis == Axis::HORIZONTAL)
+  {
+    LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current, const std::shared_ptr<View> & next) {
+      constraints.push_back({ next->left == current->right + Styling::spacingX() | kiwi::strength::strong });
+    });
+  }
+  else if (axis == Axis::VERTICAL)
+  {
+    LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current, const std::shared_ptr<View> & next) {
+      constraints.push_back({ next->top == current->bottom + Styling::spacingY() | kiwi::strength::strong });
+    });
+  }
+  return constraints;
+}
 
-std::vector<kiwi::Constraint> LayoutHelpers::fillEqually(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
+
+std::vector<kiwi::Constraint> LayoutHelpers::fillEqually(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
   std::vector<kiwi::Constraint> constraints;
   if (axis == Axis::HORIZONTAL)
@@ -270,30 +275,30 @@ std::vector<kiwi::Constraint> LayoutHelpers::fillEqually(std::shared_ptr<View> o
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::equalHeight(std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::equalHeight(const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
+  LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current, const std::shared_ptr<View> & next) {
     constraints.push_back({ current->height == next->height | kiwi::strength::strong });
   });
   return constraints;
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::equalWidth(std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::equalWidth(const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](std::shared_ptr<View> current, std::shared_ptr<View> next) {
+  LayoutHelpers::for_each_pair(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current, const std::shared_ptr<View> & next) {
     constraints.push_back({ current->width == next->width | kiwi::strength::strong });
   });
   return constraints;
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::fitWidth(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::fitWidth(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     std::vector<kiwi::Constraint> fittings = {
       { current->width == outer->content_width | kiwi::strength::strong },
       { current->left == outer->content_left | kiwi::strength::strong },
@@ -305,16 +310,16 @@ std::vector<kiwi::Constraint> LayoutHelpers::fitWidth(std::shared_ptr<View> oute
   return constraints;
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::fitWidth(std::shared_ptr<View> outer, std::shared_ptr<View> inner)
+std::vector<kiwi::Constraint> LayoutHelpers::fitWidth(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner)
 {
   return fitWidth(outer, std::vector<std::shared_ptr<View>>{ inner });
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::fitHeight(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views)
+std::vector<kiwi::Constraint> LayoutHelpers::fitHeight(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views)
 {
   std::vector<kiwi::Constraint> constraints;
-  for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     std::vector<kiwi::Constraint> fittings = {
       { current->height == outer->content_height | kiwi::strength::strong },
       { current->top == outer->content_top | kiwi::strength::strong },
@@ -326,13 +331,13 @@ std::vector<kiwi::Constraint> LayoutHelpers::fitHeight(std::shared_ptr<View> out
   return constraints;
 }
 
-std::vector<kiwi::Constraint> LayoutHelpers::fitHeight(std::shared_ptr<View> outer, std::shared_ptr<View> inner)
+std::vector<kiwi::Constraint> LayoutHelpers::fitHeight(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner)
 {
   return fitHeight(outer, std::vector<std::shared_ptr<View>>{ inner });
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::attachEnds(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
+std::vector<kiwi::Constraint> LayoutHelpers::attachEnds(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
   if (views.size() == 0) return std::vector<kiwi::Constraint>();
   
@@ -355,7 +360,7 @@ std::vector<kiwi::Constraint> LayoutHelpers::attachEnds(std::shared_ptr<View> ou
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::attachLeading(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
+std::vector<kiwi::Constraint> LayoutHelpers::attachLeading(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
   if (views.size() == 0) return std::vector<kiwi::Constraint>();
   
@@ -376,7 +381,7 @@ std::vector<kiwi::Constraint> LayoutHelpers::attachLeading(std::shared_ptr<View>
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::attachTrailing(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis)
+std::vector<kiwi::Constraint> LayoutHelpers::attachTrailing(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {
   if (views.size() == 0) return std::vector<kiwi::Constraint>();
   
@@ -397,7 +402,7 @@ std::vector<kiwi::Constraint> LayoutHelpers::attachTrailing(std::shared_ptr<View
 }
 
 #pragma mark - Alignment
-std::vector<kiwi::Constraint> LayoutHelpers::alignment(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Axis axis, Alignment alignment)
+std::vector<kiwi::Constraint> LayoutHelpers::alignment(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis, Alignment alignment)
 {
   if (axis == Axis::HORIZONTAL) return alignHorizontal(outer, views, alignment);
   else if (axis == Axis::VERTICAL) return alignVertical(outer, views, alignment);
@@ -406,10 +411,10 @@ std::vector<kiwi::Constraint> LayoutHelpers::alignment(std::shared_ptr<View> out
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::alignHorizontal(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment)
+std::vector<kiwi::Constraint> LayoutHelpers::alignHorizontal(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment)
 {
   std::vector<kiwi::Constraint> constraints;
-  for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     if (alignment == Alignment::FILL_SPACE) {
       constraints.push_back({ current->top == outer->content_top | kiwi::strength::strong });
       constraints.push_back({ current->bottom == outer->content_bottom | kiwi::strength::strong });
@@ -424,10 +429,10 @@ std::vector<kiwi::Constraint> LayoutHelpers::alignHorizontal(std::shared_ptr<Vie
 }
 
 
-std::vector<kiwi::Constraint> LayoutHelpers::alignVertical(std::shared_ptr<View> outer, std::vector<std::shared_ptr<View>> views, Alignment alignment)
+std::vector<kiwi::Constraint> LayoutHelpers::alignVertical(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment)
 {
   std::vector<kiwi::Constraint> constraints;
-  std::for_each(std::begin(views), std::end(views), [&](std::shared_ptr<View> current) {
+  std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
     if (alignment == Alignment::FILL_SPACE) {
       constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
       constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });

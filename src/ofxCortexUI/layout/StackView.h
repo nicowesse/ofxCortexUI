@@ -17,6 +17,7 @@ protected:
     
     this->enableSubviewRendering();
     this->enableMask();
+    this->disableIntrinsicSize();
   }
   
 public:
@@ -40,7 +41,7 @@ public:
   void disableBackground() { this->_enableBackground = false; }
   
 protected:
-  virtual std::string _getComponentName() const override { return "StackView"; };
+  virtual std::string getComponentName() const override { return "StackView"; };
   
   virtual void onUpdate(float time, float delta) override;
   virtual void updateConstraints() override;

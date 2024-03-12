@@ -8,7 +8,7 @@
 
 namespace ofxCortex { namespace ui {
 
-class RangeSliderView : public View {
+class RangeSliderView : public ParameterView<ofxCortex::core::types::Range> {
 public:
   class Bar : public ResizeableView {
   protected:
@@ -38,9 +38,9 @@ public:
   };
   
 protected:
-  RangeSliderView(ofParameter<ofxCortex::core::types::Range> & param) : View(param.getName())
+  RangeSliderView(const ofAbstractParameter & param) : ParameterView(param)
   {
-    parameter.makeReferenceTo(param);
+//    parameter.makeReferenceTo(param);
 //    parameter.addListener(this, &RangeSliderView::onParameterChange);
   };
   
@@ -57,7 +57,7 @@ public:
   }
   
 protected:
-  virtual std::string _getComponentName() const override { return "RangeSliderView"; };
+  virtual std::string getComponentName() const override { return "RangeSliderView"; };
   
   virtual void viewDidLoad() override;
   virtual void onDraw() override;
@@ -73,7 +73,7 @@ protected:
   void _setRightFromNormalized(float value) { bar->setRight(ofMap(value, 0, 1, this->content_left.value() + bar->getMinSize().x, this->content_right.value())); };
   
   std::shared_ptr<ResizeableView> bar;
-  ofParameter<ofxCortex::core::types::Range> parameter;
+//  ofParameter<ofxCortex::core::types::Range> parameter;
   bool _parameterSetInternally { false };
   ofEventListener onParameterChanged;
 };

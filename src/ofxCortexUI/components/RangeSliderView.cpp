@@ -77,21 +77,21 @@ void RangeSliderView::viewDidLoad()
     
     if ((hitLeft | hitRight) == 0)
     {
-      ofxCortex::core::types::Range range = parameter.get();
-      range.from = ofMap(normalizedFrom, 0, 1, parameter->min, parameter->max);
-      range.to = ofMap(normalizedTo, 0, 1, parameter->min, parameter->max);
+      ofxCortex::core::types::Range range = getParameterValue();
+      range.from = ofMap(normalizedFrom, 0, 1, getParameter()->min, getParameter()->max);
+      range.to = ofMap(normalizedTo, 0, 1, getParameter()->min, getParameter()->max);
       
-      parameter.set(range);
+      setParameter(range);
       _parameterSetInternally = true;
     }
   });
   this->addSubview(bar);
   
-  onParameterChanged = parameter.newListener([this](const ofxCortex::core::types::Range & e) {
+  onParameterChanged = getParameter().newListener([this](const ofxCortex::core::types::Range & e) {
     if (!_parameterSetInternally)
     {
-      float normalLeft = ofMap(parameter->from, parameter->min, parameter->max, 0, 1, true);
-      float normalRight = ofMap(parameter->to, parameter->min, parameter->max, 0, 1, true);
+      float normalLeft = ofMap(getParameter()->from, getParameter()->min, getParameter()->max, 0, 1, true);
+      float normalRight = ofMap(getParameter()->to, getParameter()->min, getParameter()->max, 0, 1, true);
       _setLeftFromNormalized(normalLeft);
       _setRightFromNormalized(normalRight);
     }
@@ -101,8 +101,8 @@ void RangeSliderView::viewDidLoad()
   this->setNeedsUpdateConstraints();
   LayoutEngine::forceSolve();
   
-  float normalLeft = ofMap(parameter->from, parameter->min, parameter->max, 0, 1, true);
-  float normalRight = ofMap(parameter->to, parameter->min, parameter->max, 0, 1, true);
+  float normalLeft = ofMap(getParameter()->from, getParameter()->min, getParameter()->max, 0, 1, true);
+  float normalRight = ofMap(getParameter()->to, getParameter()->min, getParameter()->max, 0, 1, true);
   _setLeftFromNormalized(normalLeft);
   _setRightFromNormalized(normalRight);
 }
@@ -118,13 +118,13 @@ void RangeSliderView::onDraw()
   Styling::drawLabel(getName(), this->getContentFrame());
   
   ofSetColor(Styling::getAccentColor(), 255 - 128 * getActiveIntensity());
-  Styling::drawValue(parameter->toString(), this->getContentFrame());
+  Styling::drawValue(getParameter()->toString(), this->getContentFrame());
   ofPopStyle();
 }
 
 void RangeSliderView::onMouseScrolled(const MouseEventArgs & e)
 {
-  parameter += -e.scrollX;
+  getParameter() += -e.scrollX;
 }
 
 void RangeSliderView::onKeyPressed(const ofKeyEventArgs & e)
@@ -139,7 +139,7 @@ void RangeSliderView::onKeyPressed(const ofKeyEventArgs & e)
   else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
   else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
   
-  parameter += delta;
+  getParameter() += delta;
 }
 
 void RangeSliderView::onWindowResized(const ofResizeEventArgs & e)

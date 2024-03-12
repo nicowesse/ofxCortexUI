@@ -33,7 +33,7 @@ void SliderView<T>::drawSlider()
     SliderView<T>::getShader().begin();
     SliderView<T>::getShader().setUniform1f("u_center", centerBulge);
     SliderView<T>::getShader().setUniform4f("u_color", sliderColor);
-    ofDrawPlane(rect.x, centerY, rect.width, 1);
+    ofDrawPlane(rect.x + rect.width * 0.5, centerY, rect.width, 0.5);
     SliderView<T>::getShader().end();
     
     ofFill();
@@ -48,7 +48,7 @@ void SliderView<T>::drawZero()
   const auto & rect = this->getContentFrame();
   float zeroPoint = ofMap(0, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), rect.getLeft() + Styling::getPaddingLeft(), rect.getRight() - Styling::getPaddingRight());
   
-  float r = Styling::getScaled(3);
+  float r = Styling::getScaled(4);
   float alpha = 0.6;
   
   ofPushStyle();

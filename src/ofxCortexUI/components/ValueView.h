@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofxCortexUI/core/View.h"
+
 #include "ofxCortex/types/Range.h"
 #include "ofxCortex/types/Image.h"
 #include "ofxCortex/types/File.h"
@@ -8,17 +9,17 @@
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class ValueView : public ofxCortex::ui::View {
+class ValueView : public ofxCortex::ui::ParameterView<T> {
 protected:
-  ValueView(std::string name, T value) : View(name)
-  {
-    parameter.setName(name);
-    parameter.set(value);
-  }
+//  ValueView(std::string name, T value) : View(name)
+//  {
+//    parameter.setName(name);
+//    parameter.set(value);
+//  }
   
-  ValueView(ofParameter<T> param) : View(param.getName())
+  ValueView(const ofAbstractParameter & param) : ParameterView<T>(param)
   {
-    parameter.makeReferenceTo(param);
+//    parameter.makeReferenceTo(param);
   }
   
 public:
@@ -35,7 +36,7 @@ public:
   }
   
 protected:
-  virtual std::string _getComponentName() const override { return "ValueView"; };
+  virtual std::string getComponentName() const override { return "ValueView"; };
   
   virtual void onDraw() override
   {
@@ -44,16 +45,16 @@ protected:
     Styling::drawBackground(this->getFrame());
     
     ofSetColor(Styling::getForegroundColor());
-    ofxCortex::ui::Styling::drawLabel(parameter.getName(), b);
+    ofxCortex::ui::Styling::drawLabel(ParameterView<T>::getParameterName(), b);
     
     ofSetColor(Styling::getAccentColor());
-    ofxCortex::ui::Styling::drawValue(_getFormattedString(), b);
+    ofxCortex::ui::Styling::drawValue(getFormattedString(), b);
   }
   
-  std::string _getFormattedString()
+  std::string getFormattedString()
   {
     std::stringstream ss;
-    ss << parameter;
+    ss << ParameterView<T>::getParameterToString();
     return ofToString(ss.str(), 1);
   }
   
@@ -62,46 +63,46 @@ protected:
 };
 
 template<>
-inline std::string ValueView<float>::_getFormattedString()
+inline std::string ValueView<float>::getFormattedString()
 {
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(parameter.get(), precision);
+  ss << ofToString(getParameterValue(), precision);
   return ss.str();
 }
 
 template<>
-inline std::string ValueView<glm::vec2>::_getFormattedString()
+inline std::string ValueView<glm::vec2>::getFormattedString()
 {
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(parameter->x, precision) << ", " << ofToString(parameter->y, precision);
+  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision);
   return ss.str();
 }
 
 template<>
-inline std::string ValueView<glm::vec3>::_getFormattedString()
+inline std::string ValueView<glm::vec3>::getFormattedString()
 {
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(parameter->x, precision) << ", " << ofToString(parameter->y, precision) << ", " << ofToString(parameter->z, precision);
+  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision) << ", " << ofToString(getParameter()->z, precision);
   return ss.str();
 }
 
 template<>
-inline std::string ValueView<ofxCortex::core::types::Range>::_getFormattedString()
+inline std::string ValueView<ofxCortex::core::types::Range>::getFormattedString()
 {
   int precision = 2;
   std::stringstream ss;
-  ss << ofToString(parameter->from, precision) << " ←→ " << ofToString(parameter->to, precision);
+  ss << ofToString(getParameter()->from, precision) << " ←→ " << ofToString(getParameter()->to, precision);
   return ss.str();
 }
 
 template<>
-inline std::string ValueView<ofxCortex::core::types::Image>::_getFormattedString()
+inline std::string ValueView<ofxCortex::core::types::Image>::getFormattedString()
 {
   std::stringstream ss;
-  ss << parameter->path;
+  ss << getParameter()->path;
   std::string original = ss.str();
   
   int length = MIN(28, original.size());
@@ -115,13 +116,13 @@ inline std::string ValueView<ofxCortex::core::types::Image>::_getFormattedString
 }
 
 template<>
-inline std::string ValueView<ofxCortex::core::types::File>::_getFormattedString()
+inline std::string ValueView<ofxCortex::core::types::File>::getFormattedString()
 {
   std::stringstream ss;
-  ss << parameter->path;
+  ss << getParameter()->path;
   std::string original = ss.str();
   
-  int leftover = ceil(this->getWidth() / Styling::getValueFont().dimensions.width) - parameter.getName().size() + 8;
+  int leftover = ceil(this->getWidth() / Styling::getValueFont().dimensions.width) - getParameterName().size() + 8;
   
   int length = MIN(leftover, original.size());
   int index = CLAMP(original.size() - length - 0, 0, original.size() - length);

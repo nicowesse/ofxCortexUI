@@ -8,11 +8,11 @@ namespace ofxCortex { namespace ui {
 
 class LayoutEngine {
 public:
-  static void addConstraint(const kiwi::Constraint& constraint) { get().solver.addConstraint(constraint); }
-  static void addConstraints(const std::vector<kiwi::Constraint>& constraints) { for (auto & constraint : constraints) get().addConstraint(constraint); }
+  static void addConstraint(const kiwi::Constraint& constraint) { get().solver.addConstraint(constraint); get().setNeedsSolve(); }
+  static void addConstraints(const std::vector<kiwi::Constraint>& constraints) { for (auto & constraint : constraints) get().addConstraint(constraint); get().setNeedsSolve(); }
   
-  static void removeConstraint(const kiwi::Constraint& constraint) { if (get().solver.hasConstraint(constraint)) get().solver.removeConstraint(constraint); }
-  static void removeConstraints(const std::vector<kiwi::Constraint> & constraints) { for (auto & constraint : constraints) get().removeConstraint(constraint); }
+  static void removeConstraint(const kiwi::Constraint& constraint) { if (get().solver.hasConstraint(constraint)) get().solver.removeConstraint(constraint); get().setNeedsSolve(); }
+  static void removeConstraints(const std::vector<kiwi::Constraint> & constraints) { for (auto & constraint : constraints) get().removeConstraint(constraint); get().setNeedsSolve(); }
   
   static void suggestValue(const kiwi::Variable& variable, double value)
   {
@@ -31,7 +31,7 @@ public:
   static const kiwi::Variable & getScreenWidth() { return get().screen_w; }
   static const kiwi::Variable & getScreenHeight() { return get().screen_h; }
   
-  static void setNeedsSolve() { get()._needSolve = true; }
+  static void setNeedsSolve() { get().needSolve = true; }
   static void forceSolve()
   {
     get().setNeedsSolve();
@@ -39,18 +39,22 @@ public:
     get().updateHandler(e);
   }
   
+  static ofEvent<void> & onSolveE() { return get().onSolve; }
+  
   
 private:
   LayoutEngine() {
-    ofLogVerbose(__PRETTY_FUNCTION__);
+    ofLogVerbose("🚒 LayoutEngine");
     
     ofAddListener(ofEvents().update, this, &LayoutEngine::updateHandler, OF_EVENT_ORDER_BEFORE_APP);
-    ofAddListener(ofEvents().windowResized, this, &LayoutEngine::onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().windowResized, this, &LayoutEngine::onWindowResized, OF_EVENT_ORDER_APP);
     
     solver.addEditVariable(screen_w, kiwi::strength::strong);
     solver.suggestValue(screen_w, ofGetWidth());
     solver.addEditVariable(screen_h, kiwi::strength::strong);
     solver.suggestValue(screen_h, ofGetHeight());
+    
+    needSolve = true;
   };
   
   ~LayoutEngine() {
@@ -69,27 +73,32 @@ private:
   
   void updateHandler(ofEventArgs &e)
   {
-    if (this->_needSolve)
+    if (this->needSolve)
     {
+      ofLogVerbose("🚒 LayoutEngine") << "updateHandler()";
+      
       solver.updateVariables();
-      this->_needSolve = false;
+      onSolve.notify(this);
+      
+      this->needSolve = false;
     }
   }
   
   void onWindowResized(ofResizeEventArgs &e)
   {
-    ofLogVerbose("LayoutEngine::" + std::string(__FUNCTION__) + "()");
+    ofLogVerbose("🚒 LayoutEngine::" + std::string(__FUNCTION__) + "()");
     
     solver.suggestValue(screen_w, e.width);
     solver.suggestValue(screen_h, e.height);
-    _needSolve = true;
+    needSolve = true;
   }
   
   kiwi::Solver solver;
   kiwi::Variable screen_w { "screen_w" };
   kiwi::Variable screen_h { "screen_h" };
+  ofEvent<void> onSolve;
   
-  bool _needSolve;
+  bool needSolve { true };
 };
 
 }}
