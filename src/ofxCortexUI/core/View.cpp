@@ -120,18 +120,18 @@ void View::internalDraw()
 
 void View::onDraw()
 {
-  ofPushStyle();
-  ofSetColor(255);
-  Styling::drawBackground(this->getFrame(), this->getMouseState());
-  Styling::drawBorder(this->getFrame());
-  ofPopStyle();
+//  ofPushStyle();
+//  ofSetColor(255);
+//  Styling::drawBackground(this->getFrame(), this->getMouseState());
+//  Styling::drawBorder(this->getFrame());
+//  ofPopStyle();
 }
 
 void View::onPostDraw()
 {
   ofPushStyle();
   if (this->isFocused()) { Styling::drawFocusBorder(this->getFrame()); }
-  else { Styling::drawBorder(this->getFrame()); }
+//  else { Styling::drawBorder(this->getFrame()); }
   ofPopStyle();
   
   if (this->isDebugEnabled) { this->onDebug(); }
@@ -324,6 +324,7 @@ void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
   subview->setLevel(this->level + 1);
   subviews.insert(subviews.begin() + index, subview);
   
+  this->setNeedsUpdateConstraints();
   this->setNeedsLayout();
 }
 
@@ -335,7 +336,7 @@ void View::addSubview(const std::shared_ptr<View> & subview)
 }
 
 
-void View::addSubviews(std::vector<std::shared_ptr<View>> views)
+void View::addSubviews(const std::vector<std::shared_ptr<View>> & views)
 {
   ofLogVerbose(_getLogModule());
   
@@ -344,9 +345,18 @@ void View::addSubviews(std::vector<std::shared_ptr<View>> views)
   for (auto & view : views) this->addSubview(view);
 }
 
-void View::removeSubview(std::shared_ptr<View> subview)
+void View::removeSubview(const std::shared_ptr<View> & subview)
 {
+  subview->setParent(nullptr);
   subviews.erase(std::remove(std::begin(subviews), std::end(subviews), subview), std::end(subviews));
+  
+  this->setNeedsUpdateConstraints();
+  this->setNeedsLayout();
+}
+
+void View::removeSubviews(const std::vector<std::shared_ptr<View>> & subviews)
+{
+  for (auto & subview : subviews) this->removeSubview(subview);
 }
 
 
@@ -547,6 +557,7 @@ void View::mousePressedHandler(ofMouseEventArgs & e)
   if (isInsideView)
   {
     onMousePressed(customE);
+    onMousePressedE.notify(this, customE);
     
     View::focused = shared_from_this();
   }
@@ -567,9 +578,13 @@ void View::mouseReleasedHandler(ofMouseEventArgs & e)
   MouseEventArgs customE(e);
   customE.isOverlapped = false;
   
-  if (isInsideView) { onMouseReleased(customE); }
+  if (isInsideView) {
+    onMouseReleased(customE);
+    onMouseReleasedE.notify(this, customE);
+  }
   else if (this->wasMousePressedInside && !isInsideView) {
     onMouseReleasedOutside(customE);
+    onMouseReleasedOutsideE.notify(this, customE);
   }
   
   this->isMousePressed = false;
@@ -595,10 +610,13 @@ void View::mouseMovedHandler(ofMouseEventArgs & e)
   customE.isOverlapped = false;
   customE.delta = e - this->lastMousePosition;
   
-  if (isInsideView) { onMouseMoved(customE); }
+  if (isInsideView) {
+    onMouseMoved(customE);
+    onMouseMovedE.notify(this, customE);
+  }
   
-  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); }
-  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); }
+  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); onMouseEnterE.notify(this, customE); }
+  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); onMouseExitE.notify(this, customE); }
   
   this->isMouseInside = isInsideView;
   this->lastMousePosition = e;
@@ -627,10 +645,10 @@ void View::mouseDraggedHandler(ofMouseEventArgs & e)
   customE.isOverlapped = false;
   customE.delta = e - this->lastMousePosition;
   
-  if (isInsideView) { onMouseDragged(customE); }
+  if (isInsideView) { onMouseDragged(customE); onMouseDraggedE.notify(this, customE); }
   
-  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); }
-  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); }
+  if (!this->isMouseInside && isInsideView) { onMouseEnter(customE); onMouseEnterE.notify(this, customE); }
+  else if (this->isMouseInside && !isInsideView) { onMouseExit(customE); onMouseExitE.notify(this, customE); }
   
   this->isMouseInside = isInsideView;
   this->lastMousePosition = e;
@@ -650,7 +668,7 @@ void View::mouseScrolledHandler(ofMouseEventArgs & e)
   MouseEventArgs customE(e);
   customE.isOverlapped = false;
   
-  if (isInsideView) { onMouseScrolled(customE); }
+  if (isInsideView) { onMouseScrolled(customE); onMouseScrolledE.notify(this, customE); }
   this->setNeedsLayout();
 }
 
@@ -677,7 +695,7 @@ void View::unbindKeyListeners()
 
 void View::keyPressedHandler(ofKeyEventArgs & e)
 {
-  if (isFocused()) { onKeyPressed(e); }
+  if (isFocused()) { onKeyPressed(e); onKeyPressedE.notify(this, e); }
 }
 
 void View::onKeyPressed(const ofKeyEventArgs & e)
@@ -687,7 +705,7 @@ void View::onKeyPressed(const ofKeyEventArgs & e)
 
 void View::keyReleasedHandler(ofKeyEventArgs & e)
 {
-  if (isFocused()) { onKeyReleased(e); }
+  if (isFocused()) { onKeyReleased(e); onKeyReleasedE.notify(this, e); }
 }
 
 void View::onKeyReleased(const ofKeyEventArgs & e)
@@ -697,7 +715,7 @@ void View::onKeyReleased(const ofKeyEventArgs & e)
 
 void View::charTypedHandler(uint32_t & c)
 {
-  if (isFocused()) { onCharTyped(c); }
+  if (isFocused()) { onCharTyped(c); onCharTypedE.notify(this, c); }
 }
 
 void View::onCharTyped(const uint32_t & c)

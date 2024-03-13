@@ -94,6 +94,19 @@ protected:
   
   virtual void onWindowResized(const ofResizeEventArgs & e);
   
+public:
+  ofEvent<MouseEventArgs> onMousePressedE;
+  ofEvent<MouseEventArgs> onMouseReleasedE;
+  ofEvent<MouseEventArgs> onMouseReleasedOutsideE;
+  ofEvent<MouseEventArgs> onMouseEnterE;
+  ofEvent<MouseEventArgs> onMouseExitE;
+  ofEvent<MouseEventArgs> onMouseMovedE;
+  ofEvent<MouseEventArgs> onMouseDraggedE;
+  ofEvent<MouseEventArgs> onMouseScrolledE;
+  
+  ofEvent<ofKeyEventArgs> onKeyPressedE;
+  ofEvent<ofKeyEventArgs> onKeyReleasedE;
+  ofEvent<uint32_t>       onCharTypedE;
   
   
 #pragma mark - OBJECT: Identification
@@ -307,8 +320,9 @@ protected:
 public:
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index);
   virtual void addSubview(const std::shared_ptr<View> & subview);
-  virtual void addSubviews(std::vector<std::shared_ptr<View>> views);
-  virtual void removeSubview(std::shared_ptr<View> subview);
+  virtual void addSubviews(const std::vector<std::shared_ptr<View>> & views);
+  virtual void removeSubview(const std::shared_ptr<View> & subview);
+  virtual void removeSubviews(const std::vector<std::shared_ptr<View>> & subviews);
   
   bool hasParent() const { return superview != nullptr; }
   std::shared_ptr<View> getParent() const { return superview; }
@@ -468,6 +482,8 @@ protected:
     if (unit) return unit->getParameter();
     else return parameterRef->cast<T>();
   }
+  
+  ofParameterGroup & getGroup() { return parameterRef->castGroup(); }
   
   std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef->newReference(); }
   

@@ -32,6 +32,9 @@ public:
     return p;
   }
   
+  void enableBackground() { this->shouldDrawBackground = true; }
+  void disableBackground() { this->shouldDrawBackground = false; }
+  
 protected:
   virtual std::string getComponentName() const override { return "LabelView"; };
   
@@ -44,7 +47,7 @@ protected:
   {
     ofPushStyle();
     {
-      Styling::drawBackground(this->getFrame());
+      if (shouldDrawBackground) Styling::drawBackground(this->getFrame());
       
       ofSetColor(Styling::getForegroundColor());
       Styling::drawLabel(parameter.getName(), this->getContentFrame());
@@ -52,7 +55,10 @@ protected:
     ofPopStyle();
   }
   
+  virtual void onPostDraw() override {};
+  
   ofParameter<std::string> parameter;
+  bool shouldDrawBackground { true };
 };
 
 }}

@@ -35,7 +35,7 @@ public:
   
   // Bypassing the
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override;
-  virtual void removeSubview(std::shared_ptr<View> subview) override;
+  virtual void removeSubview(const std::shared_ptr<View> & subview) override;
   
   void enableBackground() { this->_enableBackground = true; }
   void disableBackground() { this->_enableBackground = false; }

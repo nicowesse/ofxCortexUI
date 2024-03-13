@@ -29,12 +29,10 @@ public:
     return p;
   }
   
-  
-  
 protected:
   virtual std::string getComponentName() const override { return "SliderView"; };
   
-  virtual void viewDidLoad() override { View::setIntrinsicHeight(40); }
+  virtual void viewDidLoad() override {}
   virtual void onDraw() override;
   void drawSlider();
   void drawZero();

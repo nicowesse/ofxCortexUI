@@ -11,7 +11,7 @@ void StackView::addSubviewAt(const std::shared_ptr<View> & subview, size_t index
 //  this->setIntrinsicHeight(Styling::getRowHeight(subviews.size()) + Styling::getPaddingTop() + Styling::getPaddingBottom());
 }
 
-void StackView::removeSubview(std::shared_ptr<View> subview)
+void StackView::removeSubview(const std::shared_ptr<View> & subview)
 {
 //    stackViews.erase(std::remove(std::begin(stackViews), std::end(stackViews), subview), std::end(stackViews));
   

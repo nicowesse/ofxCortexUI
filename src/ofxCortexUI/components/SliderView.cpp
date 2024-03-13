@@ -306,7 +306,7 @@ void SliderView<int>::onMouseDragged(const MouseEventArgs & e)
 {
   View::onMouseDragged(e);
   
-  if (e.isOverlapped || !View::isFocused()) return;
+//  if (e.isOverlapped || !View::isFocused()) return;
   
   float parameterRange = ParameterView<int>::getParameterMax() - ParameterView<int>::getParameterMin();
   float stepWidth = this->getContentFrame().width / parameterRange;

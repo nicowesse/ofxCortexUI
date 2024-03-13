@@ -32,6 +32,20 @@ std::string LayoutHelpers::getAlignmentString(const Alignment & alignment)
   }
 }
 
+std::string LayoutHelpers::getEdgeString(const Edge & edge)
+{
+  switch (edge) {
+    case Edge::TOP: return "TOP";
+    case Edge::CONTENT_TOP: return "CONTENT_TOP";
+    case Edge::RIGHT: return "RIGHT";
+    case Edge::CONTENT_RIGHT: return "CONTENT_RIGHT";
+    case Edge::BOTTOM: return "BOTTOM";
+    case Edge::CONTENT_BOTTOM: return "CONTENT_BOTTOM";
+    case Edge::LEFT: return "LEFT";
+    case Edge::CONTENT_LEFT: return "CONTENT_LEFT";
+  }
+}
+
 std::vector<kiwi::Constraint> LayoutHelpers::fillWindow(const std::shared_ptr<View> & view)
 {
   return std::vector<kiwi::Constraint>{
@@ -441,6 +455,42 @@ std::vector<kiwi::Constraint> LayoutHelpers::alignVertical(const std::shared_ptr
     else if (alignment == Alignment::CENTER) constraints.push_back({ current->centerX == outer->content_centerX | kiwi::strength::strong });
     else if (alignment == Alignment::TRAILING) constraints.push_back({ current->right == outer->content_right | kiwi::strength::strong });
     else constraints.push_back({ current->left == outer->content_left | kiwi::strength::strong });
+  });
+  
+  return constraints;
+}
+
+std::vector<kiwi::Constraint> LayoutHelpers::insetFromEdge(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Edge edge, float inset)
+{
+  std::vector<kiwi::Constraint> constraints;
+  
+  std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
+    if (edge == Edge::TOP) { constraints.push_back({ current->top == outer->top + inset | kiwi::strength::strong }); }
+    else if (edge == Edge::CONTENT_TOP) constraints.push_back({ current->top == outer->content_top + inset | kiwi::strength::strong });
+    else if (edge == Edge::RIGHT) constraints.push_back({ current->right == outer->right - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_RIGHT) constraints.push_back({ current->right == outer->content_right - inset | kiwi::strength::strong });
+    else if (edge == Edge::BOTTOM) constraints.push_back({ current->bottom == outer->bottom - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_BOTTOM) constraints.push_back({ current->bottom == outer->content_bottom - inset | kiwi::strength::strong });
+    else if (edge == Edge::LEFT) constraints.push_back({ current->left == outer->left - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_LEFT) constraints.push_back({ current->left == outer->content_left + inset | kiwi::strength::strong });
+  });
+  
+  return constraints;
+}
+
+std::vector<kiwi::Constraint> LayoutHelpers::insetFromEdge(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Edge edge, const kiwi::Variable & inset)
+{
+  std::vector<kiwi::Constraint> constraints;
+  
+  std::for_each(std::begin(views), std::end(views), [&](const std::shared_ptr<View> & current) {
+    if (edge == Edge::TOP) { constraints.push_back({ current->top == outer->top + inset | kiwi::strength::strong }); }
+    else if (edge == Edge::CONTENT_TOP) constraints.push_back({ current->top == outer->content_top + inset | kiwi::strength::strong });
+    else if (edge == Edge::RIGHT) constraints.push_back({ current->right == outer->right - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_RIGHT) constraints.push_back({ current->right == outer->content_right - inset | kiwi::strength::strong });
+    else if (edge == Edge::BOTTOM) constraints.push_back({ current->bottom == outer->bottom - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_BOTTOM) constraints.push_back({ current->bottom == outer->content_bottom - inset | kiwi::strength::strong });
+    else if (edge == Edge::LEFT) constraints.push_back({ current->left == outer->left - inset | kiwi::strength::strong });
+    else if (edge == Edge::CONTENT_LEFT) constraints.push_back({ current->left == outer->content_left + inset | kiwi::strength::strong });
   });
   
   return constraints;

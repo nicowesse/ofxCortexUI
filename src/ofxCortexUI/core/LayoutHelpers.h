@@ -31,8 +31,15 @@ public:
     CENTER,
     TRAILING,
   };
-  
   static std::string getAlignmentString(const Alignment & alignment);
+  
+  enum class Edge {
+    TOP, CONTENT_TOP,
+    RIGHT, CONTENT_RIGHT,
+    BOTTOM, CONTENT_BOTTOM,
+    LEFT, CONTENT_LEFT
+  };
+  static std::string getEdgeString(const Edge & edge);
   
   static std::vector<kiwi::Constraint> fillWindow(const std::shared_ptr<View> & view);
   static std::vector<kiwi::Constraint> fillInner(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
@@ -69,6 +76,10 @@ public:
   static std::vector<kiwi::Constraint> alignment(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis, Alignment alignment);
   static std::vector<kiwi::Constraint> alignHorizontal(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment);
   static std::vector<kiwi::Constraint> alignVertical(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Alignment alignment);
+  
+#pragma mark - Pads
+  static std::vector<kiwi::Constraint> insetFromEdge(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Edge edge, float inset);
+  static std::vector<kiwi::Constraint> insetFromEdge(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Edge edge, const kiwi::Variable & inset);
   
 protected:
   class Spacer {

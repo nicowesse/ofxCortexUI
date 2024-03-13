@@ -9,6 +9,8 @@
 #include "ofxCortexUI/components/CheckboxView.h"
 #include "ofxCortexUI/components/ImageView.h"
 #include "ofxCortexUI/components/FileView.h"
+#include "ofxCortexUI/components/VectorView.h"
+#include "ofxCortexUI/components/GroupView.h"
 
 #include "ofxCortex/types/Parameter.h"
 #include "ofxCortex/types/Range.h"
@@ -44,8 +46,9 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   
   if (type == typeid(ofParameterGroup).name()) // float
   {
-    auto groupParams = createViewsForParameterGroup(param.castGroup());
-    views.insert(views.end(), groupParams.begin(), groupParams.end());
+//    auto groupParams = createViewsForParameterGroup(param.castGroup());
+//    views.insert(views.end(), groupParams.begin(), groupParams.end());
+    views.push_back(GroupView::create(param.castGroup()));
   }
   else if (valueType == typeid(float).name() || type == typeid(ofParameter<float>).name() || type == typeid(ofxCortex::UnitParameter<float>).name())
   {
@@ -54,6 +57,14 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   else if (valueType == typeid(int).name() || type == typeid(ofParameter<int>).name() || type == typeid(ofxCortex::UnitParameter<int>).name())
   {
     views.push_back(SliderView<int>::create(param));
+  }
+  else if (valueType == typeid(glm::vec2).name())
+  {
+    views.push_back(VectorView<glm::vec2>::create(param));
+  }
+  else if (valueType == typeid(glm::vec3).name())
+  {
+    views.push_back(VectorView<glm::vec3>::create(param));
   }
   else if (valueType == typeid(std::string).name() || type == typeid(ofParameter<string>).name())
   {
