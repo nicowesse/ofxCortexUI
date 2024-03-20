@@ -11,6 +11,7 @@
 #include "ofxCortexUI/components/FileView.h"
 #include "ofxCortexUI/components/VectorView.h"
 #include "ofxCortexUI/components/GroupView.h"
+#include "ofxCortexUI/components/ColorParameterView.h"
 
 #include "ofxCortex/types/Parameter.h"
 #include "ofxCortex/types/Range.h"
@@ -70,6 +71,11 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   {
     ofParameter<string> & p = param.cast<string>();
     views.push_back(ValueView<string>::create(p));
+  }
+  else if (valueType == typeid(ofFloatColor).name())
+  {
+    ofParameter<ofFloatColor> & p = param.cast<ofFloatColor>();
+    views.push_back(ColorParameterView::create(p));
   }
   else if (type == typeid(ofParameter<bool>).name())
   {

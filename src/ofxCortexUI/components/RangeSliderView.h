@@ -8,7 +8,7 @@
 
 namespace ofxCortex { namespace ui {
 
-class RangeSliderView : public ParameterView<ofxCortex::core::types::Range> {
+class RangeSliderView : public ParameterView {
 public:
   class Bar : public ResizeableView {
   protected:

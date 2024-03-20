@@ -21,7 +21,7 @@ public:
   };
   
   static const kiwi::Variable & defaultRowHeight() { return get().default_row_height; }
-  static float getRowHeight(int rows = 1) { return getScaled(40.0 * rows); }
+  static float getRowHeight(int rows = 1) { return getScaled(36.0 * rows); }
   
   static void  setMargins(float value) {
     setMarginTop(value);

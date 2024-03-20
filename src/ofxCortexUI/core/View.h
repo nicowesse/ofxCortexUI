@@ -57,6 +57,9 @@ public:
   void enableDebug() { isDebugEnabled = true; }
   void disableDebug() { isDebugEnabled = false; }
   
+  void enableBackground() { shouldDrawBackground = true; }
+  void disableBackground() { shouldDrawBackground = false; }
+  
   
 #pragma mark - OBJECT: Overrideables
 protected:
@@ -296,6 +299,7 @@ protected:
   bool isDebugEnabled { false };
   bool shouldDraw { true };
   bool shouldDrawSubviews { true };
+  bool shouldDrawBackground { true };
   
   ofRectangle frame;
   ofRectangle contentFrame;
@@ -329,6 +333,7 @@ public:
   void setParent(std::shared_ptr<View> parent) { this->superview = parent; }
   
   std::shared_ptr<View> getRoot();
+  inline static std::shared_ptr<View> getFocused() { return View::focused; }
   static std::vector<std::shared_ptr<View>> flatten(const std::shared_ptr<View> & node);
   void setLevel(int level) { this->level = level; }
   
@@ -465,17 +470,13 @@ protected:
   void charTypedHandler(uint32_t & c);
 };
 
-template<typename T>
+//template<typename T>
 class ParameterView : public View {
 protected:
-  ParameterView(const ofAbstractParameter & parameter) : View(parameter.getName())
-  {
-    this->parameterRef = parameter.newReference();
-  }
+  ParameterView(const ofAbstractParameter & parameter) : View(parameter.getName()) { this->parameterRef = parameter.newReference(); }
   
-protected:
-  std::shared_ptr<ofAbstractParameter> parameterRef;
-  
+public:
+  template<typename T>
   ofParameter<T> & getParameter() {
     auto unit = std::dynamic_pointer_cast<ofxCortex::UnitParameter<T>>(parameterRef);
     
@@ -483,20 +484,26 @@ protected:
     else return parameterRef->cast<T>();
   }
   
-  ofParameterGroup & getGroup() { return parameterRef->castGroup(); }
-  
   std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef->newReference(); }
   
-  // Aliases
   std::string getParameterName() { return parameterRef->getName(); }
-  T getParameterMin() { return getParameter().getMin(); }
-  T getParameterMax() { return getParameter().getMax(); }
-  std::string getParameterType() { return typeid(T).name(); }
-  std::string getParameterToString() { return getParameter().toString(); }
+  std::string getParameterToString() { return parameterRef->toString(); }
   
-  void setParameter(const T & value) { getParameter().set(value); }
-  T getParameterValue() { return getParameter().get(); }
+  template<typename T> const T& getParameterValue() const { return getParameter<T>().get(); }
   
+protected:
+  std::shared_ptr<ofAbstractParameter> parameterRef;
+  
+  ofParameterGroup & getGroup() { return parameterRef->castGroup(); }
+  
+  // Aliases
+  template<typename T> T getParameterMin() { return getParameter<T>().getMin(); }
+  template<typename T> T getParameterMax() { return getParameter<T>().getMax(); }
+  
+  template<typename T> void setParameter(const T & value) { getParameter<T>().set(value); }
+  template<typename T> T getParameterValue() { return getParameter<T>().get(); }
+  
+  template<typename T>
   std::string getUnit() {
     auto p = std::dynamic_pointer_cast<ofxCortex::UnitParameter<T>>(parameterRef);
     

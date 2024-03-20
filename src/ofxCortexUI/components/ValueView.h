@@ -6,24 +6,16 @@
 #include "ofxCortex/types/Image.h"
 #include "ofxCortex/types/File.h"
 
+#include "ofxCortex/utils/Helpers.h"
+
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class ValueView : public ofxCortex::ui::ParameterView<T> {
+class ValueView : public ofxCortex::ui::ParameterView {
 protected:
-//  ValueView(std::string name, T value) : View(name)
-//  {
-//    parameter.setName(name);
-//    parameter.set(value);
-//  }
-  
-  ValueView(const ofAbstractParameter & param) : ParameterView<T>(param)
-  {
-//    parameter.makeReferenceTo(param);
-  }
+  ValueView(const ofAbstractParameter & param) : ParameterView(param) {}
   
 public:
-  
   template<typename ... F>
   static std::shared_ptr<ValueView<T>> create(F&& ... f) {
     struct EnableMakeShared : public ValueView<T> { EnableMakeShared(F&&... arg) : ValueView<T>(std::forward<F>(arg)...) {} };
@@ -42,10 +34,10 @@ protected:
   {
     const auto & b = this->getContentFrame();
     
-    Styling::drawBackground(this->getFrame());
+    if (this->shouldDrawBackground) Styling::drawBackground(this->getFrame());
     
     ofSetColor(Styling::getForegroundColor());
-    ofxCortex::ui::Styling::drawLabel(ParameterView<T>::getParameterName(), b);
+    ofxCortex::ui::Styling::drawLabel(ParameterView::getParameterName(), b);
     
     ofSetColor(Styling::getAccentColor());
     ofxCortex::ui::Styling::drawValue(getFormattedString(), b);
@@ -54,55 +46,66 @@ protected:
   std::string getFormattedString()
   {
     std::stringstream ss;
-    ss << ParameterView<T>::getParameterToString();
+    ss << ParameterView::getParameterToString();
     return ofToString(ss.str(), 1);
   }
-  
-  ofParameter<T> parameter;
-
 };
 
 template<>
 inline std::string ValueView<float>::getFormattedString()
 {
+  const auto & value = getParameterValue<float>();
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(getParameterValue(), precision);
+  ss << ofToString(value, precision);
   return ss.str();
 }
 
 template<>
 inline std::string ValueView<glm::vec2>::getFormattedString()
 {
+  const auto & value = getParameterValue<glm::vec2>();
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision);
+  ss << ofToString(value.x, precision) << ", " << ofToString(value.y, precision);
   return ss.str();
 }
 
 template<>
 inline std::string ValueView<glm::vec3>::getFormattedString()
 {
+  const auto & value = getParameterValue<glm::vec3>();
   int precision = 3;
   std::stringstream ss;
-  ss << ofToString(getParameter()->x, precision) << ", " << ofToString(getParameter()->y, precision) << ", " << ofToString(getParameter()->z, precision);
+  ss << ofToString(value.x, precision) << ", " << ofToString(value.y, precision) << ", " << ofToString(value.z, precision);
+  return ss.str();
+}
+
+template<>
+inline std::string ValueView<ofFloatColor>::getFormattedString()
+{
+  const auto & value = getParameterValue<ofColor>();
+  std::stringstream ss;
+  ss << ofxCortex::core::utils::Color::colorToHex(value);
   return ss.str();
 }
 
 template<>
 inline std::string ValueView<ofxCortex::core::types::Range>::getFormattedString()
 {
+  const auto & value = getParameterValue<ofxCortex::core::types::Range>();
   int precision = 2;
   std::stringstream ss;
-  ss << ofToString(getParameter()->from, precision) << " ←→ " << ofToString(getParameter()->to, precision);
+  ss << ofToString(value.from, precision) << " ←→ " << ofToString(value.to, precision);
   return ss.str();
 }
 
 template<>
 inline std::string ValueView<ofxCortex::core::types::Image>::getFormattedString()
 {
+  const auto & value = getParameterValue<ofxCortex::core::types::Image>();
   std::stringstream ss;
-  ss << getParameter()->path;
+  ss << value.path;
   std::string original = ss.str();
   
   int length = MIN(28, original.size());
@@ -118,8 +121,9 @@ inline std::string ValueView<ofxCortex::core::types::Image>::getFormattedString(
 template<>
 inline std::string ValueView<ofxCortex::core::types::File>::getFormattedString()
 {
+  const auto & value = getParameterValue<ofxCortex::core::types::File>();
   std::stringstream ss;
-  ss << getParameter()->path;
+  ss << value.path;
   std::string original = ss.str();
   
   int leftover = ceil(this->getWidth() / Styling::getValueFont().dimensions.width) - getParameterName().size() + 8;

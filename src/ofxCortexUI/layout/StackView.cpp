@@ -31,37 +31,35 @@ void StackView::onUpdate(float time, float delta)
 void StackView::updateConstraints()
 {
   ofLogVerbose(getLogModule(__FUNCTION__)) << "START OF updateConstraints(): Subviews = " << ofToString(subviews) << " Size = " << subviews.size();
-  ofLogVerbose(getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "' Distribution = '" << LayoutHelpers::getDistributionString(this->distribution) << "'";
+  ofLogVerbose(getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
   
   if (subviews.size() == 0) return;
   
   View::clearConstraints();
   
-  auto alignmentConstraints = LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment);
-  auto distributeConstraints = LayoutHelpers::distribute(getSelf(), subviews, this->axis, this->distribution);
-//  auto stackConstraints = LayoutHelpers::stack(subviews, this->axis);
-//  auto attachConstraints = LayoutHelpers::attachLeading(getSelf(), subviews, LayoutHelpers::Axis::VERTICAL);
-  auto trailingEdgeConstraints = std::vector<kiwi::Constraint>{
-    { this->content_bottom >= subviews.back()->bottom | kiwi::strength::strong }
-  };
+//  auto alignmentConstraints = LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment);
+  this->addConstraints(LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment));
+  auto distributeConstraints = LayoutHelpers::distribute(getSelf(), subviews, this->axis, LayoutHelpers::Distribution::STACK);
   
   auto scrollConstraints = std::vector<kiwi::Constraint>{
-    { subviews.front()->top <= this->content_top | kiwi::strength::strong }
+    { subviews.front()->top == this->content_top + scroll_y | kiwi::strength::strong },
+//    { subviews.front()->top <= this->content_top | kiwi::strength::strong },
+//    { scroll_y <= subviews.back()->bottom - subviews.front()->top | kiwi::strength::strong }
   };
   
   ofLogVerbose(toString(__FUNCTION__)) 
-  << "\n— " << alignmentConstraints.size() << " x Alignment Constraints"
+//  << "\n— " << alignmentConstraints.size() << " x Alignment Constraints"
   << "\n— " << distributeConstraints.size() << " x Distribute Constraints";
 //  << "\n— " << stackConstraints.size() << " x Stack Constraints"
 //  << "\n— " << attachConstraints.size() << " x Attach Constraints";
   
   std::vector<kiwi::Constraint> constraints;
-  ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
+//  ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
   ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
 //  ofxCortex::core::utils::Array::appendVector(constraints, stackConstraints);
 //  ofxCortex::core::utils::Array::appendVector(constraints, attachConstraints);
-  ofxCortex::core::utils::Array::appendVector(constraints, trailingEdgeConstraints);
-//    ofxCortex::core::utils::Array::appendVector(constraints, scrollConstraints);
+//  ofxCortex::core::utils::Array::appendVector(constraints, trailingEdgeConstraints);
+    ofxCortex::core::utils::Array::appendVector(constraints, scrollConstraints);
   
   ofLogVerbose(toString(__FUNCTION__)) << "Constraints = " << constraints.size();
   
@@ -108,7 +106,7 @@ void StackView::onDrawMask()
 {
   ofPushStyle();
   {
-//    Styling::drawBackground(this->getContentFrame(), ofColor::white, ofColor(0, 0));
+    Styling::drawBackground(this->getContentFrame(), ofColor(255, 32), ofColor(0, 0));
   }
   ofPopStyle();
 }
@@ -118,7 +116,10 @@ void StackView::onMouseScrolled(const MouseEventArgs & e)
 //  float heightDiff = this->getHeight() - wrapper->getHeight();
 //  bool shouldScroll = heightDiff < 0.0f && scroll_y.value() + e.scrollY > heightDiff;
 //    LayoutEngine::suggestValue(scroll_y, scroll_y.value() + e.scrollY * shouldScroll);
+  
   _scrollIntensity = CLAMP(_scrollIntensity + abs(e.scrollY), 0, 1.0f);
+  
+  LayoutEngine::suggestValue(scroll_y, scroll_y.value() + e.scrollY);
 }
 
 }}

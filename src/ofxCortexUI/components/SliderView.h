@@ -9,11 +9,11 @@
 namespace ofxCortex { namespace ui {
 
 template<typename T>
-class SliderView : public ofxCortex::ui::ParameterView<T> {
+class SliderView : public ofxCortex::ui::ParameterView {
   static_assert(std::is_arithmetic<T>::value, "SliderView: T must be numeric!");
   
 protected:
-  SliderView(const ofAbstractParameter & param) : ParameterView<T>(param) {};
+  SliderView(const ofAbstractParameter & param) : ParameterView(param) {};
   
 public:
   template<typename ... F>
@@ -45,7 +45,7 @@ protected:
   
 //  std::shared_ptr<ofAbstractParameter> parameterRef;
 //  ofParameter<T> getParameter() { return parameterRef->cast<T>(); }
-  T getNormalizedParameter() { return ofMap(ParameterView<T>::getParameterValue(), ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), 0, 1, true); }
+  T getNormalizedParameter() { return ofMap(ParameterView::getParameterValue<T>(), ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>(), 0, 1, true); }
   
   static ofShader & getShader();
   float interpolation { 0.0f };

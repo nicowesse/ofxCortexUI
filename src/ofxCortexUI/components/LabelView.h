@@ -32,9 +32,6 @@ public:
     return p;
   }
   
-  void enableBackground() { this->shouldDrawBackground = true; }
-  void disableBackground() { this->shouldDrawBackground = false; }
-  
 protected:
   virtual std::string getComponentName() const override { return "LabelView"; };
   
@@ -58,7 +55,6 @@ protected:
   virtual void onPostDraw() override {};
   
   ofParameter<std::string> parameter;
-  bool shouldDrawBackground { true };
 };
 
 }}

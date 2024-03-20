@@ -5,17 +5,18 @@ namespace ofxCortex { namespace ui {
 template<typename T>
 void SliderView<T>::onDraw()
 {
-  Styling::drawBackground(this->getFrame());
+  if (this->shouldDrawBackground) Styling::drawBackground(this->getFrame());
+  
   this->drawSlider();
   
   ofSetColor(Styling::getForegroundColor(), 255);
   this->drawDot();
   
-  ofSetColor(Styling::getForegroundColor(), 255 - 128 * View::getActiveIntensity());
-  Styling::drawLabel(ParameterView<T>::getParameterName(), this->getContentFrame());
+  ofSetColor(Styling::getForegroundColor(), 255 - 64 * View::getActiveIntensity());
+  Styling::drawLabel(ParameterView::getParameterName(), this->getContentFrame());
   
-  ofSetColor(Styling::getAccentColor(), 255 - 128 * View::getActiveIntensity());
-  Styling::drawValue(ofToString(ParameterView<T>::getParameterValue(), 3) + ParameterView<T>::getUnit(), this->getContentFrame());
+  ofSetColor(Styling::getAccentColor(), 255 - 64 * View::getActiveIntensity());
+  Styling::drawValue(ofToString(ParameterView::getParameterValue<T>(), 3) + ParameterView::getUnit<T>(), this->getContentFrame());
 }
 
 template<typename T>
@@ -23,7 +24,7 @@ void SliderView<T>::drawSlider()
 {
   const auto & rect = this->getContentFrame();
   float centerY = rect.getCenter().y;
-  float centerBulge = (ParameterView<T>::getParameterMin() < 0.0) ? ofMap(0, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), 0, 1, true) : 0.5;
+  float centerBulge = (ParameterView::getParameterMin<T>() < 0.0) ? ofMap(0, ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>(), 0, 1, true) : 0.5;
   
   ofFloatColor sliderColor = Styling::getForegroundColor();
   sliderColor.a = ofMap(interpolation, 0, 1, 0.6, 1.0);
@@ -37,7 +38,7 @@ void SliderView<T>::drawSlider()
     SliderView<T>::getShader().end();
     
     ofFill();
-    if (ParameterView<T>::getParameterMin() < 0.0) this->drawZero();
+    if (ParameterView::getParameterMin<T>() < 0.0) this->drawZero();
   }
   ofPopStyle();
 }
@@ -46,7 +47,7 @@ template<typename T>
 void SliderView<T>::drawZero()
 {
   const auto & rect = this->getContentFrame();
-  float zeroPoint = ofMap(0, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), rect.getLeft() + Styling::getPaddingLeft(), rect.getRight() - Styling::getPaddingRight());
+  float zeroPoint = ofMap(0, ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>(), rect.getLeft() + Styling::getPaddingLeft(), rect.getRight() - Styling::getPaddingRight());
   
   float r = Styling::getScaled(4);
   float alpha = 0.6;
@@ -67,7 +68,7 @@ void SliderView<T>::drawDot()
 {
   const auto & BB = this->getContentFrame();
   
-  float x = ofMap(ParameterView<T>::getParameterValue(), ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax(), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), true);
+  float x = ofMap(ParameterView::getParameterValue<T>(), ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>(), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), true);
   
   ofPushStyle();
   ofSetColor(Styling::getForegroundColor());
@@ -83,11 +84,11 @@ void SliderView<T>::onMousePressed(const View::MouseEventArgs & e)
 {
   View::onMousePressed(e);
   
-  if (e.isOverlapped) return;
+//  if (e.isOverlapped) return;
   
   float normalizedX = ofMap(e.x - 2, this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), 0, 1, true);
-  float parameterValue = ofMap(normalizedX, 0, 1, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax());
-  ParameterView<T>::setParameter(parameterValue);
+  float parameterValue = ofMap(normalizedX, 0, 1, ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>());
+  ParameterView::setParameter<T>(parameterValue);
 }
 
 template<typename T>
@@ -95,11 +96,7 @@ void SliderView<T>::onMouseDragged(const View::MouseEventArgs & e)
 {
   View::onMouseDragged(e);
   
-//  if (e.isOverlapped || !View::isFocused()) return;
-  
-  float normalizedX = ofMap(e.x - 2, this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), 0, 1, true);
-  float parameterValue = ofMap(normalizedX, 0, 1, ParameterView<T>::getParameterMin(), ParameterView<T>::getParameterMax());
-  ParameterView<T>::setParameter(parameterValue);
+  return SliderView<T>::onMousePressed(e);
 }
 
 template<typename T>
@@ -109,7 +106,7 @@ void SliderView<T>::onMouseScrolled(const View::MouseEventArgs & e)
   
   if (e.modifiers == OF_KEY_SHIFT)
   {
-    ParameterView<T>::getParameter() = (e.scrollX > 0.0f) ? ceil(ParameterView<T>::getParameterValue() - 0.00001f) + 1.0 : floor(ParameterView<T>::getParameterValue() + 0.00001f) - 1.0;
+    ParameterView::getParameter<T>() = (e.scrollX > 0.0f) ? ceil(ParameterView::getParameterValue<T>() - 0.00001f) + 1.0 : floor(ParameterView::getParameterValue<T>() + 0.00001f) - 1.0;
   }
   else
   {
@@ -119,7 +116,7 @@ void SliderView<T>::onMouseScrolled(const View::MouseEventArgs & e)
     else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
     else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
     
-    ParameterView<T>::getParameter() += e.scrollX * delta;
+    ParameterView::getParameter<T>() += e.scrollX * delta;
   }
 }
 
@@ -139,30 +136,30 @@ void SliderView<T>::onKeyPressed(const ofKeyEventArgs & e)
   {
     case OF_KEY_LEFT:
     {
-      if (e.modifiers == OF_KEY_SHIFT) { ParameterView<T>::getParameter() = floor(ParameterView<T>::getParameterValue() - 0.000001f) + 1; }
+      if (e.modifiers == OF_KEY_SHIFT) { ParameterView::getParameter<T>() = floor(ParameterView::getParameterValue<T>() - 0.000001f) + 1; }
       
-      ParameterView<T>::getParameter() += -1.0 / multiplier;
+      ParameterView::getParameter<T>() += -1.0 / multiplier;
     }
     break;
     case OF_KEY_DOWN:
     {
-      if (e.modifiers == OF_KEY_SHIFT) { ParameterView<T>::getParameter() = floor(ParameterView<T>::getParameterValue() - 0.000001f) + 1; }
+      if (e.modifiers == OF_KEY_SHIFT) { ParameterView::getParameter<T>() = floor(ParameterView::getParameterValue<T>() - 0.000001f) + 1; }
       
-      ParameterView<T>::getParameter() += -10.0 * multiplier;
+      ParameterView::getParameter<T>() += -10.0 * multiplier;
     }
     break;
     case OF_KEY_RIGHT:
     {
-      if (e.modifiers == OF_KEY_SHIFT) { ParameterView<T>::getParameter() = ceil(ParameterView<T>::getParameterValue() + 0.000001f) - 1; }
+      if (e.modifiers == OF_KEY_SHIFT) { ParameterView::getParameter<T>() = ceil(ParameterView::getParameterValue<T>() + 0.000001f) - 1; }
       
-      ParameterView<T>::getParameter() += 1.0 / multiplier;
+      ParameterView::getParameter<T>() += 1.0 / multiplier;
     }
     break;
     case OF_KEY_UP:
     {
-      if (e.modifiers == OF_KEY_SHIFT) { ParameterView<T>::getParameter() = ceil(ParameterView<T>::getParameterValue() + 0.000001f) - 1; }
+      if (e.modifiers == OF_KEY_SHIFT) { ParameterView::getParameter<T>() = ceil(ParameterView::getParameterValue<T>() + 0.000001f) - 1; }
       
-      ParameterView<T>::getParameter() += 10.0 * multiplier;
+      ParameterView::getParameter<T>() += 10.0 * multiplier;
     }
     break;
   }
@@ -243,21 +240,21 @@ ofShader & SliderView<T>::getShader()
 template<>
 void SliderView<int>::onDraw()
 {
-  Styling::drawBackground(this->getFrame());
+  if (this->shouldDrawBackground) Styling::drawBackground(this->getFrame());
   
   this->drawSlider();
   
-  int parameterRange = ParameterView<int>::getParameterMax() - ParameterView<int>::getParameterMin();
+  int parameterRange = ParameterView::getParameterMax<int>() - ParameterView::getParameterMin<int>();
   float stepWidth = this->getWidth() / parameterRange;
   int stepSize = parameterRange / 10; //(stepWidth < 5.0f) ? 5 : 1;
   
   ofSetColor(Styling::getForegroundColor(), 64 + (64 * View::getHoverIntensity() * View::getActiveIntensity()));
   
-  for (int i = ParameterView<int>::getParameterMin() + 1; i <= ParameterView<int>::getParameterMax() - 1; i++)
+  for (int i = ParameterView::getParameterMin<int>() + 1; i <= ParameterView::getParameterMax<int>() - 1; i++)
   {
 //    if (i == parameter.getMin())
     
-    float x = ofMap(i, getParameter().getMin(), getParameter().getMax(), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), true);
+    float x = ofMap(i, getParameterMin<int>(), getParameterMax<int>(), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), true);
     
     float scaleY = 1.0 + 2.0 * getActiveIntensity() + 1.0 * getHoverIntensity();
     float baseOffset = 2.5 * (stepWidth > 3.0f);
@@ -275,10 +272,10 @@ void SliderView<int>::onDraw()
   this->drawDot();
   
   ofSetColor(Styling::getForegroundColor(), 255 - 128 * getActiveIntensity());
-  Styling::drawLabel(getParameter().getName(), this->getContentFrame());
+  Styling::drawLabel(getParameterName(), this->getContentFrame());
   
   ofSetColor(Styling::getAccentColor(), 255 - 128 * getActiveIntensity());
-  Styling::drawValue(ofToString(getParameter().get(), 3) + ParameterView<int>::getUnit(), this->getContentFrame());
+  Styling::drawValue(ofToString(getParameterValue<int>(), 3) + ParameterView::getUnit<int>(), this->getContentFrame());
 }
 
 template<>
@@ -286,11 +283,14 @@ void SliderView<int>::onMousePressed(const MouseEventArgs & e)
 {
   View::onMousePressed(e);
   
-  float parameterRange = ParameterView<int>::getParameterMax() - ParameterView<int>::getParameterMin();
+  int min = ParameterView::getParameterMin<int>();
+  int max = ParameterView::getParameterMax<int>();
+  
+  float parameterRange = max - min;
   float stepWidth = this->getContentFrame().width / parameterRange;
   
-  float parameterValue = ofMap(ofxCortex::core::utils::roundToNearest(e.x, stepWidth), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), getParameter().getMin(), getParameter().getMax(), true);
-  ParameterView<int>::setParameter(parameterValue);
+  float parameterValue = ofMap(ofxCortex::core::utils::roundToNearest(e.x, stepWidth), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), min, max, true);
+  ParameterView::setParameter<int>(parameterValue);
 }
 
 template<>
@@ -298,7 +298,7 @@ void SliderView<int>::onMouseScrolled(const View::MouseEventArgs & e)
 {
   if (!View::isFocused()) return;
   
-  ParameterView<int>::getParameter() += ofSign(e.scrollX) * ceil(abs(e.scrollX));
+  ParameterView::getParameter<int>() += ofSign(e.scrollX) * ceil(abs(e.scrollX));
 }
 
 template<>
@@ -306,13 +306,7 @@ void SliderView<int>::onMouseDragged(const MouseEventArgs & e)
 {
   View::onMouseDragged(e);
   
-//  if (e.isOverlapped || !View::isFocused()) return;
-  
-  float parameterRange = ParameterView<int>::getParameterMax() - ParameterView<int>::getParameterMin();
-  float stepWidth = this->getContentFrame().width / parameterRange;
-  
-  float parameterValue = ofMap(ofxCortex::core::utils::roundToNearest(e.x, stepWidth), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), getParameter().getMin(), getParameter().getMax(), true);
-  ParameterView<int>::setParameter(parameterValue);
+  SliderView<int>::onMousePressed(e);
 }
 
 template<>
@@ -329,10 +323,10 @@ void SliderView<int>::onKeyPressed(const ofKeyEventArgs & e)
   
   switch(e.key)
   {
-    case OF_KEY_LEFT: ParameterView<int>::getParameter() += -1; break;
-    case OF_KEY_DOWN: ParameterView<int>::getParameter() += -10 * multiplier; break;
-    case OF_KEY_RIGHT: ParameterView<int>::getParameter() += 1.0; break;
-    case OF_KEY_UP: ParameterView<int>::getParameter() += 10 * multiplier; break;
+    case OF_KEY_LEFT: ParameterView::getParameter<int>() += -1; break;
+    case OF_KEY_DOWN: ParameterView::getParameter<int>() += -10 * multiplier; break;
+    case OF_KEY_RIGHT: ParameterView::getParameter<int>() += 1.0; break;
+    case OF_KEY_UP: ParameterView::getParameter<int>() += 10 * multiplier; break;
   }
 }
 

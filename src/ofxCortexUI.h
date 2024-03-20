@@ -15,5 +15,8 @@
 #include "ofxCortexUI/components/RangeSliderView.h"
 #include "ofxCortexUI/components/ButtonView.h"
 #include "ofxCortexUI/components/CheckboxView.h"
+#include "ofxCortexUI/components/VectorView.h"
+#include "ofxCortexUI/components/GroupView.h"
+#include "ofxCortexUI/components/ColorParameterView.h"
 //#include "ofxCortexUI/components/ImageView.h"
 //#include "ofxCortexUI/components/FileView.h"

@@ -9,8 +9,8 @@ namespace ofxCortex { namespace ui {
 
 class StackView : public ofxCortex::ui::View {
 protected:
-  StackView(LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Distribution distribution = LayoutHelpers::Distribution::STACK, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE)
-  : View("StackView"), axis(axis), distribution(distribution), alignment(alignment)
+  StackView(LayoutHelpers::Axis axis = LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment align = LayoutHelpers::Alignment::FILL_SPACE)
+  : View("StackView"), axis(axis), alignment(alignment)
   {
     LayoutEngine::addEditVariable(scroll_y, kiwi::strength::strong);
     LayoutEngine::suggestValue(scroll_y, 0.0);
@@ -87,7 +87,6 @@ protected:
 //  std::shared_ptr<Wrapper> wrapper;
   
   LayoutHelpers::Axis axis;
-  LayoutHelpers::Distribution distribution;
   LayoutHelpers::Alignment alignment;
   kiwi::Variable scroll_y;
   

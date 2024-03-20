@@ -15,11 +15,11 @@ template<> struct is_vector<glm::vec2> : std::true_type {};
 template<> struct is_vector<glm::vec3> : std::true_type {};
 
 template<typename T>
-class VectorView : public ofxCortex::ui::ParameterView<T> {
+class VectorView : public ofxCortex::ui::ParameterView {
   static_assert(is_vector<T>::value, "MyClass only supports glm::vec2 and glm::vec3.");
   
 protected:
-  VectorView(const ofAbstractParameter & param) : ofxCortex::ui::ParameterView<T>(param) {};
+  VectorView(const ofAbstractParameter & param) : ofxCortex::ui::ParameterView(param) {};
   
 public:
   template<typename ... F>
@@ -41,34 +41,34 @@ protected:
   virtual void viewDidLoad() override {
     using namespace ofxCortex::ui;
     
-    label = LabelView::create(ParameterView<T>::getParameter());
+    label = LabelView::create(ParameterView::getParameter<T>());
     label->disableBackground();
     
-    x.set("X", ParameterView<T>::getParameterValue().x, ParameterView<T>::getParameterMin().x, ParameterView<T>::getParameterMax().x);
+    x.set("X", ParameterView::getParameterValue<T>().x, ParameterView::getParameterMin<T>().x, ParameterView::getParameterMax<T>().x);
     sliderListeners.push(x.newListener([this](float & value){
-      T v = ParameterView<T>::getParameterValue();
+      auto v = ParameterView::getParameterValue<T>();
       v.x = value;
-      ParameterView<T>::setParameter(v);
+      ParameterView::setParameter<T>(v);
     }));
     sliderX = SliderView<float>::create(x);
     
-    y.set("Y", ParameterView<T>::getParameterValue().y, ParameterView<T>::getParameterMin().y, ParameterView<T>::getParameterMax().y);
+    y.set("Y", ParameterView::getParameterValue<T>().y, ParameterView::getParameterMin<T>().y, ParameterView::getParameterMax<T>().y);
     sliderListeners.push(y.newListener([this](float & value){
-      T v = ParameterView<T>::getParameterValue();
+      auto v = ParameterView::getParameterValue<T>();
       v.y = value;
-      ParameterView<T>::setParameter(v);
+      ParameterView::setParameter<T>(v);
     }));
     sliderY = SliderView<float>::create(y);
     
-    z.set("Z", ParameterView<T>::getParameterValue().z, ParameterView<T>::getParameterMin().z, ParameterView<T>::getParameterMax().z);
+    z.set("Z", ParameterView::getParameterValue<T>().z, ParameterView::getParameterMin<T>().z, ParameterView::getParameterMax<T>().z);
     sliderListeners.push(z.newListener([this](float & value){
-      T v = ParameterView<T>::getParameterValue();
+      T v = ParameterView::getParameterValue<T>();
       v.z = value;
-      ParameterView<T>::setParameter(v);
+      ParameterView::setParameter<T>(v);
     }));
     sliderZ = SliderView<float>::create(z);
     
-    sliderListeners.push(ParameterView<T>::getParameter().newListener([this](T & value) {
+    sliderListeners.push(ParameterView::getParameter<T>().newListener([this](T & value) {
       x.setWithoutEventNotifications(value.x);
       y.setWithoutEventNotifications(value.y);
       z.setWithoutEventNotifications(value.z);
@@ -119,9 +119,9 @@ protected:
 };
 
 template<>
-class VectorView<glm::vec2> : public ofxCortex::ui::ParameterView<glm::vec2> {
+class VectorView<glm::vec2> : public ofxCortex::ui::ParameterView {
 protected:
-  VectorView(const ofAbstractParameter & param) : ofxCortex::ui::ParameterView<glm::vec2>(param) {};
+  VectorView(const ofAbstractParameter & param) : ofxCortex::ui::ParameterView(param) {};
   
 public:
   template<typename ... F>
@@ -141,26 +141,26 @@ protected:
   virtual void viewDidLoad() override {
     using namespace ofxCortex::ui;
     
-    label = LabelView::create(ParameterView<glm::vec2>::getParameter());
+    label = LabelView::create(ParameterView::getParameter<glm::vec2>());
     label->disableBackground();
     
-    x.set("X", ParameterView<glm::vec2>::getParameterValue().x, ParameterView<glm::vec2>::getParameterMin().x, ParameterView<glm::vec2>::getParameterMax().x);
+    x.set("X", ParameterView::getParameterValue<glm::vec2>().x, ParameterView::getParameterMin<glm::vec2>().x, ParameterView::getParameterMax<glm::vec2>().x);
     sliderListeners.push(x.newListener([this](float & value){
-      auto v = ParameterView<glm::vec2>::getParameterValue();
+      auto v = ParameterView::getParameterValue<glm::vec2>();
       v.x = value;
-      ParameterView<glm::vec2>::setParameter(v);
+      ParameterView::setParameter<glm::vec2>(v);
     }));
     sliderX = SliderView<float>::create(x);
     
-    y.set("Y", ParameterView<glm::vec2>::getParameterValue().y, ParameterView<glm::vec2>::getParameterMin().y, ParameterView<glm::vec2>::getParameterMax().y);
+    y.set("Y", ParameterView::getParameterValue<glm::vec2>().y, ParameterView::getParameterMin<glm::vec2>().y, ParameterView::getParameterMax<glm::vec2>().y);
     sliderListeners.push(y.newListener([this](float & value){
-      auto v = ParameterView<glm::vec2>::getParameterValue();
+      auto v = ParameterView::getParameterValue<glm::vec2>();
       v.y = value;
-      ParameterView<glm::vec2>::setParameter(v);
+      ParameterView::setParameter(v);
     }));
     sliderY = SliderView<float>::create(y);
     
-    sliderListeners.push(ParameterView<glm::vec2>::getParameter().newListener([this](glm::vec2 & value) {
+    sliderListeners.push(ParameterView::getParameter<glm::vec2>().newListener([this](glm::vec2 & value) {
       x.setWithoutEventNotifications(value.x);
       y.setWithoutEventNotifications(value.y);
     }));

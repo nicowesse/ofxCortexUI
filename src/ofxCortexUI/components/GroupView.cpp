@@ -39,7 +39,10 @@ void GroupView::viewDidLoad()
   this->addSubview(heading);
   
   parameterViews = ofxCortex::ui::ParameterUtils::createViewsForParameterGroup(groupRef->castGroup(), false);
-//  this->addSubviews(parameterViews);
+  
+  for (auto & view : parameterViews) {
+    for (auto & node : View::flatten(view)) node->disableInteraction();
+  }
 }
 
 void GroupView::updateConstraints()
@@ -77,10 +80,10 @@ void GroupView::onPostDraw()
     float x = this->getContentLeft();
     float y = parameterViews.front()->getTop();
     float h = parameterViews.back()->getBottom() - parameterViews.front()->getTop();
-    float w = Styling::getPaddingLeft() * 0.35;
+    float w = Styling::getPaddingLeft() * 0.5;
     
     ofPushStyle();
-    ofSetColor(Styling::getAccentColor(), 255);
+    ofSetColor(Styling::getAccentColor(), 128);
     ofDrawRectRounded(x + 1, y, w, h, Styling::getScaled(w * 0.5));
     ofPopStyle();
   }
@@ -95,13 +98,17 @@ void GroupView::onToggle(View::MouseEventArgs & e)
   
   if (isOpen)
   {
+    for (auto & view : parameterViews) {
+      for (auto & node : View::flatten(view)) node->enableInteraction();
+    }
     this->addSubviews(parameterViews);
   }
   else {
+    for (auto & view : parameterViews) {
+      for (auto & node : View::flatten(view)) node->disableInteraction();
+    }
     this->removeSubviews(parameterViews);
   }
-  
-  std::cout << "Open/Close Group! " << isOpen << std::endl;
 }
 
 }}

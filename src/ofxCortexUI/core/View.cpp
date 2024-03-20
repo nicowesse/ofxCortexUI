@@ -141,7 +141,7 @@ void View::onDrawMask()
 {
   ofPushStyle();
   ofFill();
-  ofSetColor(255, 128);
+  ofSetColor(255, 32);
   ofDrawRectangle(this->getFrame());
   ofPopStyle();
 }
@@ -559,7 +559,7 @@ void View::mousePressedHandler(ofMouseEventArgs & e)
     onMousePressed(customE);
     onMousePressedE.notify(this, customE);
     
-    View::focused = shared_from_this();
+    View::focused = getSelf();
   }
   
   this->wasMousePressedInside = isInsideView;

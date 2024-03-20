@@ -5,7 +5,7 @@
 
 namespace ofxCortex { namespace ui {
 
-class CheckboxView : public ofxCortex::ui::ParameterView<bool> {
+class CheckboxView : public ofxCortex::ui::ParameterView {
 protected:
   CheckboxView(ofAbstractParameter & param) : ParameterView(param)
   {
@@ -38,7 +38,7 @@ protected:
     outerRing.circle(0, 0, 10 * 0.5);
     outerRing.setFillColor(Styling::getAccentColor());
     
-    innerAnimation = getParameter();
+    innerAnimation = getParameter<bool>();
     innerAnimation.setSmoothing(0.001);
   };
   
@@ -78,8 +78,8 @@ protected:
   {
     View::onMousePressed(e);
     
-    setParameter(!getParameterValue());
-    innerAnimation = (float) getParameterValue();
+    setParameter<bool>(!getParameterValue<bool>());
+    innerAnimation = (float) getParameterValue<bool>();
     
 //    Tweenzor::add(&innerAnimation, innerAnimation, getParameterValue(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
   }
