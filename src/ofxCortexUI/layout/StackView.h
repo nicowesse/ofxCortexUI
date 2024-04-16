@@ -37,8 +37,8 @@ public:
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override;
   virtual void removeSubview(const std::shared_ptr<View> & subview) override;
   
-  void enableBackground() { this->_enableBackground = true; }
-  void disableBackground() { this->_enableBackground = false; }
+  void enableBackground() { this->isBackgroundEnabled = true; }
+  void disableBackground() { this->isBackgroundEnabled = false; }
   
 protected:
   virtual std::string getComponentName() const override { return "StackView"; };
@@ -52,46 +52,12 @@ protected:
   
   virtual void onMouseScrolled(const MouseEventArgs & e) override;
   
-//  class Wrapper : public ofxCortex::ui::View {
-//  protected:
-//    Wrapper() : View("Wrapper") {}
-//    
-//  public:
-//    
-//    
-//    template<typename ... F>
-//    static std::shared_ptr<Wrapper> create(F&& ... f) {
-//      struct EnableMakeShared : public Wrapper { EnableMakeShared(F&&... arg) : Wrapper(std::forward<F>(arg)...) {} };
-//      
-//      auto p = std::make_shared<EnableMakeShared>(std::forward<F>(f)...);
-//      p->viewDidLoad();
-//      
-//      View::everyView.insert(p);
-//      return p;
-//    }
-//    
-//    virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override
-//    {
-//      ofLogNotice(_getLogModule(__FUNCTION__)) << "Index = " << index << " Name = '" << subview->getName() << "'";
-//      
-//      subview->setParent(this->getParent());
-//      subview->setLevel(this->level + 1);
-//      subview->disableInteractionOutsideParent();
-//      
-//      this->subviews.push_back(subview);
-//    }
-//    
-//  protected:
-//    virtual std::string _getComponentName() const override { return "StackView::Wrapper"; };
-//  };
-//  std::shared_ptr<Wrapper> wrapper;
-  
   LayoutHelpers::Axis axis;
   LayoutHelpers::Alignment alignment;
   kiwi::Variable scroll_y;
   
-  float _scrollIntensity { 0.0f };
-  bool _enableBackground { true };
+  float scrollIntensity { 0.0f };
+  bool isBackgroundEnabled { true };
 };
 
 }}

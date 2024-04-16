@@ -264,6 +264,19 @@ std::vector<kiwi::Constraint> LayoutHelpers::spacing(const std::vector<std::shar
   return constraints;
 }
 
+std::vector<kiwi::Constraint> LayoutHelpers::fitContent(const std::shared_ptr<View> & view, const Axis & axis)
+{
+  std::vector<kiwi::Constraint> constraints;
+  
+  auto spacingConstraints = spacing(view->getSubviews(), axis);
+  constraints.insert(std::end(constraints), std::begin(spacingConstraints), std::end(spacingConstraints));
+  
+  auto attachConstraints = attachEnds(view, view->getSubviews(), axis);
+  constraints.insert(std::end(constraints), std::begin(attachConstraints), std::end(attachConstraints));
+  
+  return constraints;
+}
+
 
 std::vector<kiwi::Constraint> LayoutHelpers::fillEqually(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis)
 {

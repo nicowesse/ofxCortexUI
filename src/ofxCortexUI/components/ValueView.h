@@ -65,7 +65,7 @@ template<>
 inline std::string ValueView<glm::vec2>::getFormattedString()
 {
   const auto & value = getParameterValue<glm::vec2>();
-  int precision = 3;
+  int precision = 1;
   std::stringstream ss;
   ss << ofToString(value.x, precision) << ", " << ofToString(value.y, precision);
   return ss.str();
@@ -75,18 +75,25 @@ template<>
 inline std::string ValueView<glm::vec3>::getFormattedString()
 {
   const auto & value = getParameterValue<glm::vec3>();
-  int precision = 3;
+  int precision = 1;
   std::stringstream ss;
   ss << ofToString(value.x, precision) << ", " << ofToString(value.y, precision) << ", " << ofToString(value.z, precision);
   return ss.str();
 }
 
 template<>
-inline std::string ValueView<ofFloatColor>::getFormattedString()
+inline std::string ValueView<ofColor>::getFormattedString()
 {
   const auto & value = getParameterValue<ofColor>();
-  std::stringstream ss;
-  ss << ofxCortex::core::utils::Color::colorToHex(value);
+  std::stringstream ss; ss << ofxCortex::core::utils::Color::colorToHex(value);
+  return ss.str();
+}
+
+template<>
+inline std::string ValueView<ofFloatColor>::getFormattedString()
+{
+  const auto & value = getParameterValue<ofFloatColor>();
+  std::stringstream ss; ss << ofxCortex::core::utils::Color::colorToHex(value);
   return ss.str();
 }
 

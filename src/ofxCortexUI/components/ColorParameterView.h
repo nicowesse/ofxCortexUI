@@ -3,15 +3,16 @@
 #include "ofColor.h"
 
 #include "ofxCortexUI/core/View.h"
-#include "ofxCortexUI/components/LabelView.h"
+#include "ofxCortexUI/core/LayoutHelpers.h"
+#include "ofxCortexUI/components/ValueView.h"
 #include "ofxCortexUI/components/SliderView.h"
 
 namespace ofxCortex { namespace ui {
 
-class ColorHeadingView : public ValueView<ofColor> {
+class ColorHeadingView : public ValueView<ofFloatColor> {
 protected:
   ColorHeadingView(ofAbstractParameter & param)
-  : ValueView<ofColor>(param) {}
+  : ValueView<ofFloatColor>(param) {}
   
 public:
   template<typename ... T>
@@ -45,6 +46,8 @@ protected:
     }
     ofPopStyle();
   }
+  
+  virtual void onPostDraw() override {};
   
   ofFloatColor labelColor;
 };

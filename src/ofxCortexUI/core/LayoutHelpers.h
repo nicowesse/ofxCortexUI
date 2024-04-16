@@ -67,6 +67,8 @@ public:
   static std::vector<kiwi::Constraint> fitHeight(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views);
   static std::vector<kiwi::Constraint> fitHeight(const std::shared_ptr<View> & outer, const std::shared_ptr<View> & inner);
   
+  static std::vector<kiwi::Constraint> fitContent(const std::shared_ptr<View> & view, const Axis & axis);
+  
   static std::vector<kiwi::Constraint> attachEnds(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
   static std::vector<kiwi::Constraint> attachLeading(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);
   static std::vector<kiwi::Constraint> attachTrailing(const std::shared_ptr<View> & outer, const std::vector<std::shared_ptr<View>> & views, Axis axis);

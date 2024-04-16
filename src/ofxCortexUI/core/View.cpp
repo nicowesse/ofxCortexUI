@@ -92,6 +92,8 @@ void View::internalUpdate(double time, double delta)
 
 void View::internalDraw()
 {
+//  if (!this->shouldDraw) return;
+  
   ofPushMatrix();
   {
     ofPushStyle();
@@ -112,26 +114,20 @@ void View::internalDraw()
       if (this->isMaskEnabled) Stencil::endUsingMask();
       
       if (this->shouldDraw) this->onPostDraw();
+      if (this->isDebugEnabled) { this->onDebug(); }
     }
     ofPopStyle();
   }
   ofPopMatrix();
 }
 
-void View::onDraw()
-{
-//  ofPushStyle();
-//  ofSetColor(255);
-//  Styling::drawBackground(this->getFrame(), this->getMouseState());
-//  Styling::drawBorder(this->getFrame());
-//  ofPopStyle();
-}
+void View::onDraw() {}
 
 void View::onPostDraw()
 {
   ofPushStyle();
-  if (this->isFocused()) { Styling::drawFocusBorder(this->getFrame()); }
-//  else { Styling::drawBorder(this->getFrame()); }
+//  if (this->isFocused()) { Styling::drawFocusBorder(this->getFrame()); }
+  { Styling::drawBorder(this->getFrame(), getMouseState()); }
   ofPopStyle();
   
   if (this->isDebugEnabled) { this->onDebug(); }

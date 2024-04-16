@@ -89,7 +89,7 @@ public:
   static const ofColor & getAccentColor() { return get().accentColor; }
   static const ofColor & getBorderColor(State state = IDLE) {
     switch (state) {
-      case ACTIVE: return getAccentColor(); break;
+      case ACTIVE: return get().borderColorActive; break;
       case FOCUS: return get().borderColorFocused; break;
         //      case HOVER: get().borderColorHover; break;
       case IDLE: return get().borderColor; break;
@@ -369,6 +369,7 @@ private:
   ofColor accentColor { ofColor::fromHex(0xFFD953) };
   
   ofColor borderColor { 24 };
+  ofColor borderColorActive { 32 };
   ofColor borderColorHover { 255 };
   ofColor borderColorFocused { 48 };
   

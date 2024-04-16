@@ -327,6 +327,7 @@ public:
   virtual void addSubviews(const std::vector<std::shared_ptr<View>> & views);
   virtual void removeSubview(const std::shared_ptr<View> & subview);
   virtual void removeSubviews(const std::vector<std::shared_ptr<View>> & subviews);
+  std::vector<std::shared_ptr<View>> getSubviews() { return subviews; }
   
   bool hasParent() const { return superview != nullptr; }
   std::shared_ptr<View> getParent() const { return superview; }
@@ -425,7 +426,7 @@ protected:
   void mouseDraggedHandler(ofMouseEventArgs & e);
   void mouseScrolledHandler(ofMouseEventArgs & e);
   
-  ofxCortex::ui::Styling::State getMouseState() const {
+  virtual ofxCortex::ui::Styling::State getMouseState() const {
     if (!this->isInteractionEnabled) return ofxCortex::ui::Styling::State::IDLE;
     
     if (this->isMouseInside && this->isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
@@ -484,14 +485,30 @@ public:
     else return parameterRef->cast<T>();
   }
   
-  std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef->newReference(); }
+  std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef; }
   
   std::string getParameterName() { return parameterRef->getName(); }
   std::string getParameterToString() { return parameterRef->toString(); }
   
   template<typename T> const T& getParameterValue() const { return getParameter<T>().get(); }
   
+  void setLinkStatus(bool status) { this->isLinked = status; }
+  
 protected:
+  virtual void onPostDraw() override
+  {
+    View::onPostDraw();
+    
+    const auto & frame = this->getFrame();
+    ofPushStyle();
+    if (isLinked)
+    {
+      ofSetColor(ofColor(ofColor::springGreen, 128));
+      ofDrawCircle(frame.getRight() - 8, frame.getTop() + 8, 2);
+    }
+    ofPopStyle();
+  }
+  
   std::shared_ptr<ofAbstractParameter> parameterRef;
   
   ofParameterGroup & getGroup() { return parameterRef->castGroup(); }
@@ -508,6 +525,18 @@ protected:
     auto p = std::dynamic_pointer_cast<ofxCortex::UnitParameter<T>>(parameterRef);
     
     return (p) ? p->getUnit() : "";
+  }
+  
+  bool isLinked { false };
+  
+  virtual ofxCortex::ui::Styling::State getMouseState() const {
+    if (!this->isInteractionEnabled) return ofxCortex::ui::Styling::State::IDLE;
+    
+    else if (this->isMouseInside && this->isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
+    else if (this->isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
+    else if (this->isMouseInside) return ofxCortex::ui::Styling::State::HOVER;
+    
+    return ofxCortex::ui::Styling::State::IDLE;
   }
 };
 

@@ -99,13 +99,13 @@ void GroupView::onToggle(View::MouseEventArgs & e)
   if (isOpen)
   {
     for (auto & view : parameterViews) {
-      for (auto & node : View::flatten(view)) node->enableInteraction();
+      for (auto & node : View::flatten(view)) { node->enableInteraction(); }
     }
     this->addSubviews(parameterViews);
   }
   else {
     for (auto & view : parameterViews) {
-      for (auto & node : View::flatten(view)) node->disableInteraction();
+      for (auto & node : View::flatten(view)) { node->disableInteraction(); }
     }
     this->removeSubviews(parameterViews);
   }

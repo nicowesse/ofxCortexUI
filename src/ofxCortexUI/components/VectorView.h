@@ -5,7 +5,8 @@
 #include <glm/vec3.hpp>
 
 #include "ofxCortexUI/core/View.h"
-#include "ofxCortexUI/components/LabelView.h"
+#include "ofxCortexUI/core/LayoutHelpers.h"
+#include "ofxCortexUI/components/ValueView.h"
 #include "ofxCortexUI/components/SliderView.h"
 
 namespace ofxCortex { namespace ui {
@@ -41,8 +42,8 @@ protected:
   virtual void viewDidLoad() override {
     using namespace ofxCortex::ui;
     
-    label = LabelView::create(ParameterView::getParameter<T>());
-    label->disableBackground();
+    heading = ValueView<T>::create(ParameterView::getParameter<T>());
+    heading->disableBackground();
     
     x.set("X", ParameterView::getParameterValue<T>().x, ParameterView::getParameterMin<T>().x, ParameterView::getParameterMax<T>().x);
     sliderListeners.push(x.newListener([this](float & value){
@@ -75,7 +76,7 @@ protected:
     }));
     
     
-    this->addSubviews({ label, sliderX, sliderY, sliderZ });
+    this->addSubviews({ heading, sliderX, sliderY, sliderZ });
   }
   
   virtual void onPreDraw() override
@@ -104,7 +105,7 @@ protected:
     this->addConstraints(LayoutHelpers::attachEnds(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL));
   }
   
-  std::shared_ptr<ofxCortex::ui::LabelView> label;
+  std::shared_ptr<ofxCortex::ui::ValueView<T>> heading;
   
   ofEventListeners sliderListeners;
   
@@ -141,8 +142,8 @@ protected:
   virtual void viewDidLoad() override {
     using namespace ofxCortex::ui;
     
-    label = LabelView::create(ParameterView::getParameter<glm::vec2>());
-    label->disableBackground();
+    heading = ValueView<glm::vec2>::create(ParameterView::getParameter<glm::vec2>());
+    heading->disableBackground();
     
     x.set("X", ParameterView::getParameterValue<glm::vec2>().x, ParameterView::getParameterMin<glm::vec2>().x, ParameterView::getParameterMax<glm::vec2>().x);
     sliderListeners.push(x.newListener([this](float & value){
@@ -165,7 +166,7 @@ protected:
       y.setWithoutEventNotifications(value.y);
     }));
     
-    this->addSubviews({ label, sliderX, sliderY });
+    this->addSubviews({ heading, sliderX, sliderY });
   }
   
   virtual void onPreDraw() override
@@ -198,7 +199,7 @@ protected:
     this->addConstraints(attachConstraints);
   }
   
-  std::shared_ptr<ofxCortex::ui::LabelView> label;
+  std::shared_ptr<ofxCortex::ui::ValueView<glm::vec2>> heading;
   
   ofEventListeners sliderListeners;
   

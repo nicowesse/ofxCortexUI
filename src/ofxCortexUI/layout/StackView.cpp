@@ -25,7 +25,7 @@ void StackView::onUpdate(float time, float delta)
 {
   View::onUpdate(time, delta);
   
-  _scrollIntensity = ofLerp(_scrollIntensity, 0.0, 1.0 - pow(0.005, delta));
+  scrollIntensity = ofLerp(scrollIntensity, 0.0, 1.0 - pow(0.005, delta));
 }
 
 void StackView::updateConstraints()
@@ -72,7 +72,7 @@ void StackView::updateConstraints()
 void StackView::onPreDraw()
 {
   View::onPreDraw();
-  if (this->_enableBackground)
+  if (this->isBackgroundEnabled)
   {
     ofPushStyle();
     {
@@ -113,13 +113,20 @@ void StackView::onDrawMask()
 
 void StackView::onMouseScrolled(const MouseEventArgs & e)
 {
-//  float heightDiff = this->getHeight() - wrapper->getHeight();
-//  bool shouldScroll = heightDiff < 0.0f && scroll_y.value() + e.scrollY > heightDiff;
-//    LayoutEngine::suggestValue(scroll_y, scroll_y.value() + e.scrollY * shouldScroll);
-  
-  _scrollIntensity = CLAMP(_scrollIntensity + abs(e.scrollY), 0, 1.0f);
-  
   LayoutEngine::suggestValue(scroll_y, scroll_y.value() + e.scrollY);
+  
+  for (auto & view : subviews)
+  {
+    if (view->getTop() > this->getContentBottom() || view->getBottom() < this->getContentTop()) {
+      view->disableRendering();
+      view->disableInteraction();
+    }
+    else
+    {
+      view->enableRendering();
+      view->enableInteraction();
+    }
+  }
 }
 
 }}
