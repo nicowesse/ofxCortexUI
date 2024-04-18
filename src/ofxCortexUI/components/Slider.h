@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ofxCortex/utils/Helpers.h"
+#include "ofxCortex/utils/AudioUtils.h"
+
 #include "ofxCortexUI/core/View.h"
 #include "ofxCortexUI/core/Draggable.h"
 #include "ofxCortexUI/components/Background.h"

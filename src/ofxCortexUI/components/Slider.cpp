@@ -51,7 +51,7 @@ void Slider<T>::drawValueDot()
 {
   const auto & rect = getRenderRect();
   
-  float x = ofMap(parameter, parameter.getMin(), parameter.getMax(), rect.getLeft() + inset, rect.getRight() - inset, true);
+  float x = ofMap(parameter.get(), parameter.getMin(), parameter.getMax(), rect.getLeft() + inset, rect.getRight() - inset, true);
   float y = rect.getCenter().y;
   float diameter = 6.0;
   
@@ -358,5 +358,6 @@ void Slider<int>::_mouseDragged(const ofMouseEventArgs & e)
 template class Slider<float>;
 template class Slider<int>;
 template class Slider<double>;
+template class Slider<ofxCortex::core::types::BeatDivision>;
 
 }}

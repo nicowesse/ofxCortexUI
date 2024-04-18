@@ -9,6 +9,7 @@
 
 #include "ofxCortex/types/Range.h"
 #include "ofxCortex/types/Spacer.h"
+#include "ofxCortex/types/BeatDivision.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -49,6 +50,10 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   {
     views.push_back(Slider<int>::create(param.cast<int>()));
   }
+  else if (type == typeid(ofParameter<int>).name())
+  {
+    views.push_back(Slider<int>::create(param.cast<int>()));
+  }
   else if (type == typeid(ofParameter<string>).name())
   {
     views.push_back(Value<string>::create(param.cast<string>()));
@@ -64,6 +69,10 @@ std::vector<shared_ptr<ofxCortex::ui::View> > ParameterUtils::createViewsFromPar
   else if (type == typeid(ofParameter<ofxCortex::core::types::Range>).name())
   {
     views.push_back(RangeSlider::create(param.cast<ofxCortex::core::types::Range>()));
+  }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::BeatDivision>).name())
+  {
+    views.push_back(Slider<ofxCortex::core::types::BeatDivision>::create(param.cast<ofxCortex::core::types::BeatDivision>()));
   }
   else if (type == typeid(ofParameter<ofxCortex::core::types::Spacer>).name())
   {

@@ -4,6 +4,7 @@
 #include "ofxCortexUI/components/Label.h"
 #include "ofxCortex/types/Range.h"
 #include "ofxCortex/types/Image.h"
+#include "ofxCortex/utils/AudioUtils.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -139,6 +140,14 @@ inline string Value<ofxCortex::core::types::Range>::_getFormattedString()
   int precision = 2;
   stringstream ss;
   ss << ofToString(parameter->from, precision) << " ←→ " << ofToString(parameter->to, precision);
+  return ss.str();
+}
+
+template<>
+inline string Value<ofxCortex::core::types::BeatDivision>::_getFormattedString()
+{
+  stringstream ss;
+  ss << ofToString(parameter);
   return ss.str();
 }
 
