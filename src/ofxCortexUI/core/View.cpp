@@ -112,6 +112,7 @@ void View::internalDraw()
       
       if (this->shouldDrawSubviews) this->onDrawSubviews();
       if (this->isMaskEnabled) Stencil::endUsingMask();
+      if (this->isMaskEnabled) Stencil::endUsingMask();
       
       if (this->shouldDraw) this->onPostDraw();
       if (this->isDebugEnabled) { this->onDebug(); }
@@ -127,7 +128,7 @@ void View::onPostDraw()
 {
   ofPushStyle();
 //  if (this->isFocused()) { Styling::drawFocusBorder(this->getFrame()); }
-  { Styling::drawBorder(this->getFrame(), getMouseState()); }
+  if (shouldDrawBorder) Styling::drawBorder(this->getFrame(), getMouseState());
   ofPopStyle();
   
   if (this->isDebugEnabled) { this->onDebug(); }

@@ -78,7 +78,7 @@ protected:
   {
     View::onMousePressed(e);
     
-    setParameter<bool>(!getParameterValue<bool>());
+    setParameterValue<bool>(!getParameterValue<bool>());
     innerAnimation = (float) getParameterValue<bool>();
     
 //    Tweenzor::add(&innerAnimation, innerAnimation, getParameterValue(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);

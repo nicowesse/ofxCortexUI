@@ -81,7 +81,7 @@ void RangeSliderView::viewDidLoad()
       range.from = ofMap(normalizedFrom, 0, 1, range.min, range.max);
       range.to = ofMap(normalizedTo, 0, 1, range.min, range.max);
       
-      setParameter(range);
+      setParameterValue(range);
       _parameterSetInternally = true;
     }
   });

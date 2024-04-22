@@ -371,7 +371,7 @@ private:
   ofColor borderColor { 24 };
   ofColor borderColorActive { 32 };
   ofColor borderColorHover { 255 };
-  ofColor borderColorFocused { 48 };
+  ofColor borderColorFocused { 64 };
   
   // Fonts
   struct Fonts {

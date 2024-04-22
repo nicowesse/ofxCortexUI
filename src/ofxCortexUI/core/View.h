@@ -13,6 +13,7 @@
 #include "Style.h"
 #include "Stencil.h"
 #include "ofxCortex/types/Parameter.h"
+#include "ofxCortex/utils/ParameterUtils.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -59,6 +60,9 @@ public:
   
   void enableBackground() { shouldDrawBackground = true; }
   void disableBackground() { shouldDrawBackground = false; }
+  
+  void enableBorder() { shouldDrawBorder = true; }
+  void disableBorder() { shouldDrawBorder = false; }
   
   
 #pragma mark - OBJECT: Overrideables
@@ -300,6 +304,7 @@ protected:
   bool shouldDraw { true };
   bool shouldDrawSubviews { true };
   bool shouldDrawBackground { true };
+  bool shouldDrawBorder { true };
   
   ofRectangle frame;
   ofRectangle contentFrame;
@@ -335,6 +340,18 @@ public:
   
   std::shared_ptr<View> getRoot();
   inline static std::shared_ptr<View> getFocused() { return View::focused; }
+  inline static std::set<std::shared_ptr<View>> getAllViews() { return View::everyView; }
+  
+  template<typename Type>
+  static std::set<std::shared_ptr<Type>> getEveryOfType()
+  {
+    auto views = ofxCortex::core::utils::Array::filter(everyView, [](const std::shared_ptr<View> & view) { return std::dynamic_pointer_cast<Type>(view) != nullptr; });
+    
+    std::set<std::shared_ptr<Type>> output;
+    for (auto & view : views) output.emplace(std::dynamic_pointer_cast<Type>(view));
+    return output;
+  }
+  
   static std::vector<std::shared_ptr<View>> flatten(const std::shared_ptr<View> & node);
   void setLevel(int level) { this->level = level; }
   
@@ -474,7 +491,7 @@ protected:
 //template<typename T>
 class ParameterView : public View {
 protected:
-  ParameterView(const ofAbstractParameter & parameter) : View(parameter.getName()) { this->parameterRef = parameter.newReference(); }
+  ParameterView(const ofAbstractParameter & parameter) : View(ofxCortex::core::utils::Parameters::serializeName(parameter)) { this->parameterRef = parameter.newReference(); }
   
 public:
   template<typename T>
@@ -488,6 +505,7 @@ public:
   std::shared_ptr<ofAbstractParameter> getParameterReference() { return parameterRef; }
   
   std::string getParameterName() { return parameterRef->getName(); }
+  std::string getSerializedParameterName() { return ofxCortex::core::utils::Parameters::serializeName(*parameterRef); }
   std::string getParameterToString() { return parameterRef->toString(); }
   
   template<typename T> const T& getParameterValue() const { return getParameter<T>().get(); }
@@ -517,7 +535,7 @@ protected:
   template<typename T> T getParameterMin() { return getParameter<T>().getMin(); }
   template<typename T> T getParameterMax() { return getParameter<T>().getMax(); }
   
-  template<typename T> void setParameter(const T & value) { getParameter<T>().set(value); }
+  template<typename T> void setParameterValue(const T & value) { getParameter<T>().set(value); }
   template<typename T> T getParameterValue() { return getParameter<T>().get(); }
   
   template<typename T>
@@ -528,16 +546,6 @@ protected:
   }
   
   bool isLinked { false };
-  
-  virtual ofxCortex::ui::Styling::State getMouseState() const {
-    if (!this->isInteractionEnabled) return ofxCortex::ui::Styling::State::IDLE;
-    
-    else if (this->isMouseInside && this->isMousePressed) return ofxCortex::ui::Styling::State::ACTIVE;
-    else if (this->isFocused()) return ofxCortex::ui::Styling::State::FOCUS;
-    else if (this->isMouseInside) return ofxCortex::ui::Styling::State::HOVER;
-    
-    return ofxCortex::ui::Styling::State::IDLE;
-  }
 };
 
 }}

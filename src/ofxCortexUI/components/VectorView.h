@@ -44,28 +44,34 @@ protected:
     
     heading = ValueView<T>::create(ParameterView::getParameter<T>());
     heading->disableBackground();
+    heading->disableBorder();
+    
+    ofParameterGroup parent = getParameter<T>().getFirstParent();
     
     x.set("X", ParameterView::getParameterValue<T>().x, ParameterView::getParameterMin<T>().x, ParameterView::getParameterMax<T>().x);
+    x.setParent(parent);
     sliderListeners.push(x.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<T>();
       v.x = value;
-      ParameterView::setParameter<T>(v);
+      ParameterView::setParameterValue<T>(v);
     }));
     sliderX = SliderView<float>::create(x);
     
     y.set("Y", ParameterView::getParameterValue<T>().y, ParameterView::getParameterMin<T>().y, ParameterView::getParameterMax<T>().y);
+    y.setParent(parent);
     sliderListeners.push(y.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<T>();
       v.y = value;
-      ParameterView::setParameter<T>(v);
+      ParameterView::setParameterValue<T>(v);
     }));
     sliderY = SliderView<float>::create(y);
     
     z.set("Z", ParameterView::getParameterValue<T>().z, ParameterView::getParameterMin<T>().z, ParameterView::getParameterMax<T>().z);
+    z.setParent(parent);
     sliderListeners.push(z.newListener([this](float & value){
       T v = ParameterView::getParameterValue<T>();
       v.z = value;
-      ParameterView::setParameter<T>(v);
+      ParameterView::setParameterValue<T>(v);
     }));
     sliderZ = SliderView<float>::create(z);
     
@@ -145,19 +151,23 @@ protected:
     heading = ValueView<glm::vec2>::create(ParameterView::getParameter<glm::vec2>());
     heading->disableBackground();
     
+    ofParameterGroup parent = getParameter<glm::vec2>().getFirstParent();
+    
     x.set("X", ParameterView::getParameterValue<glm::vec2>().x, ParameterView::getParameterMin<glm::vec2>().x, ParameterView::getParameterMax<glm::vec2>().x);
+    x.setParent(parent);
     sliderListeners.push(x.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<glm::vec2>();
       v.x = value;
-      ParameterView::setParameter<glm::vec2>(v);
+      ParameterView::setParameterValue<glm::vec2>(v);
     }));
     sliderX = SliderView<float>::create(x);
     
     y.set("Y", ParameterView::getParameterValue<glm::vec2>().y, ParameterView::getParameterMin<glm::vec2>().y, ParameterView::getParameterMax<glm::vec2>().y);
+    y.setParent(parent);
     sliderListeners.push(y.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<glm::vec2>();
       v.y = value;
-      ParameterView::setParameter(v);
+      ParameterView::setParameterValue(v);
     }));
     sliderY = SliderView<float>::create(y);
     

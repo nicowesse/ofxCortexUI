@@ -88,7 +88,7 @@ void SliderView<T>::onMousePressed(const View::MouseEventArgs & e)
   
   float normalizedX = ofMap(e.x - 2, this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), 0, 1, true);
   float parameterValue = ofMap(normalizedX, 0, 1, ParameterView::getParameterMin<T>(), ParameterView::getParameterMax<T>());
-  ParameterView::setParameter<T>(parameterValue);
+  ParameterView::setParameterValue<T>(parameterValue);
 }
 
 template<typename T>
@@ -290,7 +290,7 @@ void SliderView<int>::onMousePressed(const MouseEventArgs & e)
   float stepWidth = this->getContentFrame().width / parameterRange;
   
   float parameterValue = ofMap(ofxCortex::core::utils::roundToNearest(e.x, stepWidth), this->content_left.value() + Styling::getPaddingLeft(), this->content_right.value() - Styling::getPaddingRight(), min, max, true);
-  ParameterView::setParameter<int>(parameterValue);
+  ParameterView::setParameterValue<int>(parameterValue);
 }
 
 template<>

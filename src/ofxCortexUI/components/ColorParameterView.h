@@ -47,8 +47,6 @@ protected:
     ofPopStyle();
   }
   
-  virtual void onPostDraw() override {};
-  
   ofFloatColor labelColor;
 };
 
@@ -78,42 +76,53 @@ protected:
     
     label = ColorHeadingView::create(ParameterView::getParameter<ofFloatColor>());
     label->disableBackground();
+    label->disableBorder();
+    
+    ofParameterGroup parameterParent = getParameter<ofFloatColor>().getFirstParent();
+//    ofParameterGroup containerGroup { getParameterName() + " Group" }; containerGroup.add(parameterParent);
+//    std::cout << "New Group = " << ofxCortex::core::utils::Parameters::serializeName(containerGroup) << std::endl;
+    
     
     hue.set("Hue", ParameterView::getParameterValue<ofFloatColor>().getHue(), 0.0f, ofFloatColor::limit());
+    hue.setParent(parameterParent);
+    std::cout << "Name = " << ofxCortex::core::utils::Parameters::serializeName(hue) << std::endl;
     sliderListeners.push(hue.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<ofFloatColor>();
       v.setHue(value);
-      ParameterView::setParameter(v);
+      ParameterView::setParameterValue(v);
       
       label->setLabelBrightness(1.0 - round(v.getBrightness()));
     }));
     sliderHue = SliderView<float>::create(hue);
     
     saturation.set("Saturation", ParameterView::getParameterValue<ofFloatColor>().getSaturation(), 0.0f, ofFloatColor::limit());
+    saturation.setParent(parameterParent);
     sliderListeners.push(saturation.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<ofFloatColor>();
       v.setSaturation(value);
-      ParameterView::setParameter(v);
+      ParameterView::setParameterValue(v);
       
       label->setLabelBrightness(1.0 - round(v.getBrightness()));
     }));
     sliderSaturation = SliderView<float>::create(saturation);
     
     brightness.set("Brightness", ParameterView::getParameterValue<ofFloatColor>().getBrightness(), 0.0f, ofFloatColor::limit());
+    brightness.setParent(parameterParent);
     sliderListeners.push(brightness.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<ofFloatColor>();
       v.setBrightness(value);
-      ParameterView::setParameter(v);
+      ParameterView::setParameterValue(v);
       
       label->setLabelBrightness(1.0 - round(value));
     }));
     sliderBrightness = SliderView<float>::create(brightness);
     
     alpha.set("Alpha", ParameterView::getParameterValue<ofFloatColor>().a, 0.0f, ofFloatColor::limit());
+    alpha.setParent(parameterParent);
     sliderListeners.push(alpha.newListener([this](float & value){
       auto v = ParameterView::getParameterValue<ofFloatColor>();
       v.a = value;
-      ParameterView::setParameter(v);
+      ParameterView::setParameterValue(v);
       
       label->setLabelBrightness(1.0 - round(value));
     }));
