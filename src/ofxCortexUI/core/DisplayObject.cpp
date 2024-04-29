@@ -443,16 +443,24 @@ void DisplayObject::disableKeyEvents()
   _removeKeyEventListeners();
 }
 
-void DisplayObject::enableEvents()
+void DisplayObject::enableEvents(bool propagate)
 {
   enableMouseEvents();
   enableKeyEvents();
+  
+  if (propagate) {
+    for (auto & child : _children) child->enableEvents(propagate);
+  }
 }
 
-void DisplayObject::disableEvents()
+void DisplayObject::disableEvents(bool propagate)
 {
   disableMouseEvents();
   disableKeyEvents();
+  
+  if (propagate) {
+    for (auto & child : _children) child->enableEvents(propagate);
+  }
 }
 
 void DisplayObject::onMousePressed(function<void (ofMouseEventArgs)> callback)

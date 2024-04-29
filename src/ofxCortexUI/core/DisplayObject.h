@@ -191,7 +191,7 @@ namespace ofxCortex { namespace ui {
     // Children
     vector<shared_ptr<DisplayObject>> children(bool recursive = false) const;
     
-    template<typename T> vector<shared_ptr<T>> children(bool recursive = false)
+    template<typename T = DisplayObject> vector<shared_ptr<T>> children(bool recursive = false)
     {
       vector<shared_ptr<T>> candidates;
       
@@ -249,8 +249,8 @@ namespace ofxCortex { namespace ui {
     void enableKeyEvents();
     void disableKeyEvents();
     
-    void enableEvents();
-    void disableEvents();
+    void enableEvents(bool propagate = false);
+    void disableEvents(bool propagate = false);
     
     ofEvent<ofMouseEventArgs> onMousePressedE;
     void onMousePressed(function<void(ofMouseEventArgs)> callback);

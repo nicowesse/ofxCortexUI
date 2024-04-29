@@ -105,8 +105,6 @@ void StackView::_adjustLayout()
 {
   View::_recalculateRenderRect();
   
-  
-  
   if (_axis == Layout::VERTICAL)
   {
     if (LayoutHelpers::getSpacedViewsHeight(_subviews, style->padding) > this->getHeight() || _distribution == STACK || _distribution == STACK_CENTER || _distribution == STACK_END) _layoutVerticalStack();
@@ -121,6 +119,12 @@ void StackView::_adjustLayout()
   }
   
   background->setRect(this->getRect());
+  
+  for (auto & child : wrapper->children(true))
+  {
+    if (child->getBottom() < wrapper->getTop() || child->getTop() > wrapper->getBottom()) child->disableEvents();
+    else child->enableEvents();
+  }
   
   DisplayObject::_adjustLayout();
 }
@@ -246,6 +250,18 @@ void StackView::_mouseScrolled(const ofMouseEventArgs & e)
   View::_mouseScrolled(e);
   
   if (wrapper->getHeight() <= this->getHeight() && wrapper->getWidth() <= this->getWidth()) return;
+  
+  for (auto & child : wrapper->children(true))
+  {
+    if (child->getBottom() < wrapper->getTop() || child->getTop() > wrapper->getBottom()) {
+      std::cout << "Disable Events!" << std::endl;
+      child->disableEvents(true);
+    }
+    else {
+      std::cout << "Enable Events!" << std::endl;
+      child->enableEvents(true);
+    }
+  }
   
   // Scroll Y
   float diffY = wrapper->getHeight() - this->getHeight();
