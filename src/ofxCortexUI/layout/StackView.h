@@ -37,9 +37,6 @@ public:
   virtual void addSubviewAt(const std::shared_ptr<View> & subview, size_t index) override;
   virtual void removeSubview(const std::shared_ptr<View> & subview) override;
   
-  void enableBackground() { this->isBackgroundEnabled = true; }
-  void disableBackground() { this->isBackgroundEnabled = false; }
-  
 protected:
   virtual std::string getComponentName() const override { return "StackView"; };
   
@@ -57,7 +54,6 @@ protected:
   kiwi::Variable scroll_y;
   
   float scrollIntensity { 0.0f };
-  bool isBackgroundEnabled { true };
 };
 
 }}

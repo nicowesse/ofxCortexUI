@@ -353,6 +353,8 @@ public:
   }
   
   static std::vector<std::shared_ptr<View>> flatten(const std::shared_ptr<View> & node);
+  std::vector<std::shared_ptr<View>> flattenSubviews();
+  
   void setLevel(int level) { this->level = level; }
   
 protected:

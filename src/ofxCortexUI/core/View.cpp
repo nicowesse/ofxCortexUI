@@ -112,7 +112,6 @@ void View::internalDraw()
       
       if (this->shouldDrawSubviews) this->onDrawSubviews();
       if (this->isMaskEnabled) Stencil::endUsingMask();
-      if (this->isMaskEnabled) Stencil::endUsingMask();
       
       if (this->shouldDraw) this->onPostDraw();
       if (this->isDebugEnabled) { this->onDebug(); }
@@ -430,6 +429,22 @@ std::vector<std::shared_ptr<View>> View::flatten(const std::shared_ptr<View> & n
   }
   
   return result;
+}
+
+
+std::vector<std::shared_ptr<View>> View::flattenSubviews()
+{
+  if (subviews.size() == 0) return std::vector<std::shared_ptr<View>>();
+  
+  std::vector<std::shared_ptr<View>> output;
+  for (const auto& subview : subviews) {
+    output.push_back(subview);
+    
+    auto flattenedSubviews = subview->flattenSubviews();
+    output.insert(output.end(), flattenedSubviews.begin(), flattenedSubviews.end());
+  }
+  
+  return output;
 }
 
 int View::getDepth() const {

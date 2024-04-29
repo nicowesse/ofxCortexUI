@@ -37,42 +37,22 @@ void StackView::updateConstraints()
   
   View::clearConstraints();
   
-//  auto alignmentConstraints = LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment);
   this->addConstraints(LayoutHelpers::alignment(getSelf(), subviews, this->axis, this->alignment));
-  auto distributeConstraints = LayoutHelpers::distribute(getSelf(), subviews, this->axis, LayoutHelpers::Distribution::STACK);
+  this->addConstraints(LayoutHelpers::distribute(getSelf(), subviews, this->axis, LayoutHelpers::Distribution::STACK));
   
   auto scrollConstraints = std::vector<kiwi::Constraint>{
     { subviews.front()->top == this->content_top + scroll_y | kiwi::strength::strong },
-//    { subviews.front()->top <= this->content_top | kiwi::strength::strong },
-//    { scroll_y <= subviews.back()->bottom - subviews.front()->top | kiwi::strength::strong }
+    
   };
-  
-  ofLogVerbose(toString(__FUNCTION__)) 
-//  << "\n— " << alignmentConstraints.size() << " x Alignment Constraints"
-  << "\n— " << distributeConstraints.size() << " x Distribute Constraints";
-//  << "\n— " << stackConstraints.size() << " x Stack Constraints"
-//  << "\n— " << attachConstraints.size() << " x Attach Constraints";
-  
-  std::vector<kiwi::Constraint> constraints;
-//  ofxCortex::core::utils::Array::appendVector(constraints, alignmentConstraints);
-  ofxCortex::core::utils::Array::appendVector(constraints, distributeConstraints);
-//  ofxCortex::core::utils::Array::appendVector(constraints, stackConstraints);
-//  ofxCortex::core::utils::Array::appendVector(constraints, attachConstraints);
-//  ofxCortex::core::utils::Array::appendVector(constraints, trailingEdgeConstraints);
-    ofxCortex::core::utils::Array::appendVector(constraints, scrollConstraints);
-  
-  ofLogVerbose(toString(__FUNCTION__)) << "Constraints = " << constraints.size();
-  
-  this->addConstraints(constraints);
-//  for (auto & subview : subviews) subview->setNeedsLayout();
-  
+  this->addConstraints(scrollConstraints);
+
   ofLogVerbose(toString(__FUNCTION__)) << "END OF updateConstraints(): Current Layout Constraints = " << this->layoutConstraints.size();
 }
 
 void StackView::onPreDraw()
 {
   View::onPreDraw();
-  if (this->isBackgroundEnabled)
+  if (this->shouldDrawBackground)
   {
     ofPushStyle();
     {
@@ -106,26 +86,26 @@ void StackView::onDrawMask()
 {
   ofPushStyle();
   {
-    Styling::drawBackground(this->getContentFrame(), ofColor(255, 32), ofColor(0, 0));
+    Styling::drawBackground(this->getContentFrame(), ofColor(255), ofColor(0, 0));
   }
   ofPopStyle();
 }
 
 void StackView::onMouseScrolled(const MouseEventArgs & e)
 {
-  LayoutEngine::suggestValue(scroll_y, scroll_y.value() + e.scrollY);
+  float subviewHeight = subviews.back()->getBottom() - subviews.front()->getTop();
+  float heightDiff = this->getContentHeight() - subviewHeight;
+  
+  if (subviewHeight >= this->getContentHeight()) LayoutEngine::suggestValue(scroll_y, ofClamp(scroll_y.value() + e.scrollY, heightDiff, 0));
   
   for (auto & view : subviews)
   {
-    if (view->getTop() > this->getContentBottom() || view->getBottom() < this->getContentTop()) {
-      view->disableRendering();
-      view->disableInteraction();
-    }
-    else
+    for (const auto & child : View::flatten(view))
     {
-      view->enableRendering();
-      view->enableInteraction();
+      if (child->getTop() > this->getContentBottom() || child->getBottom() < this->getContentTop()) { child->disableInteraction(); }
+      else { child->enableInteraction(); }
     }
+      
   }
 }
 
