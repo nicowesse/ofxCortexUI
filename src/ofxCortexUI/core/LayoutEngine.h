@@ -75,9 +75,16 @@ private:
   {
     if (this->needSolve)
     {
-      ofLogVerbose("🚒 LayoutEngine") << "updateHandler()";
+      
+//      auto start = std::chrono::high_resolution_clock::now();
       
       solver.updateVariables();
+      
+//      auto end = std::chrono::high_resolution_clock::now();
+//      auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+//      
+//      ofLogNotice("🚒 LayoutEngine") << "Solved in " << static_cast<unsigned int>(duration.count()) << "μs";
+      
       onSolve.notify(this);
       
       this->needSolve = false;

@@ -246,7 +246,7 @@ void SliderView<int>::onDraw()
   
   int parameterRange = ParameterView::getParameterMax<int>() - ParameterView::getParameterMin<int>();
   float stepWidth = this->getWidth() / parameterRange;
-  int stepSize = parameterRange / 10; //(stepWidth < 5.0f) ? 5 : 1;
+  int stepSize = parameterRange / Styling::getScaled(10); //(stepWidth < 5.0f) ? 5 : 1;
   
   ofSetColor(Styling::getForegroundColor(), 64 + (64 * View::getHoverIntensity() * View::getActiveIntensity()));
   

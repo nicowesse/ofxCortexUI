@@ -53,11 +53,20 @@ void GroupView::updateConstraints()
   
   View::clearConstraints();
   
-  this->addConstraints(LayoutHelpers::alignment(View::getSelf(), { heading }, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::FILL_SPACE));
-  this->addConstraints(LayoutHelpers::stack(View::subviews, LayoutHelpers::Axis::VERTICAL));
-  this->addConstraints(LayoutHelpers::attachEnds(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL));
-  this->addConstraints(LayoutHelpers::alignment(View::getSelf(), parameterViews, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::TRAILING));
-  this->addConstraints(LayoutHelpers::insetFromEdge(View::getSelf(), parameterViews, LayoutHelpers::Edge::CONTENT_LEFT, Styling::getPaddingLeft() * 1.5));
+  auto alignmentConstraints = LayoutHelpers::alignment(View::getSelf(), { heading }, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::FILL_SPACE);
+  this->addConstraints(alignmentConstraints);
+  
+  auto stackConstraints = LayoutHelpers::stack(View::subviews, LayoutHelpers::Axis::VERTICAL);
+  this->addConstraints(stackConstraints);
+  
+  auto attachConstraints = LayoutHelpers::attachEnds(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL);
+  this->addConstraints(attachConstraints);
+  
+  auto parameterAlignmentConstraints = LayoutHelpers::alignment(View::getSelf(), parameterViews, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::TRAILING);
+  this->addConstraints(parameterAlignmentConstraints);
+  
+  auto insetConstraint = LayoutHelpers::insetFromEdge(View::getSelf(), parameterViews, LayoutHelpers::Edge::CONTENT_LEFT, Styling::getPaddingLeft() * 1.5);
+  this->addConstraints(insetConstraint);
 }
 
 void GroupView::onPreDraw()
@@ -75,7 +84,7 @@ void GroupView::onPostDraw()
 {
   using namespace ofxCortex::ui;
   
-  if (isOpen)
+  if (!parameterViews.empty() && isOpen)
   {
     float x = this->getContentLeft();
     float y = parameterViews.front()->getTop();
@@ -83,7 +92,7 @@ void GroupView::onPostDraw()
     float w = Styling::getPaddingLeft() * 0.5;
     
     ofPushStyle();
-    ofSetColor(Styling::getAccentColor(), 128);
+    ofSetColor(Styling::getAccentColor(), 192);
     ofDrawRectRounded(x + 1, y, w, h, Styling::getScaled(w * 0.5));
     ofPopStyle();
   }

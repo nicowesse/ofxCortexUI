@@ -30,10 +30,12 @@ void StackView::onUpdate(float time, float delta)
 
 void StackView::updateConstraints()
 {
-  ofLogVerbose(getLogModule(__FUNCTION__)) << "START OF updateConstraints(): Subviews = " << ofToString(subviews) << " Size = " << subviews.size();
-  ofLogVerbose(getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
+//  ofLogVerbose(getLogModule(__FUNCTION__)) << "START OF updateConstraints(): Subviews = " << ofToString(subviews) << " Size = " << subviews.size();
+//  ofLogVerbose(getLogModule(__FUNCTION__)) << "Axis = '" << LayoutHelpers::getAxisString(this->axis) << "' Alignment = '" << LayoutHelpers::getAlignmentString(this->alignment) << "'";
   
   if (subviews.size() == 0) return;
+  
+//  auto start = std::chrono::high_resolution_clock::now();
   
   View::clearConstraints();
   
@@ -45,8 +47,13 @@ void StackView::updateConstraints()
     
   };
   this->addConstraints(scrollConstraints);
+  
+//  auto end = std::chrono::high_resolution_clock::now();
+//  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+//  
+//  ofLogNotice("StackView") << "updateConstraints in " << static_cast<unsigned int>(duration.count()) << "ms";
 
-  ofLogVerbose(toString(__FUNCTION__)) << "END OF updateConstraints(): Current Layout Constraints = " << this->layoutConstraints.size();
+//  ofLogVerbose(toString(__FUNCTION__)) << "END OF updateConstraints(): Current Layout Constraints = " << this->layoutConstraints.size();
 }
 
 void StackView::onPreDraw()
@@ -98,14 +105,10 @@ void StackView::onMouseScrolled(const MouseEventArgs & e)
   
   if (subviewHeight >= this->getContentHeight()) LayoutEngine::suggestValue(scroll_y, ofClamp(scroll_y.value() + e.scrollY, heightDiff, 0));
   
-  for (auto & view : subviews)
+  for (auto & view : getSubviews(true))
   {
-    for (const auto & child : View::flatten(view))
-    {
-      if (child->getTop() > this->getContentBottom() || child->getBottom() < this->getContentTop()) { child->disableInteraction(); }
-      else { child->enableInteraction(); }
-    }
-      
+    if (view->getTop() > this->getBottom() || view->getBottom() < this->getTop()) { view->disableInteraction(); view->disableRendering(); }
+    else { view->enableInteraction(); view->enableRendering(); }
   }
 }
 

@@ -77,7 +77,7 @@ inline std::string ValueView<glm::vec3>::getFormattedString()
   const auto & value = getParameterValue<glm::vec3>();
   int precision = 1;
   std::stringstream ss;
-  ss << ofToString(value.x, precision) << ", " << ofToString(value.y, precision) << ", " << ofToString(value.z, precision);
+  ss << ofToString(value.x, precision, 3, '0') << ", " << ofToString(value.y, precision, 3, '0') << ", " << ofToString(value.z, precision, 3, '0');
   return ss.str();
 }
 

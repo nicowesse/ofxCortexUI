@@ -54,12 +54,12 @@ protected:
   {
     const auto & rect = this->getContentFrame();
     
-    float diameter = 10.0f;
+    float diameter = Styling::getScaled(10);
     float radius = diameter * 0.5;
     
     float innerRadius = radius * 0.4 * innerAnimation;
     
-    float x = rect.getRight() - radius - 12.0;
+    float x = rect.getRight() - radius - Styling::getScaled(12);
     float y = rect.getCenter().y;
     
     ofPushStyle();

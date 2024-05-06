@@ -200,13 +200,9 @@ protected:
     
     View::clearConstraints();
     
-    auto alignmentConstraints = LayoutHelpers::alignment(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::FILL_SPACE);
-    auto stackConstraints = LayoutHelpers::stack(View::subviews, LayoutHelpers::Axis::VERTICAL);
-    auto attachConstraints = LayoutHelpers::attachEnds(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL);
-    
-    this->addConstraints(alignmentConstraints);
-    this->addConstraints(stackConstraints);
-    this->addConstraints(attachConstraints);
+    this->addConstraints(LayoutHelpers::alignment(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL, LayoutHelpers::Alignment::FILL_SPACE));
+    this->addConstraints(LayoutHelpers::stack(View::subviews, LayoutHelpers::Axis::VERTICAL));
+    this->addConstraints(LayoutHelpers::attachEnds(View::getSelf(), View::subviews, LayoutHelpers::Axis::VERTICAL));
   }
   
   std::shared_ptr<ofxCortex::ui::ValueView<glm::vec2>> heading;

@@ -71,8 +71,16 @@ View::~View()
   LayoutEngine::removeConstraints(intrinsicSizeConstraints);
   intrinsicSizeConstraints.clear();
   
-  this->clearConstraints();
+  this->removeConstraints(this->layoutConstraints);
+  this->layoutConstraints.clear();
   subviews.clear();
+  
+  LayoutEngine::removeEditVariable(left);
+  LayoutEngine::removeEditVariable(top);
+  LayoutEngine::removeEditVariable(width);
+  LayoutEngine::removeEditVariable(height);
+  LayoutEngine::removeEditVariable(intrinsic_width);
+  LayoutEngine::removeEditVariable(intrinsic_height);
   
 //  View::everyView.erase(std::remove(View::everyView.begin(), View::everyView.end(), getSelf()), View::everyView.end());
 }
@@ -319,6 +327,7 @@ void View::addSubviewAt(const std::shared_ptr<View> & subview, size_t index)
   subview->setParent(shared_from_this());
   subview->setLevel(this->level + 1);
   subviews.insert(subviews.begin() + index, subview);
+  View::everyView.insert(subview);
   
   this->setNeedsUpdateConstraints();
   this->setNeedsLayout();
@@ -343,6 +352,7 @@ void View::addSubviews(const std::vector<std::shared_ptr<View>> & views)
 
 void View::removeSubview(const std::shared_ptr<View> & subview)
 {
+  subview->setParent(nullptr);
   subview->setParent(nullptr);
   subviews.erase(std::remove(std::begin(subviews), std::end(subviews), subview), std::end(subviews));
   
@@ -379,7 +389,7 @@ void View::addConstraints(const std::vector<kiwi::Constraint> & constraints)
 void View::removeConstraint(kiwi::Constraint & constraint)
 {
   LayoutEngine::removeConstraint(constraint);
-  std::remove(std::begin(this->layoutConstraints), std::end(this->layoutConstraints), constraint);
+  std::remove(this->layoutConstraints.begin(), this->layoutConstraints.end(), constraint);
   
   this->setNeedsLayout();
 }
@@ -429,22 +439,6 @@ std::vector<std::shared_ptr<View>> View::flatten(const std::shared_ptr<View> & n
   }
   
   return result;
-}
-
-
-std::vector<std::shared_ptr<View>> View::flattenSubviews()
-{
-  if (subviews.size() == 0) return std::vector<std::shared_ptr<View>>();
-  
-  std::vector<std::shared_ptr<View>> output;
-  for (const auto& subview : subviews) {
-    output.push_back(subview);
-    
-    auto flattenedSubviews = subview->flattenSubviews();
-    output.insert(output.end(), flattenedSubviews.begin(), flattenedSubviews.end());
-  }
-  
-  return output;
 }
 
 int View::getDepth() const {

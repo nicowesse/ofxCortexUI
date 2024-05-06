@@ -353,7 +353,25 @@ public:
   }
   
   static std::vector<std::shared_ptr<View>> flatten(const std::shared_ptr<View> & node);
-  std::vector<std::shared_ptr<View>> flattenSubviews();
+  
+  template<typename T = View>
+  std::vector<std::shared_ptr<T>> getSubviews(bool recursive = false)
+  {
+    std::vector<std::shared_ptr<T>> candidates;
+    
+    for (auto & subview : subviews)
+    {
+      if (auto subviewWithType = std::dynamic_pointer_cast<T>(subview)) candidates.push_back(subviewWithType);
+      
+      if (recursive)
+      {
+        auto subviewCandidates = subview->getSubviews<T>(recursive);
+        candidates.insert(candidates.end(), subviewCandidates.begin(), subviewCandidates.end());
+      }
+    }
+    
+    return candidates;
+  }
   
   void setLevel(int level) { this->level = level; }
   
@@ -512,7 +530,8 @@ public:
   
   template<typename T> const T& getParameterValue() const { return getParameter<T>().get(); }
   
-  void setLinkStatus(bool status) { this->isLinked = status; }
+  enum class LinkStatus { NOT_LINKED, PENDING, LINKED };
+  void setLinkStatus(LinkStatus status) { this->linkStatus = status; }
   
 protected:
   virtual void onPostDraw() override
@@ -521,10 +540,15 @@ protected:
     
     const auto & frame = this->getFrame();
     ofPushStyle();
-    if (isLinked)
+    if (linkStatus == LinkStatus::LINKED)
     {
       ofSetColor(ofColor(ofColor::springGreen, 128));
-      ofDrawCircle(frame.getRight() - 8, frame.getTop() + 8, 2);
+      ofDrawCircle(frame.getRight() - Styling::getScaled(8), frame.getTop() + Styling::getScaled(8), Styling::getScaled(2));
+    }
+    else if (linkStatus == LinkStatus::PENDING)
+    {
+      ofSetColor(ofColor(ofColor::tomato, 196));
+      ofDrawCircle(frame.getRight() - Styling::getScaled(8), frame.getTop() + Styling::getScaled(8), Styling::getScaled(2));
     }
     ofPopStyle();
   }
@@ -547,7 +571,7 @@ protected:
     return (p) ? p->getUnit() : "";
   }
   
-  bool isLinked { false };
+  LinkStatus linkStatus { LinkStatus::NOT_LINKED };
 };
 
 }}
