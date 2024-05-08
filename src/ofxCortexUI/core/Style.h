@@ -18,7 +18,7 @@ public:
     supportingColor(0.4),
     containerColor(0.10),
     accentColor(ofFloatColor::white),
-    borderColor(ofFloatColor::white, 0.25),
+    borderColor(ofFloatColor::white, 0.1),
     labelFontColor(ofFloatColor::white),
     valueFontColor(ofFloatColor::white, 0.75)
   {

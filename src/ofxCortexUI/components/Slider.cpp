@@ -226,45 +226,65 @@ void Slider<T>::_keyPressed(const ofKeyEventArgs & e)
 {
   if (!hasFocus()) return;
   
+  float delta = 0.0f;
+  
   switch(e.key)
   {
     case OF_KEY_LEFT:
     {
-      if (e.modifiers == OF_KEY_SHIFT)
-      {
-        parameter = floor(parameter.get() - 0.000001f) + 1;
-      }
+      if (e.modifiers == OF_KEY_SHIFT) { parameter = floor(parameter.get() - 0.000001f) + 1; }
       
-      float delta = -1.0f;
+      delta = -1.0f;
       
       if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT + OF_KEY_SHIFT)) delta *= 0.001f;
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
-      
-      parameter += delta;
       
       _handleOpacity = 1.0f;
     }
     break;
     case OF_KEY_RIGHT:
     {
-      if (e.modifiers == OF_KEY_SHIFT)
-      {
-        parameter = ceil(parameter.get() + 0.000001f) - 1;
-      }
+      if (e.modifiers == OF_KEY_SHIFT) { parameter = ceil(parameter.get() + 0.000001f) - 1; }
       
-      float delta = 1.0f;
+      delta = 1.0f;
       
       if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT + OF_KEY_SHIFT)) delta *= 0.001f;
       else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 0.01f;
       else if (e.modifiers == OF_KEY_COMMAND) delta *= 0.1f;
       
-      parameter += delta;
+      _handleOpacity = 1.0f;
+    }
+    break;
+    case OF_KEY_DOWN: // Decrease
+    {
+      if (e.modifiers == OF_KEY_SHIFT) { parameter = floor(parameter.get() - 0.000001f) + 1; }
+      
+      delta = -10.0f;
+      
+      if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT + OF_KEY_SHIFT)) delta *= 1000.0f;
+      else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 100.0f;
+      else if (e.modifiers == OF_KEY_COMMAND) delta *= 10.0f;
+      
+      _handleOpacity = 1.0f;
+    }
+    break;
+    case OF_KEY_UP: // Increase
+    {
+      if (e.modifiers == OF_KEY_SHIFT) { parameter = ceil(parameter.get() + 0.000001f) - 1; }
+      
+      delta = 10.0f;
+      
+      if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT + OF_KEY_SHIFT)) delta *= 1000.0f;
+      else if (e.modifiers == (OF_KEY_COMMAND + OF_KEY_ALT)) delta *= 100.0f;
+      else if (e.modifiers == OF_KEY_COMMAND) delta *= 10.0f;
       
       _handleOpacity = 1.0f;
     }
     break;
   }
+  
+  parameter += delta;
 }
 
 template<typename T>

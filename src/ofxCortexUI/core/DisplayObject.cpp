@@ -459,7 +459,7 @@ void DisplayObject::disableEvents(bool propagate)
   disableKeyEvents();
   
   if (propagate) {
-    for (auto & child : _children) child->enableEvents(propagate);
+    for (auto & child : _children) child->disableEvents(propagate);
   }
 }
 

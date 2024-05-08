@@ -253,12 +253,10 @@ void StackView::_mouseScrolled(const ofMouseEventArgs & e)
   
   for (auto & child : wrapper->children(true))
   {
-    if (child->getBottom() < wrapper->getTop() || child->getTop() > wrapper->getBottom()) {
-      std::cout << "Disable Events!" << std::endl;
+    if (child->getBottom() < this->getTop() || child->getTop() > this->getBottom()) {
       child->disableEvents(true);
     }
     else {
-      std::cout << "Enable Events!" << std::endl;
       child->enableEvents(true);
     }
   }

@@ -43,7 +43,7 @@ protected:
     background->setName("Button::Background");
     background->disableEvents();
     
-    backgroundColor = style->foregroundColor;
+    backgroundColor = style->backgroundColor;
     
     label = ui::Label::create(parameter);
     label->setName("Button::Label");
@@ -52,7 +52,7 @@ protected:
   
   virtual void _draw() override
   {
-    background->drawBackground(backgroundColor);
+    background->drawBackground(backgroundColor, style->borderColor);
     label->drawLabel(style->labelFontColor, OF_ALIGN_HORZ_CENTER);
   }
   
@@ -68,14 +68,14 @@ protected:
   {
     View::_mouseEnter(e);
     
-    backgroundColor = style->foregroundColor * 1.2;
+    backgroundColor = style->backgroundColor * 1.2;
   }
   
   virtual void _mousePressed(const ofMouseEventArgs & e) override
   {
     View::_mousePressed(e);
     
-    backgroundColor = style->foregroundColor * 1.4;
+    backgroundColor = style->backgroundColor * 1.4;
     
     parameter.trigger();
   }
@@ -84,21 +84,21 @@ protected:
   {
     View::_mouseReleased(e);
     
-    backgroundColor = style->foregroundColor;
+    backgroundColor = style->backgroundColor;
   }
   
   virtual void _mouseReleasedOutside(const ofMouseEventArgs & e) override
   {
     View::_mouseReleasedOutside(e);
     
-    backgroundColor = style->foregroundColor;
+    backgroundColor = style->backgroundColor;
   }
   
   virtual void _mouseExit(const ofMouseEventArgs & e) override
   {
     View::_mousePressed(e);
     
-    backgroundColor = style->foregroundColor;
+    backgroundColor = style->backgroundColor;
   }
   
   // Members
