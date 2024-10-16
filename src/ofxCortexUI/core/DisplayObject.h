@@ -251,6 +251,7 @@ namespace ofxCortex { namespace ui {
     
     void enableEvents(bool propagate = false);
     void disableEvents(bool propagate = false);
+    bool isEventsEnabled() { return _isEventsEnabled; }
     
     ofEvent<ofMouseEventArgs> onMousePressedE;
     void onMousePressed(function<void(ofMouseEventArgs)> callback);
@@ -305,6 +306,7 @@ namespace ofxCortex { namespace ui {
     uint64_t _lastMousePressTime { 0 };
     int _doublePressInterval { 200 }; // ms
     
+    bool _isEventsEnabled { true };
     bool _isChildInteractionOutsideRectEnabled { true };
     
     // Bulk-add listeners

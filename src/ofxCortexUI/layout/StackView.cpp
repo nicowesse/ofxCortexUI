@@ -251,15 +251,15 @@ void StackView::_mouseScrolled(const ofMouseEventArgs & e)
   
   if (wrapper->getHeight() <= this->getHeight() && wrapper->getWidth() <= this->getWidth()) return;
   
-  for (auto & child : wrapper->children(true))
-  {
-    if (child->getBottom() < this->getTop() || child->getTop() > this->getBottom()) {
-      child->disableEvents(true);
-    }
-    else {
-      child->enableEvents(true);
-    }
-  }
+//  for (auto & child : wrapper->children(true))
+//  {
+//    if (child->getBottom() < this->getTop() || child->getTop() > this->getBottom()) {
+//      child->disableEvents(true);
+//    }
+//    else {
+//      child->enableEvents(true);
+//    }
+//  }
   
   // Scroll Y
   float diffY = wrapper->getHeight() - this->getHeight();

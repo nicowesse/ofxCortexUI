@@ -53,7 +53,7 @@ protected:
   virtual void _draw() override
   {
     background->drawBackground(backgroundColor, style->borderColor);
-    label->drawLabel(style->labelFontColor, OF_ALIGN_HORZ_CENTER);
+    label->drawLabel(style->labelFontColor * (this->isEventsEnabled() ? 1.0 : 0.5), OF_ALIGN_HORZ_CENTER);
   }
   
   virtual void _adjustLayout() override

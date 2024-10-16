@@ -447,6 +447,7 @@ void DisplayObject::enableEvents(bool propagate)
 {
   enableMouseEvents();
   enableKeyEvents();
+  _isEventsEnabled = true;
   
   if (propagate) {
     for (auto & child : _children) child->enableEvents(propagate);
@@ -457,6 +458,7 @@ void DisplayObject::disableEvents(bool propagate)
 {
   disableMouseEvents();
   disableKeyEvents();
+  _isEventsEnabled = false;
   
   if (propagate) {
     for (auto & child : _children) child->disableEvents(propagate);
