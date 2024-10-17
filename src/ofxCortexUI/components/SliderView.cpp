@@ -247,9 +247,8 @@ void SliderView<int>::onDraw()
   int parameterRange = ParameterView::getParameterMax<int>() - ParameterView::getParameterMin<int>();
   float stepWidth = this->getWidth() / parameterRange;
   int stepSize = parameterRange / Styling::getScaled(10); //(stepWidth < 5.0f) ? 5 : 1;
-  
+//
   ofSetColor(Styling::getForegroundColor(), 64 + (64 * View::getHoverIntensity() * View::getActiveIntensity()));
-  
   for (int i = ParameterView::getParameterMin<int>() + 1; i <= ParameterView::getParameterMax<int>() - 1; i++)
   {
 //    if (i == parameter.getMin())
@@ -258,15 +257,15 @@ void SliderView<int>::onDraw()
     
     float scaleY = 1.0 + 2.0 * getActiveIntensity() + 1.0 * getHoverIntensity();
     float baseOffset = 2.5 * (stepWidth > 3.0f);
-    baseOffset += 2.5 * (i % 5 == 0) * (stepWidth >= 1.0f);
-    baseOffset += 2.5 * (i % 10 == 0);
-    baseOffset += 2.5 * (i % 100 == 0);
-    baseOffset *= Styling::getScale();
+//    baseOffset += 2.5 * (i % 5 == 0) * (stepWidth >= 1.0f);
+//    baseOffset += 2.5 * (i % 10 == 0);
+//    baseOffset += 2.5 * (i % 100 == 0);
+//    baseOffset *= Styling::getScale();
     
 //      ofDrawCircle(x, this->contentFrame.getCenter().y, 1.5 + interpolation);
-    if (baseOffset > 0.0f ) ofDrawLine(x, this->getContentFrame().getCenter().y - baseOffset - scaleY, x, this->getContentFrame().getCenter().y + baseOffset + scaleY);
+    if (baseOffset > 0.0f) ofDrawLine(x, this->getContentFrame().getCenter().y - baseOffset - scaleY, x, this->getContentFrame().getCenter().y + baseOffset + scaleY);
   }
-  
+
   
   ofSetColor(Styling::getForegroundColor(), 255);
   this->drawDot();

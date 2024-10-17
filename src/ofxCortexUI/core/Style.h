@@ -4,6 +4,7 @@
 #include "LayoutEngine.h"
 #include "ofTrueTypeFont.h"
 #include "ofAppGLFWWindow.h"
+#include "ofxCortex/utils/Helpers.h"
 
 namespace ofxCortex { namespace ui {
 
@@ -105,6 +106,7 @@ public:
       ofSetColor(fillColor);
       ofFill();
       ofDrawRectRounded(bounds, 6 * Styling::getScale());
+//      ofDrawRectangle(bounds);
     }
     ofPopStyle();
   }
@@ -143,10 +145,12 @@ public:
       ofSetColor(fillColor);
       ofFill();
       ofDrawRectRounded(bounds, Styling::getScaled(6));
+//      ofDrawRectangle(bounds);
       
       ofSetColor(borderColor);
       ofNoFill();
       ofDrawRectRounded(bounds, Styling::getScaled(6));
+//      ofDrawRectangle(bounds);
     }
     ofPopStyle();
   }
@@ -154,6 +158,7 @@ public:
   static void drawLabel(const std::string & text, const glm::vec2 & position, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_LEFT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
   {
     float textW = get().fonts.labelFont.stringWidth(text);
+    static float bitmapH = ofxCortex::core::utils::getBitmapStringHeight("X");
     
     glm::vec2 offset { 0, 0 };
     if (verticalAlignment == OF_ALIGN_VERT_TOP) offset.y += get().fonts.labelFont.dimensions.height;
@@ -164,7 +169,16 @@ public:
     
     glm::vec2 renderPosition = position + offset;
     
-    Styling::getLabelFont().drawString(text, renderPosition.x, renderPosition.y);
+    ofSetDrawBitmapMode(OF_BITMAPMODE_MODEL);
+    
+    ofPushMatrix();
+    ofTranslate(renderPosition);
+    ofScale(2);
+    ofDrawBitmapString(text, renderPosition);
+    ofPopMatrix();
+    
+//    Styling::getLabelFont().drawString(text, renderPosition.x, renderPosition.y);
+//    ofDrawBitmapString(text, renderPosition);
   }
   
   static void drawLabel(const std::string & text, const ofRectangle & BB, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_LEFT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
@@ -199,7 +213,7 @@ public:
   
   static void drawValue(const std::string & text, const glm::vec2 & position, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_RIGHT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
   {
-    float textW = get().fonts.valueFont.stringWidth(text);
+    float textW = getValueFont().stringWidth(text);
     
     glm::vec2 offset { 0, 0 };
     if (verticalAlignment == OF_ALIGN_VERT_TOP) offset.y += Styling::getValueFont().dimensions.height;
@@ -210,7 +224,7 @@ public:
     
     glm::vec2 renderPosition = position + offset;
     
-    getValueFont().drawStringAsShapes(text, (int) renderPosition.x - 1, (int) renderPosition.y);
+    Styling::getValueFont().drawString(text, (int) renderPosition.x - 1, (int) renderPosition.y);
   }
   
   static void drawValue(const std::string & text, const ofRectangle & BB, ofAlignHorz horzAlignment = OF_ALIGN_HORZ_RIGHT, ofAlignVert verticalAlignment = OF_ALIGN_VERT_CENTER)
@@ -243,10 +257,10 @@ public:
     }
   }
   
-  static Styling::Font getLabelFont() { return get().fonts.labelFont; }
-  static Styling::Font getValueFont() { return get().fonts.valueFont; }
+  static const Styling::Font & getLabelFont() { return get().fonts.labelFont; }
+  static const Styling::Font & getValueFont() { return get().fonts.valueFont; }
   
-  static float getScale() { return get().scale; }
+  static const float & getScale() { return get().scale; }
   static float getScaled(float x = 1.0) { return x * get().scale; }
   
 private:
