@@ -1,110 +1,73 @@
 #pragma once
 
-#include "ofxTweenzor.h"
+namespace ofxCortex::ui::components {
 
-namespace ofxCortex { namespace ui {
-
-class Checkbox : public ofxCortex::ui::View {
-public:
+inline bool Checkbox(const char* label, bool* value)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
-  Checkbox(ofParameter<bool> & param)
+  bool didChange = false;
+  
+  ImVec2 cursorPosition = ImGui::GetCursorScreenPos();
+  float availableWidth = ImGui::GetContentRegionAvail().x;
+  float frameHeight = ImGui::GetFrameHeight();
+  const ImVec2 & framePadding = ImGui::GetStyle().FramePadding;
+  
+  //  ImGui::PushID(ImGui::GetUniqueID(label));
+  
+  if (ImGui::InvisibleButton("##Button", ImVec2(availableWidth, frameHeight)))
   {
-    setName(param.getName());
-    parameter.makeReferenceTo(param);
-    
-    _init();
-    _adjustLayout();
-  };
-  
-//  ~Checkbox()
-//  {
-//    Tweenzor::removeTween(&innerAnimation);
-//  }
-  
-  static shared_ptr<Checkbox> create(ofParameter<bool> & param) { return make_shared<Checkbox>(param); }
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<bool> & getParameter() { return parameter; }
-  
-protected:
-  virtual string _getModule() const override { return "Checkbox"; };
-  
-  void _init()
-  {
-    background = ui::Background::create();
-    background->setName("Checkbox::Background");
-    background->disableEvents();
-    
-    label = ui::Label::create(parameter);
-    label->setName("Checkbox::Label");
-    label->disableEvents();
-    
-    outerRing.circle(0, 0, 12 * 0.5);
-    outerRing.circle(0, 0, 10 * 0.5);
-    outerRing.setFillColor(style->accentColor);
-    
-    onParameterTrigger = parameter.newListener([this](bool & param) {
-      Tweenzor::add(&innerAnimation, innerAnimation, parameter.get(), 0.0f, 200.0 / 1000.0, EASE_IN_OUT_QUINT);
-    });
-    
-    innerAnimation = parameter.get();
-  };
-  
-  virtual void _draw() override
-  {
-    background->drawBackground(style->backgroundColor);
-    label->drawLabel(style->labelFontColor);
-    
-    _drawCheckbox();
+    *value = !*value;
   }
   
-  virtual void _drawCheckbox()
+  core::DrawBackground(cursorPosition, availableWidth, frameHeight);
+  
+  ImVec2 statusPos = ImVec2(cursorPosition.x + availableWidth - framePadding.x - 2.5f, cursorPosition.y + frameHeight * 0.5);
+  
+  draw_list->AddCircle(statusPos, 5.0f, IM_COL32(255, 255, 255, 255));
+  draw_list->AddCircleFilled(statusPos, 2.0f, IM_COL32(255, 255, 255, 255 * (*value)));
+  
+  core::DrawOverlay(label, NULL, cursorPosition, availableWidth, frameHeight);
+  
+  //  ImGui::PopID();
+  
+  return didChange;
+}
+
+inline bool ParameterCheckbox(ofParameter<bool> & parameter)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  
+  bool didChange = false;
+  bool ref = parameter.get();
+  
+  ImVec2 cursorPosition = ImGui::GetCursorScreenPos();
+  float availableWidth = ImGui::GetContentRegionAvail().x;
+  float frameHeight = ImGui::GetFrameHeight();
+  const ImVec2 & framePadding = ImGui::GetStyle().FramePadding;
+  
+  ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
-    const auto & rect = getRenderRect();
-    
-    float diameter = 10.0f;
-    float radius = diameter * 0.5;
-    
-    float innerRadius = radius * 0.5 * innerAnimation;
-    
-    float x = rect.getRight() - radius - 12.0;
-    float y = rect.getCenter().y;
-    
-    ofPushStyle();
+    if (ImGui::InvisibleButton("##Button", ImVec2(availableWidth, frameHeight)))
     {
-      ofSetColor(style->accentColor);
-      outerRing.draw(x, y);
-      
-      ofFill();
-      ofDrawCircle(x, y, innerRadius);
+      parameter.set(!ref);
+      didChange = true;
     }
-    ofPopStyle();
-  }
-  
-  virtual void _adjustLayout() override
-  {
-    background->setRect(this->getRect());
-    label->setRect(this->getRect());
     
-    View::_adjustLayout();
-  }
-  
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
-  {
-    View::_mousePressed(e);
+    core::DrawBackground(cursorPosition, availableWidth, frameHeight);
     
-    parameter.set(!parameter.get());
+    ImVec2 statusPos = ImVec2(cursorPosition.x + availableWidth - framePadding.x - 2.5f, cursorPosition.y + frameHeight * 0.5);
+    draw_list->AddCircle(statusPos, 5.0f, IM_COL32(255, 255, 255, 255));
+    draw_list->AddCircleFilled(statusPos, 2.0f, IM_COL32(255, 255, 255, 255 * ref));
+    
+    
+    core::DrawOverlay(parameter.getName().c_str(), NULL, cursorPosition, availableWidth, frameHeight);
   }
+  ImGui::PopID();
   
-  // Members
-  ofParameter<bool> parameter;
-  ofEventListener onParameterTrigger;
+  if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   
-  shared_ptr<ui::Background> background;
-  shared_ptr<ui::Label> label;
-  
-  ofPath outerRing;
-  float innerAnimation { 0.0f };
-};
+  return didChange;
+}
 
-}}
+}

@@ -1,113 +1,66 @@
 #pragma once
 
-#include "ofxCortexUI/core/View.h"
-#include "ofxCortexUI/components/Label.h"
+namespace ofxCortex::ui::components {
 
-namespace ofxCortex { namespace ui {
+inline bool Button(const char* label, const ImVec2& size_arg = ImVec2(0, 0), float rounding = -1.0f, ImDrawFlags rounding_flags = ImDrawFlags_RoundCornersAll)
+{
+  // Get the current window draw list
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  ImGuiStyle& style = ImGui::GetStyle();
+  
+  // Calculate button size based on provided size argument
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+  ImVec2 size = size_arg;
+  if (size.x == 0.0f) size.x = ImGui::CalcItemWidth();  // Use available width if none specified
+  if (size.y == 0.0f) size.y = ImGui::GetFrameHeight(); // Use default button height if none specified
+  rounding = (rounding == -1.0f) ? style.FrameRounding : rounding;
+  
+  // Button behavior (hover/active states)
+  ImGui::InvisibleButton(label, size);
+  bool hovered = ImGui::IsItemHovered();
+  bool active = ImGui::IsItemActive();
+  bool pressed = ImGui::IsItemClicked();
+  
+  // Determine colors from the current style
+  ImU32 bg_color;
+  ImU32 border_color = ImGui::GetColorU32(style.Colors[ImGuiCol_Border]);
+  
+  if (active) { bg_color = ImGui::GetColorU32(style.Colors[ImGuiCol_ButtonActive]); }
+  else if (hovered) { bg_color = ImGui::GetColorU32(style.Colors[ImGuiCol_ButtonHovered]); }
+  else { bg_color = ImGui::GetColorU32(style.Colors[ImGuiCol_Button]); }
+  
+  // Draw the button's background
+  draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x, pos.y + size.y), bg_color, rounding, rounding_flags);
+  
+  // Draw the button's border
+  if (style.FrameBorderSize > 0.0f) draw_list->AddRect(pos, ImVec2(pos.x + size.x, pos.y + size.y), border_color, rounding, rounding_flags, style.FrameBorderSize);
+  
+  // Draw button label
+  ImVec2 text_size = ImGui::CalcTextSize(label);
+  ImVec2 text_pos = ImVec2(pos.x + (size.x - text_size.x) * 0.5f, pos.y + (size.y - text_size.y) * 0.5f); // Center text
+  draw_list->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
+  
+  return pressed;
+}
 
-class Button : public ofxCortex::ui::View {
-public:
+inline bool ParameterButton(ofParameter<void> & parameter)
+{
+  bool didChange = false;
   
-  Button(ofParameter<void> param)
+  ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
-    setName(param.getName());
-    parameter.makeReferenceTo(param);
-    
-    _init();
-    _adjustLayout();
-  };
-  
-  Button(string name, function<void()> func)
-  {
-    setName(name);
-    parameter.setName(name);
-    
-    onParameterTrigger = parameter.newListener(func);
-    
-    _init();
-    _adjustLayout();
-  };
-  
-  static shared_ptr<Button> create(ofParameter<void> param) { return make_shared<Button>(param); }
-  static shared_ptr<Button> create(string name, function<void()> func) { return make_shared<Button>(name, func); }
-  
-  virtual bool hasParameter() const override { return true; }
-  virtual ofParameter<void> & getParameter() { return parameter; }
-  
-protected:
-  virtual string _getModule() const override { return "Button"; };
-  
-  void _init()
-  {
-    background = ui::Background::create();
-    background->setName("Button::Background");
-    background->disableEvents();
-    
-    backgroundColor = style->backgroundColor;
-    
-    label = ui::Label::create(parameter);
-    label->setName("Button::Label");
-    label->disableEvents();
-  };
-  
-  virtual void _draw() override
-  {
-    background->drawBackground(backgroundColor, style->borderColor);
-    label->drawLabel(style->labelFontColor * (this->isEventsEnabled() ? 1.0 : 0.5), OF_ALIGN_HORZ_CENTER);
+    ImGui::Button(parameter.getName().c_str(), ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight()));
+    if (ImGui::IsItemClicked())
+    {
+      parameter.trigger();
+      didChange = true;
+    }
   }
+  ImGui::PopID();
   
-  virtual void _adjustLayout() override
-  {
-    background->setRect(this->getRect());
-    label->setRect(this->getRect());
-    
-    View::_adjustLayout();
-  }
+  if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   
-  virtual void _mouseEnter(const ofMouseEventArgs & e) override
-  {
-    View::_mouseEnter(e);
-    
-    backgroundColor = style->backgroundColor * 1.2;
-  }
-  
-  virtual void _mousePressed(const ofMouseEventArgs & e) override
-  {
-    View::_mousePressed(e);
-    
-    backgroundColor = style->backgroundColor * 1.4;
-    
-    parameter.trigger();
-  }
-  
-  virtual void _mouseReleased(const ofMouseEventArgs & e) override
-  {
-    View::_mouseReleased(e);
-    
-    backgroundColor = style->backgroundColor;
-  }
-  
-  virtual void _mouseReleasedOutside(const ofMouseEventArgs & e) override
-  {
-    View::_mouseReleasedOutside(e);
-    
-    backgroundColor = style->backgroundColor;
-  }
-  
-  virtual void _mouseExit(const ofMouseEventArgs & e) override
-  {
-    View::_mousePressed(e);
-    
-    backgroundColor = style->backgroundColor;
-  }
-  
-  // Members
-  ofParameter<void> parameter;
-  ofEventListener onParameterTrigger;
-  
-  shared_ptr<ui::Background> background;
-  ofFloatColor backgroundColor;
-  shared_ptr<ui::Label> label;
-};
+  return didChange;
+}
 
-}}
+}
