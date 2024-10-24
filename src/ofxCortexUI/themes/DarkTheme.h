@@ -76,8 +76,8 @@ public:
     style->Colors[ImGuiCol_ButtonHovered] = style->Colors[ImGuiCol_FrameBgHovered]; //ImVec4(ofColor::white, 0.075f);
     style->Colors[ImGuiCol_ButtonActive] = style->Colors[ImGuiCol_FrameBgActive]; //ImVec4(ofColor::white, 0.1f);
     
-    style->Colors[ImGuiCol_Tab] = ImVec4(componentBG, 1.00f);
-    style->Colors[ImGuiCol_TabSelected] = ImVec4(headerBG, 1.00f);
+    style->Colors[ImGuiCol_Tab] = ImVec4(headerBG, 1.00f);
+    style->Colors[ImGuiCol_TabSelected] = ImVec4(headerBG + 16, 1.00f);
     style->Colors[ImGuiCol_TabHovered] = ImVec4(headerBG + 8, 1.00f);
     
     style->Colors[ImGuiCol_Header] = ImVec4(componentBG, 1.00f);

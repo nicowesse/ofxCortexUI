@@ -57,8 +57,6 @@ inline bool Slider(const char* label, T * value, T v_min, T v_max, float step = 
       
       float delta = 1.0f * (commandPressed ? 0.1f : 1.0f) * (controlPressed ? 0.1f : 1.0f) * (altPressed ? 0.1f : 1.0f);
       
-      std::cout << "Delta = " << delta << std::endl;
-      
       isActive = true;
       
       if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) { *value -= delta; }
