@@ -47,9 +47,13 @@ inline bool ParameterButton(ofParameter<void> & parameter)
 {
   bool didChange = false;
   
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+  float availableWidth = ImGui::GetContentRegionAvail().x;
+  float frameHeight = ImGui::GetFrameHeight();
+  
   ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
-    ImGui::Button(parameter.getName().c_str(), ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight()));
+    ImGui::Button(parameter.getName().c_str(), ImVec2(availableWidth, frameHeight));
     if (ImGui::IsItemClicked())
     {
       parameter.trigger();
@@ -57,6 +61,11 @@ inline bool ParameterButton(ofParameter<void> & parameter)
     }
   }
   ImGui::PopID();
+  
+  if (ofxCortex::ui::linkedParameters.find(ofxCortex::core::utils::Parameters::hash(parameter)) != ofxCortex::ui::linkedParameters.end())
+  {
+    core::DrawLinkBorder(pos, availableWidth, frameHeight);
+  }
   
   if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   

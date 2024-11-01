@@ -5,14 +5,18 @@
 namespace ofxCortex::ui::components {
 
 template<typename T>
-inline bool ParameterDropdown(ofParameter<Select<T>> & parameter)
+inline bool ParameterDropdown(ofParameter<T> & parameter)
 {
   auto ref = parameter.get();
-  std::vector<const char*> itemStrings = ref.getItemStrings();
+  auto itemStrings = ref.getItemStrings();
   
   // Get the current selected index
   int selectedIndex = ref.getSelectedIndex();
   bool didChange = false;
+  
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+  float availableWidth = ImGui::GetContentRegionAvail().x;
+  float frameHeight = ImGui::GetFrameHeight();
   
   ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
@@ -23,7 +27,7 @@ inline bool ParameterDropdown(ofParameter<Select<T>> & parameter)
     }; ImGui::SameLine();
     
     float width = ImGui::GetContentRegionAvail().x;
-    ImGui::PushItemWidth(width);
+    ImGui::PushItemWidth(-1);
     
     if (ImGui::Combo("##Dropdown", &selectedIndex, itemStrings.data(), (int)ref.size())) {
       ref.setSelectedIndex(selectedIndex);
@@ -34,6 +38,11 @@ inline bool ParameterDropdown(ofParameter<Select<T>> & parameter)
     ImGui::PopItemWidth();
   }
   ImGui::PopID();
+  
+  if (ofxCortex::ui::linkedParameters.find(ofxCortex::core::utils::Parameters::hash(parameter)) != ofxCortex::ui::linkedParameters.end())
+  {
+    core::DrawLinkBorder(pos, availableWidth, frameHeight);
+  }
   
   if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   

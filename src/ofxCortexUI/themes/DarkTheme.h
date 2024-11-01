@@ -10,8 +10,8 @@ class DarkTheme: public ofxImGui::BaseTheme
 public:
   void setup() override {
     ofColor BG = ofColor::black;
-    ofColor componentBG = ofColor(24);
-    ofColor headerBG = ofColor(24);
+    ofColor componentBG = ofColor(16);
+    ofColor headerBG = componentBG; //ofColor(24);
     ofColor accent = ofColor::white;
     
     ImGuiStyle* style = &ImGui::GetStyle();
@@ -51,7 +51,7 @@ public:
     style->Colors[ImGuiCol_TextDisabled] = ImVec4(ofColor::white, 0.60f);
     
     style->Colors[ImGuiCol_WindowBg] = ImVec4(BG, 1.00f);
-    style->Colors[ImGuiCol_ChildBg] = ImVec4(componentBG - 6, 1.00f);
+    style->Colors[ImGuiCol_ChildBg] = ImVec4(componentBG + 12, 1.00f);
     
     style->Colors[ImGuiCol_Border] = ImVec4(ofColor::white, 0.20f);
     style->Colors[ImGuiCol_FrameBg] = ImVec4(componentBG, 1.00f);
@@ -77,7 +77,7 @@ public:
     style->Colors[ImGuiCol_ButtonActive] = style->Colors[ImGuiCol_FrameBgActive]; //ImVec4(ofColor::white, 0.1f);
     
     style->Colors[ImGuiCol_Tab] = ImVec4(headerBG, 1.00f);
-    style->Colors[ImGuiCol_TabSelected] = ImVec4(headerBG + 16, 1.00f);
+//    style->Colors[ImGuiCol_TabSelected] = ImVec4(headerBG + 16, 1.00f);
     style->Colors[ImGuiCol_TabHovered] = ImVec4(headerBG + 8, 1.00f);
     
     style->Colors[ImGuiCol_Header] = ImVec4(componentBG, 1.00f);
@@ -87,17 +87,19 @@ public:
     style->Colors[ImGuiCol_Separator] = ImVec4(ofColor::white, 0.25f);
     style->Colors[ImGuiCol_SeparatorHovered] = ImVec4(ofColor::white, 0.50f);
     style->Colors[ImGuiCol_SeparatorActive] = ImVec4(ofColor::white, 1.00f);
+    style->SeparatorTextAlign = ImVec2(0.5f, 0.5f);
+    style->SeparatorTextBorderSize = 1.0f;
     
     //    style->Colors[ImGuiCol_ResizeGrip] = ImVec4(getRandomColor(), 0.04f);
     //    style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(getRandomColor(), 0.78f);
     //    style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(getRandomColor(), 1.00f);
     
-    //    style->Colors[ImGuiCol_PlotLines] = ImVec4(getRandomColor(), 0.63f);
-    //    style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(getRandomColor(), 1.00f);
-    //    style->Colors[ImGuiCol_PlotHistogram] = ImVec4(getRandomColor(), 0.63f);
-    //    style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(getRandomColor(), 1.00f);
+        style->Colors[ImGuiCol_PlotLines] = ImVec4(ofColor::tomato, 1.00f);
+        style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent, 1.00f);
+//        style->Colors[ImGuiCol_PlotHistogram] = ImVec4(getRandomColor(), 0.63f);
+//        style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(getRandomColor(), 1.00f);
     
-    //    style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(getRandomColor(), 0.43f);
+        style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(accent, 0.50f);
     
     //    style->Colors[ImGuiCol_PopupBg] = ImVec4(getRandomColor(), 0.92f);
     //    style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(getRandomColor(), 0.73f);

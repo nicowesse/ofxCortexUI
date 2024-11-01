@@ -1,10 +1,14 @@
-#pragma mark
+#pragma once
 
 #include "ofxImGui.h"
-
 #include "ofParameter.h"
+#include <unordered_set>
+
 namespace ofxCortex::ui {
-  static std::shared_ptr<ofAbstractParameter> focusedParameter = nullptr;
+
+inline static std::shared_ptr<ofAbstractParameter> focusedParameter = nullptr;
+inline static std::unordered_set<std::string> linkedParameters;
+
 }
 
 #include "ofxCortexUI/themes/DarkTheme.h"

@@ -59,8 +59,10 @@ inline bool Slider(const char* label, T * value, T v_min, T v_max, float step = 
       
       isActive = true;
       
-      if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) { *value -= delta; }
-      else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow)) { *value += delta; }
+      if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow) && !shiftPressed) { *value -= delta; }
+      if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow) && shiftPressed) { *value = std::ceil(*value - 1.00001f); }
+      else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && !shiftPressed) { *value += delta; }
+      else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && shiftPressed) { *value = std::floor(*value + 1.00001f); }
       else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)) { *value -= 1.0f / delta; }
       else if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)) { *value += 1.0f / delta; }
     }
@@ -106,21 +108,19 @@ inline bool ParameterSlider(ofParameter<T> & parameter, float step = 0.001f)
   
   ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
-    //    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(12, 10));
     ImGui::PushItemWidth(availableWidth);
-    //    if (ImGui::SliderFloat("##Slider", &ref, parameter.getMin(), parameter.getMax(), "")) {
-    //      parameter.set(ref);
-    //      didChange = true;
-    //    }
-    //    ofApp::DrawSliderOverlay(parameter.getName().c_str(), ofToString(ref).c_str(), pos, availableWidth, frameHeight);
     if (Slider<T>(parameter.getName().c_str(), &ref, parameter.getMin(), parameter.getMax(), step)) {
       parameter.set(ref);
       didChange = true;
     }
     ImGui::PopItemWidth();
-    //    ImGui::PopStyleVar();
   }
   ImGui::PopID();
+  
+  if (ofxCortex::ui::linkedParameters.find(ofxCortex::core::utils::Parameters::hash(parameter)) != ofxCortex::ui::linkedParameters.end())
+  {
+    core::DrawLinkBorder(pos, availableWidth, frameHeight);
+  }
   
   if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   
@@ -259,7 +259,7 @@ inline bool ParameterSlider(ofParameter<glm::vec3> & parameter)
       //      parameter.set(ref);
       //      didChange |= true;
       //    }
-      if (Slider("X", &ref.x, parameter.getMin().x, parameter.getMax().x))
+      if (Slider("X", &ref.x, parameter.getMin().x, parameter.getMax().x, 0.001f))
       {
         parameter.set(ref);
         didChange |= true;
@@ -286,7 +286,7 @@ inline bool ParameterSlider(ofParameter<glm::vec3> & parameter)
       //      parameter.set(ref);
       //      didChange |= true;
       //    }
-      if (Slider("Y", &ref.y, parameter.getMin().y, parameter.getMax().y))
+      if (Slider("Y", &ref.y, parameter.getMin().y, parameter.getMax().y, 0.001f))
       {
         parameter.set(ref);
         didChange |= true;
@@ -299,7 +299,7 @@ inline bool ParameterSlider(ofParameter<glm::vec3> & parameter)
       ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.35f, 0.9f, 1.0f));
       ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.25f, 0.8f, 1.0f));
       if (components::Button("", btnSize, -1.0f, ImDrawFlags_RoundCornersAll)) {
-        ref.z = 0.0f;
+        ref.z = parameter.getInit().z;
         parameter.set(ref);
         didChange |= true;
       }

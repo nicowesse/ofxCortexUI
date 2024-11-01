@@ -29,4 +29,12 @@ inline void DrawOverlay(const char* label, const char* value, const ImVec2 & pos
   }
 }
 
+inline void DrawLinkBorder(const ImVec2 & position, float width, float height)
+{
+  const ImGuiStyle& style = ImGui::GetStyle();
+  auto * renderer = ImGui::GetWindowDrawList();
+  
+  renderer->AddRect(position, ImVec2(position.x + width, position.y + height), ImGui::ColorConvertFloat4ToU32(ImVec4(ofColor::springGreen, 0.50f)), style.FrameRounding, ImDrawFlags_RoundCornersAll, style.FrameBorderSize);  // Gray tracking
+}
+
 }

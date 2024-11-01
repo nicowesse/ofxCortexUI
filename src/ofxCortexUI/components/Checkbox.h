@@ -65,6 +65,11 @@ inline bool ParameterCheckbox(ofParameter<bool> & parameter)
   }
   ImGui::PopID();
   
+  if (ofxCortex::ui::linkedParameters.find(ofxCortex::core::utils::Parameters::hash(parameter)) != ofxCortex::ui::linkedParameters.end())
+  {
+    core::DrawLinkBorder(cursorPosition, availableWidth, frameHeight);
+  }
+  
   if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
   
   return didChange;
