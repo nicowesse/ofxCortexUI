@@ -53,7 +53,7 @@ inline bool ParameterButton(ofParameter<void> & parameter)
   
   ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
-    ImGui::Button(parameter.getName().c_str(), ImVec2(availableWidth, frameHeight));
+    ImGui::Button(parameter.getName().c_str(), ImVec2(-FLT_MIN, 0.0f));
     if (ImGui::IsItemClicked())
     {
       parameter.trigger();

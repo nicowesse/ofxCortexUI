@@ -34,7 +34,11 @@ inline void DrawLinkBorder(const ImVec2 & position, float width, float height)
   const ImGuiStyle& style = ImGui::GetStyle();
   auto * renderer = ImGui::GetWindowDrawList();
   
-  renderer->AddRect(position, ImVec2(position.x + width, position.y + height), ImGui::ColorConvertFloat4ToU32(ImVec4(ofColor::springGreen, 0.50f)), style.FrameRounding, ImDrawFlags_RoundCornersAll, style.FrameBorderSize);  // Gray tracking
+  const float inset = 5;
+  
+//  renderer->AddRect(position, ImVec2(position.x + width, position.y + height), ImGui::ColorConvertFloat4ToU32(ImVec4(ofColor::springGreen, 0.50f)), style.FrameRounding, ImDrawFlags_RoundCornersAll, style.FrameBorderSize);  // Gray tracking
+  
+  renderer->AddCircleFilled(ImVec2(position.x + width - inset, position.y + inset), inset * 0.5, ImGui::ColorConvertFloat4ToU32(ImVec4(ofColor::springGreen, 0.75f)));
 }
 
 }

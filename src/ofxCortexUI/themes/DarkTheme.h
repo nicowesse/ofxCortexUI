@@ -24,7 +24,7 @@ public:
     style->ItemInnerSpacing = ImVec2(style->ItemSpacing.y, style->ItemSpacing.y);
     style->IndentSpacing = 12.0f;
     
-    style->ScrollbarSize = 2.0f;
+    style->ScrollbarSize = 1.0f;
     style->GrabMinSize = 2.0f;
     
     style->WindowBorderSize = 0.0f;
@@ -77,7 +77,7 @@ public:
     style->Colors[ImGuiCol_ButtonActive] = style->Colors[ImGuiCol_FrameBgActive]; //ImVec4(ofColor::white, 0.1f);
     
     style->Colors[ImGuiCol_Tab] = ImVec4(headerBG, 1.00f);
-//    style->Colors[ImGuiCol_TabSelected] = ImVec4(headerBG + 16, 1.00f);
+    style->Colors[ImGuiCol_TabActive] = ImVec4(headerBG + 16, 1.00f);
     style->Colors[ImGuiCol_TabHovered] = ImVec4(headerBG + 8, 1.00f);
     
     style->Colors[ImGuiCol_Header] = ImVec4(componentBG, 1.00f);
@@ -94,12 +94,12 @@ public:
     //    style->Colors[ImGuiCol_ResizeGripHovered] = ImVec4(getRandomColor(), 0.78f);
     //    style->Colors[ImGuiCol_ResizeGripActive] = ImVec4(getRandomColor(), 1.00f);
     
-        style->Colors[ImGuiCol_PlotLines] = ImVec4(ofColor::tomato, 1.00f);
-        style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent, 1.00f);
+    style->Colors[ImGuiCol_PlotLines] = ImVec4(ofColor::tomato, 1.00f);
+    style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(accent, 1.00f);
 //        style->Colors[ImGuiCol_PlotHistogram] = ImVec4(getRandomColor(), 0.63f);
 //        style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(getRandomColor(), 1.00f);
     
-        style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(accent, 0.50f);
+    style->Colors[ImGuiCol_TextSelectedBg] = ImVec4(accent, 0.50f);
     
     //    style->Colors[ImGuiCol_PopupBg] = ImVec4(getRandomColor(), 0.92f);
     //    style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(getRandomColor(), 0.73f);

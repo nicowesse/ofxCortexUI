@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ofxCortexUI/components/Button.h"
 #include "imgui_internal.h"
+#include "ofxCortex/types/Range.h"
+#include "ofxCortexUI/components/Button.h"
+#include "ofxCortexUI/core/RangeSlider.h"
 
 namespace ofxCortex::ui::components {
 
@@ -111,7 +113,7 @@ inline bool ParameterSlider(ofParameter<T> & parameter, float step = 0.001f)
     ImGui::PushItemWidth(availableWidth);
     if (Slider<T>(parameter.getName().c_str(), &ref, parameter.getMin(), parameter.getMax(), step)) {
       parameter.set(ref);
-      didChange = true;
+      didChange |= true;
     }
     ImGui::PopItemWidth();
   }
@@ -122,12 +124,15 @@ inline bool ParameterSlider(ofParameter<T> & parameter, float step = 0.001f)
     core::DrawLinkBorder(pos, availableWidth, frameHeight);
   }
   
-  if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
+  if (ImGui::IsItemActive() || didChange)
+  {
+    ofxCortex::ui::focusedParameter = parameter.newReference();
+  }
   
   return didChange;
 }
 
-bool ParameterSlider(ofParameter<float> & parameter)
+inline bool ParameterSlider(ofParameter<float> & parameter)
 {
   return ParameterSlider<float>(parameter);
 }
@@ -326,6 +331,39 @@ inline bool ParameterSlider(ofParameter<glm::vec3> & parameter)
   ImGui::PopID();
   
   if (didChange) ofxCortex::ui::focusedParameter = parameter.newReference();
+  
+  return didChange;
+}
+
+inline bool ParameterSlider(ofParameter<ofxCortex::core::types::Range> & parameter)
+{
+  bool didChange = false;
+  ofxCortex::core::types::Range ref = parameter.get();
+  
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+  float availableWidth = ImGui::GetContentRegionAvail().x;
+  float frameHeight = ImGui::GetFrameHeight();
+  
+  ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
+  {
+    ImGui::PushItemWidth(availableWidth);
+    if (core::RangeSlider(parameter.getName().c_str(), &ref.from, &ref.to, ref.min, ref.max, "%.3f <-> %.3f")) {
+      parameter.set(ref);
+      didChange |= true;
+    }
+    ImGui::PopItemWidth();
+  }
+  ImGui::PopID();
+  
+  if (ofxCortex::ui::linkedParameters.find(ofxCortex::core::utils::Parameters::hash(parameter)) != ofxCortex::ui::linkedParameters.end())
+  {
+    core::DrawLinkBorder(pos, availableWidth, frameHeight);
+  }
+  
+  if (ImGui::IsItemActive() || didChange)
+  {
+    ofxCortex::ui::focusedParameter = parameter.newReference();
+  }
   
   return didChange;
 }

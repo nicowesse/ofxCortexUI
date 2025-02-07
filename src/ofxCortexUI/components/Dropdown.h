@@ -8,6 +8,8 @@ template<typename T>
 inline bool ParameterDropdown(ofParameter<T> & parameter)
 {
   auto ref = parameter.get();
+  if (ref.size() == 0) return false;
+  
   auto itemStrings = ref.getItemStrings();
   
   // Get the current selected index
@@ -27,7 +29,7 @@ inline bool ParameterDropdown(ofParameter<T> & parameter)
     }; ImGui::SameLine();
     
     float width = ImGui::GetContentRegionAvail().x;
-    ImGui::PushItemWidth(-1);
+    ImGui::PushItemWidth(-FLT_MIN);
     
     if (ImGui::Combo("##Dropdown", &selectedIndex, itemStrings.data(), (int)ref.size())) {
       ref.setSelectedIndex(selectedIndex);
