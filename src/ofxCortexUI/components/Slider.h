@@ -103,6 +103,7 @@ inline bool ParameterSlider(ofParameter<T> & parameter, float step = 0.001f)
 {
   bool didChange = false;
   T ref = parameter.get();
+  T originalValue = ref;
   
   ImVec2 pos = ImGui::GetCursorScreenPos();
   float availableWidth = ImGui::GetContentRegionAvail().x;
@@ -111,7 +112,7 @@ inline bool ParameterSlider(ofParameter<T> & parameter, float step = 0.001f)
   ImGui::PushID(ofxCortex::core::utils::Parameters::hash(parameter).c_str());
   {
     ImGui::PushItemWidth(availableWidth);
-    if (Slider<T>(parameter.getName().c_str(), &ref, parameter.getMin(), parameter.getMax(), step)) {
+    if (Slider<T>(parameter.getName().c_str(), &ref, parameter.getMin(), parameter.getMax(), step) && ref != originalValue) {
       parameter.set(ref);
       didChange |= true;
     }

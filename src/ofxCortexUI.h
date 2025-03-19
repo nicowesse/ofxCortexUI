@@ -25,5 +25,6 @@ inline static std::unordered_set<std::string> linkedParameters;
 #include "ofxCortexUI/components/Text.h"
 #include "ofxCortexUI/components/List.h"
 #include "ofxCortexUI/components/Status.h"
+#include "ofxCortexUI/components/FilePicker.h"
 
 #include "ofxCortexUI/utils/Helpers.h"

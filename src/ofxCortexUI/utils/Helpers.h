@@ -26,7 +26,7 @@ inline bool ShapingFunction(ofParameter<T> & parameter);
 
 inline bool PlotFunction(ofParameter<ofxCortex::core::types::Plot> & parameter);
 
-inline void DrawOutputParameter(const ofParameter<ofxCortex::types::OutputValue> & parameter)
+inline void DrawOutputParameter(const ofParameter<ofxCortex::types::DisplayValue> & parameter)
 {
   const auto & ref = parameter.get();
   
@@ -72,7 +72,8 @@ inline bool DrawParameter(ofAbstractParameter & parameter)
   else if (type == typeid(ofParameter<ofFloatColor>).name()) { didChange |= components::ParameterColor(parameter.cast<ofFloatColor>()); }
   else if (type == typeid(ofParameter<void>).name()) { didChange |= components::ParameterButton(parameter.cast<void>()); }
   else if (type == typeid(ofParameter<ofxCortex::core::types::Separator>).name()) { ImGui::SeparatorText(parameter.cast<ofxCortex::core::types::Separator>()->heading.c_str()); }
-  else if (type == typeid(ofParameter<ofxCortex::types::OutputValue>).name()) { DrawOutputParameter(parameter.cast<ofxCortex::types::OutputValue>()); }
+  else if (type == typeid(ofParameter<ofxCortex::types::DisplayValue>).name()) { DrawOutputParameter(parameter.cast<ofxCortex::types::DisplayValue>()); }
+  else if (type == typeid(ofParameter<ofxCortex::core::types::File>).name()) { components::ParameterFilePicker(parameter.cast<ofxCortex::core::types::File>()); }
   
   else if (type == typeid(ofParameter<ofxCortex::core::utils::LinearFunction>).name()) { ShapingFunction(parameter.cast<ofxCortex::core::utils::LinearFunction>()); }
   else if (type == typeid(ofParameter<ofxCortex::core::utils::InvertFunction>).name()) { ShapingFunction(parameter.cast<ofxCortex::core::utils::InvertFunction>()); }
