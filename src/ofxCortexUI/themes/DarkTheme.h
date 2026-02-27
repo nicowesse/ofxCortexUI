@@ -60,8 +60,8 @@ public:
     style->Colors[ImGuiCol_FrameBgActive] = ImVec4(componentBG + 8, 1.00f);
     
     style->Colors[ImGuiCol_TitleBg] = ImVec4(ofColor::black, 0.00f);
-    //    style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(getRandomColor(), 0.75f);
-    //    style->Colors[ImGuiCol_TitleBgActive] = ImVec4(getRandomColor(), 1.00f);
+    style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(headerBG, 0.75f);
+    style->Colors[ImGuiCol_TitleBgActive] = ImVec4(headerBG, 1.00f);
     
     style->Colors[ImGuiCol_MenuBarBg] = ImVec4(ofColor::black, 0.00f);
     style->Colors[ImGuiCol_ScrollbarBg] = ImVec4(componentBG + 16, 1.00f);
@@ -78,7 +78,10 @@ public:
     
     style->Colors[ImGuiCol_Tab] = ImVec4(headerBG, 1.00f);
     style->Colors[ImGuiCol_TabActive] = ImVec4(headerBG + 16, 1.00f);
-    style->Colors[ImGuiCol_TabHovered] = ImVec4(headerBG + 8, 1.00f);
+    style->Colors[ImGuiCol_TabHovered] = ImVec4(headerBG + 24, 1.00f);
+    style->Colors[ImGuiCol_TabUnfocused] = ImVec4(headerBG + 16, 1.00f);
+    style->Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(headerBG + 8, 1.00f);
+    
     
     style->Colors[ImGuiCol_Header] = ImVec4(componentBG, 1.00f);
     style->Colors[ImGuiCol_HeaderHovered] = ImVec4(componentBG + 6, 1.00f);
